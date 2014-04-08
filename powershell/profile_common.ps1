@@ -28,7 +28,7 @@ $env:path += ";$profileRoot;$scripts"
 # Import PowerTab
 pushd
 cd $modules\power-tab
-Import-Module .\PowerTab
+Import-Module .\PowerTab -ArgumentList "..\..\PowerTabConfig.xml"
 popd
 
 # Run posh-git init script

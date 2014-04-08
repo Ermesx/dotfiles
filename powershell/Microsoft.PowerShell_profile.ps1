@@ -3,3 +3,4 @@ if (Test-Path $myProfile) {
 . $myProfile
 }
 Remove-Item variable:myProfile
+
