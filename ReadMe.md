@@ -6,3 +6,11 @@ PowerShell
 
 Modules:
 * posh-git
+* PowerTabs
+
+Git
+---
+
+There are:
+* global .gitconfig
+* global .gitignore

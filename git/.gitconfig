@@ -1,0 +1,20 @@
+[user]
+	name = Wojciech Gadziński
+	email = wojtekgadzinski@gmail.com
+[core]
+	autocrlf = true
+[http]
+	sslVerify = false
+
+[gitflow "branch"]
+  master = master
+  develop = develop
+[gitflow "prefix"]
+  feature = feature/
+  release = release/
+  hotfix = hotfix/
+  support = support/
+  versiontag = v
+[color "status"]
+	changed = yellow
+	untracked = cyan
