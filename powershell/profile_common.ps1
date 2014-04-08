@@ -15,15 +15,18 @@ function Find-InPath($fileName){
 }
 
 # General variables
-$computer    = get-content env:computername
-$profileRoot = "$(split-path $profile)"
+$computer    = $env:computername
+$profileRoot =  Split-Path $PROFILE
 $scripts     = "$profileRoot\Scripts"
 $modules     = "$profileRoot\Modules"
 
 # Include common functions
 . $scripts\common-utils.ps1
 
-$env:path += ";$profileRoot;$scripts"
+# Add to PATH when exists
+$paths = $env:Path -split ';'
+if ($paths -notcontains $profileRoot) { $env:Path += ";$profileRoot" }
+if ($paths -notcontains $scripts) { $env:Path += ";$scripts" }
 
 # Import PowerTab
 pushd
@@ -71,10 +74,7 @@ if ((Test-Path $historyPath)) {
 
 . $profileRoot\Scripts\Set-ConsoleIcon.ps1
 
-function dc {
-    git diff | out-colordiff
-}
-
+# Set colors for ls
 remove-item alias:ls
 set-alias ls Get-ChildItemColor
 
@@ -111,7 +111,11 @@ function Get-ChildItemColor {
         $Host.UI.RawUI.ForegroundColor = 'Magenta'
         echo $_
         $Host.UI.RawUI.ForegroundColor = $fore
-       }
+       } elseif ($_.Name -match '\.(gitignore)$') {
+	    $Host.UI.RawUI.ForegroundColor = 'DarkRed'
+        echo $_
+        $Host.UI.RawUI.ForegroundColor = $fore
+	   }
         else {
         $Host.UI.RawUI.ForegroundColor = $fore
         echo $_
