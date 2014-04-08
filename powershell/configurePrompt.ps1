@@ -24,27 +24,17 @@ function prompt {
 	 $realLASTEXITCODE = $LASTEXITCODE
 
     # Reset color, which can be messed up by Enable-GitColors
-    $Host.UI.RawUI.ForegroundColor = $GitPromptSettings.DefaultForegroundColor
+    $Host.UI.RawUI.ForegroundColor = $GitPromptSettings.DefaultForegroundColor    
+	
+	$directories = Split-Path $pwd.Path -Parent | Split-Path -Leaf | Join-Path -ChildPath (Split-Path $PWD.Path -Leaf)    
 
-    # Cut long path
-    $m = 25 # maximum prompt length
-    $str = $pwd.Path
-    if ($str.length -ge $m)
-    {
-        # The prompt will begin with "...",
-        # end with ">", and in between contain
-        # as many of the path characters as will fit,
-        # reading from the end of the path.
-        $str = "..." + $str.substring($str.length - $m + 4)
-    }
-
-    Write-Host($str) -ForegroundColor DarkGray -nonewline
+    Write-Host("~\" + $directories + ">") -ForegroundColor DarkGray -nonewline
 
     Write-VcsStatus
 
     $global:LASTEXITCODE = $realLASTEXITCODE
 	
-	return '> '
+	return " "
 }
 
 function DevTabExpansion($lastBlock){
