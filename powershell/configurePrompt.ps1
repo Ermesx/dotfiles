@@ -37,26 +37,26 @@ function prompt {
 	return " "
 }
 
-function DevTabExpansion($lastBlock){
-	switch -regex ($lastBlock) {
-		'dev (\S*)$' {
-			ls $dev | ?{ $_.Name -match "^$($matches[1])" }
-		}
-	}
-}
-
-if(-not (Test-Path Function:\DefaultTabExpansion)) {
-	Rename-Item Function:\TabExpansion DefaultTabExpansion
-}
+#function DevTabExpansion($lastBlock){
+#	switch -regex ($lastBlock) {
+#		'dev (\S*)$' {
+#			ls $dev | ?{ $_.Name -match "^$($matches[1])" }
+#		}
+#	}
+#}
+#
+#if(-not (Test-Path Function:\DefaultTabExpansion)) {
+#	Rename-Item Function:\TabExpansion DefaultTabExpansion
+#}
 
 # Set up tab expansion and include git expansion
-function TabExpansion($line, $lastWord) {
-	$lastBlock = [regex]::Split($line, '[|;]')[-1]
+#function TabExpansion($line, $lastWord) {
+#	$lastBlock = [regex]::Split($line, '[|;]')[-1]
 
-	switch -regex ($lastBlock) {		
+#	switch -regex ($lastBlock) {		
 		# Development folder tab expansion
-		'dev (.*)' { DevTabExpansion $lastBlock }
+#		'dev (.*)' { DevTabExpansion $lastBlock }
 		# Fall back on existing tab expansion
-		default { DefaultTabExpansion $line $lastWord }
-	}
-}
+#		default { DefaultTabExpansion $line $lastWord }
+#	}
+#}
