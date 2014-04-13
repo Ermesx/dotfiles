@@ -51,9 +51,6 @@ Register-TabExpansion "Get-Command" -Type "Command" {
                 $Parameters["CommandType"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["CommandType"]
             } else {
                 $Parameters["CommandType"] = "Alias","Function","Filter","Cmdlet"
-                if ($PSVersionTable.PSVersion -ge "3.0") {
-                    $Parameters["CommandType"] += "Workflow"
-                }
             }
             Get-Command "$Argument*" @Parameters | Select-Object -ExpandProperty Name
         }
@@ -300,11 +297,7 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
                         $Commands
                     }
                 } else {
-                    $CommandTypes = "Function","ExternalScript","Filter","Cmdlet","Alias"
-                    if ($PSVersionTable.PSVersion -ge "3.0") {
-                        $CommandTypes += "Workflow"
-                    }
-                    $Commands = Get-Command "$Argument*" -CommandType $CommandTypes | Select-Object -ExpandProperty Name
+                    $Commands = Get-Command "$Argument*" -CommandType Function,Filter,Cmdlet,ExternalScript | Select-Object -ExpandProperty Name
                     if ($Commands) {
                         $TabExpansionHasOutput.Value = $true
                         $Commands
@@ -700,11 +693,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 ## TODO:  Filter command list based on what is used in a script?!
                 ## TODO:  Set object types
-                $CommandTypes = "Function","ExternalScript","Filter","Cmdlet"
-                if ($PSVersionTable.PSVersion -ge "3.0") {
-                    $CommandTypes += "Workflow"
-                }
-                Get-Command "$Argument*" -CommandType $CommandTypes | New-TabItem -Value {$_.Name} -Text {$_.Name}
+                Get-Command "$Argument*" -CommandType Function,Filter,Cmdlet,ExternalScript | New-TabItem -Value {$_.Name} -Text {$_.Name}
             }
             'Id' {
                 ## TODO:  More info in display text
