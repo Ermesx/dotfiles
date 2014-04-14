@@ -23,21 +23,14 @@ if ($gitInstallDir -ne $null) {
     $env:PLINK_PROTOCOL = 'ssh'
 }
 
-# Import PowerTab
-Import-Module "PowerTab" -ArgumentList "C:\repositories\dotfiles\powershell\PowerTabConfig.xml"
 
-# Run posh-git init script
-pushd
-cd $modules\posh-git
-Import-Module .\posh-git
+# Imports
+Import-Module PowerTab -ArgumentList "C:\repositories\dotfiles\powershell\PowerTabConfig.xml"
+
+Import-Module posh-git
 Enable-GitColors
-popd
 
-# Run posh-rake init script
-pushd
-cd $modules\posh-rake
-Import-Module .\posh-rake
-popd
+Import-Module posh-rake
 
 # Configure prompt
 . $configuration\configure-ps-prompt.ps1
