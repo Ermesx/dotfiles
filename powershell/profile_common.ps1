@@ -2,24 +2,10 @@
 # General variables
 $profileRoot    = "$(split-path $profile)"
 $scripts     	= "$profileRoot\Scripts"
-$modules     	= "$profileRoot\Modules"
 $configuration	= "$profileRoot\configuration"
 
-$env:path += ";$profileRoot;$scripts"
-
-set-alias ai assembly-info
-
-# Configuring git
-$gitInstallDir = Get-FolderInProgramFiles "Git"
-if ($gitInstallDir -ne $null) {
-    #$env:Path = "$env:Path;$gitInstallDir\bin;$gitInstallDir\mingw\bin"
-	#$env:Path = "$env:Path;$gitInstallDir\mingw\bin"
-    if(!$Env:HOME) { $env:HOME = "$env:HOMEDRIVE$env:HOMEPATH" }
-    if(!$Env:HOME) { $env:HOME = $env:USERPROFILE }
-    if(!$Env:GIT_HOME) { $env:GIT_HOME = "$gitInstallDir" }
-    $env:PLINK_PROTOCOL = 'ssh'
-}
-
+# Configure PATH
+. $configuration\configure-env-path.ps1
 
 # Imports
 Import-Module PowerTab -ArgumentList "C:\repositories\dotfiles\powershell\PowerTabConfig.xml"
