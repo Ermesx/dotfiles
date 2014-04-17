@@ -5,9 +5,6 @@ $scripts     	= "$profileRoot\Scripts"
 $modules     	= "$profileRoot\Modules"
 $configuration	= "$profileRoot\configuration"
 
-# Include common functions
-. $scripts\common-utils.ps1
-
 $env:path += ";$profileRoot;$scripts"
 
 set-alias ai assembly-info
