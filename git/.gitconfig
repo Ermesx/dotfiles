@@ -18,3 +18,7 @@
 [color "status"]
 	changed = yellow
 	untracked = cyan
+[credential]
+	helper = !'C:\\Users\\Wojtek Gadziński\\AppData\\Roaming\\GitCredStore\\git-credential-winstore.exe'
+[alias]
+	st = status
