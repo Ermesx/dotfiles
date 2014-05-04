@@ -11,13 +11,13 @@ function Get-FolderInProgramFiles() {
 
 $profilePath = split-path $PROFILE
 
-if (!(Test-Path "$profilePath\Scripts")) { $env:PATH += ";$profilePath\Scripts"; 	write-host "Add to PATH: $profilePath\Scripts" }
+if (!(Test-Env "$profilePath\Scripts")) { $env:PATH += ";$profilePath\Scripts"; write-host "Add to PATH: $profilePath\Scripts" }
 
 $gitPath = (Get-FolderInProgramFiles "Git")
 if ($gitPath)
 {
-	if (!(Test-Path "$gitPath\minigw\bin")) { $env:PATH += ";$gitPath\minigw\bin"; 	write-host "Add to PATH: $gitPath\minigw\bin" }
-	if (!(Test-Path "$gitPath\bin")) { $env:PATH += ";$gitPath\bin"; 	write-host "Add to PATH: $gitPath\bin" }
-	if (!(Test-Path "$gitPath\cmd")) { $env:PATH += ";$gitPath\cmd"; 	write-host "Add to PATH: $gitPath\cmd" }	
+	if (!(Test-Env "$gitPath\minigw\bin")) { $env:PATH += ";$gitPath\minigw\bin"; write-host "Add to PATH: $gitPath\minigw\bin" }
+	if (!(Test-Env "$gitPath\bin")) { $env:PATH += ";$gitPath\bin"; write-host "Add to PATH: $gitPath\bin" }
+	if (!(Test-Env "$gitPath\cmd")) { $env:PATH += ";$gitPath\cmd"; write-host "Add to PATH: $gitPath\cmd" }	
 }
 else { write-host "There is not Git in ProgramFiles. Please install" -ForegroundColor Red }
