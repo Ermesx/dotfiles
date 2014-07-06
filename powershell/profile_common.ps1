@@ -18,6 +18,9 @@ Import-Module posh-rake
 # Configure prompt
 . $configuration\configure-ps-prompt.ps1
 
+# add function
+. $scripts\git-most-changed.ps1
+
 # Configure ssh-agent so git doesn't require a password on every push
 . $scripts\ssh-agent-utils.ps1
 
