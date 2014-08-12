@@ -9,15 +9,24 @@ function Get-FolderInProgramFiles() {
     return ls env: | ? Name -match ^ProgramFiles | ForEach-Object { join-path $_.Value $folder } | Where-Object { Test-Path $_ }
 }
 
-$profilePath = split-path $PROFILE
+function Set-To-Env-Path($path)
+{
+	if (!(Test-Env $path)) { $env:PATH += ";$path"; write-host "Add to PATH: $path" }
+}
 
-if (!(Test-Env "$profilePath\Scripts")) { $env:PATH += ";$profilePath\Scripts"; write-host "Add to PATH: $profilePath\Scripts" }
+$profilePath = split-path $PROFILE
+Set-To-Env-Path "$profilePath\Scripts"
+
+#12.0 because I have VS 2013
+#-1 because MSbuild exists in both directories and I want to get x86(last directory)
+$msbuildPath = (Get-FolderInProgramFiles "MSBuild")[-1]
+Set-To-Env-Path "$msbuildPath\12.0\Bin"
 
 $gitPath = (Get-FolderInProgramFiles "Git")
 if ($gitPath)
 {
-	if (!(Test-Env "$gitPath\minigw\bin")) { $env:PATH += ";$gitPath\minigw\bin"; write-host "Add to PATH: $gitPath\minigw\bin" }
-	if (!(Test-Env "$gitPath\bin")) { $env:PATH += ";$gitPath\bin"; write-host "Add to PATH: $gitPath\bin" }
-	if (!(Test-Env "$gitPath\cmd")) { $env:PATH += ";$gitPath\cmd"; write-host "Add to PATH: $gitPath\cmd" }	
+	Set-To-Env-Path "$gitPath\minigw\bin"
+	Set-To-Env-Path "$gitPath\bin" 
+	Set-To-Env-Path "$gitPath\cmd" 
 }
 else { write-host "There is not Git in ProgramFiles. Please install" -ForegroundColor Red }
