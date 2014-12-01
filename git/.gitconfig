@@ -2,19 +2,19 @@
 	name = Wojciech Gadziński
 	email = wojtekgadzinski@gmail.com
 [core]
-	autocrlf = true
+	autocrlf = True
+	editor = vi
 [http]
 	sslVerify = false
-
 [gitflow "branch"]
-  master = master
-  develop = develop
+	master = master
+	develop = develop
 [gitflow "prefix"]
-  feature = feature/
-  release = release/
-  hotfix = hotfix/
-  support = support/
-  versiontag = v
+	feature = feature/
+	release = release/
+	hotfix = hotfix/
+	support = support/
+	versiontag = v
 [color "status"]
 	changed = yellow
 	untracked = cyan
@@ -24,6 +24,22 @@
 	st = status
 	lg1 = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
 	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
-	lg = !"git lg1"
+	lg = !git lg1
+	commit-amend = commit --amendd --no-edit
 [push]
-	default = simple
+	default = matching
+[difftool "sourcetree"]
+	cmd = 'C:/Program Files/Perforce/p4merge.exe' \"$LOCAL\" \"$REMOTE\"
+[mergetool "sourcetree"]
+	cmd = 'C:/Program Files/Perforce/p4merge.exe' \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
+	trustExitCode = true
+[merge]
+	tool = p4merge
+[diff]
+	guitool = p4merge
+[difftool "p4merge"]
+	path = C:/Program Files/Perforce/p4merge.exe
+	cmd = \"C:/Program Files/Perforce/p4merge.exe\" \"$LOCAL\" \"$REMOTE\"
+[mergetool "p4merge"]
+	path = C:/Program Files/Perforce/p4merge.exe
+	cmd = \"C:/Program Files/Perforce/p4merge.exe\" \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
