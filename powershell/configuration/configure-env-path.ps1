@@ -30,3 +30,5 @@ if ($gitPath)
 	Set-To-Env-Path "$gitPath\cmd" 
 }
 else { write-host "There is not Git in ProgramFiles. Please install" -ForegroundColor Red }
+
+Set-To-Env-Path "$env:LOCALAPPDATA\Microsoft\dotnet\cli\bin"
