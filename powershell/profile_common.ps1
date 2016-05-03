@@ -8,7 +8,7 @@ $configuration	= "$profileRoot\configuration"
 . $configuration\configure-env-path.ps1
 
 # Imports
-Import-Module PowerTab -ArgumentList "C:\repositories\dotfiles\powershell\PowerTabConfig.xml"
+Import-Module PowerTab -ArgumentList "$profileRoot\PowerTabConfig.xml"
 
 Import-Module posh-git
 Enable-GitColors
