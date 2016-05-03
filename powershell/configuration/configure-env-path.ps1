@@ -27,7 +27,8 @@ if ($gitPath)
 {
 	Set-To-Env-Path "$gitPath\minigw\bin"
 	Set-To-Env-Path "$gitPath\bin" 
-	Set-To-Env-Path "$gitPath\cmd" 
+	Set-To-Env-Path "$gitPath\cmd"
+	Set-To-Env-Path "$gitPath\usr\bin" 
 }
 else { write-host "There is not Git in ProgramFiles. Please install" -ForegroundColor Red }
 
