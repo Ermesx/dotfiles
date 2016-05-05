@@ -21,12 +21,17 @@ Set-To-Env-Path "$profilePath\Scripts"
 #-1 because MSbuild exists in both directories and I want to get x86(last directory)
 $msbuildPath = (Get-FolderInProgramFiles "MSBuild")[-1]
 Set-To-Env-Path "$msbuildPath\12.0\Bin"
+Set-To-Env-Path "$msbuildPath\14.0\Bin"
+Set-To-Env-Path "$msbuildPath\4.0\Bin"
 
 $gitPath = (Get-FolderInProgramFiles "Git")
 if ($gitPath)
 {
 	Set-To-Env-Path "$gitPath\minigw\bin"
-	Set-To-Env-Path "$gitPath\bin" 
-	Set-To-Env-Path "$gitPath\cmd" 
+	Set-To-Env-Path "$gitPath\bin"
+	Set-To-Env-Path "$gitPath\cmd"
 }
 else { write-host "There is not Git in ProgramFiles. Please install" -ForegroundColor Red }
+
+$gnuplotPath = (Get-FolderInProgramFiles "gnuplot")
+Set-To-Env-Path "$gnuplotPath\bin"
