@@ -6,7 +6,7 @@
 
 Import-Module PSReadLine
 
-Set-PSReadLineOption -EditMode Emacs
+#Set-PSReadLineOption -EditMode Emacs
 
 # Searching for commands with up/down arrow is really handy.  The
 # option "moves to end" is useful if you want the cursor at the end
@@ -88,12 +88,12 @@ Set-PSReadlineKeyHandler -Key Ctrl+B `
 
 # In Emacs mode - Tab acts like in bash, but the Windows style completion
 # is still useful sometimes, so bind some keys so we can do both
-Set-PSReadlineKeyHandler -Key Ctrl+Q -Function TabCompleteNext
-Set-PSReadlineKeyHandler -Key Ctrl+Shift+Q -Function TabCompletePrevious
+#Set-PSReadlineKeyHandler -Key Ctrl+Q -Function TabCompleteNext
+#Set-PSReadlineKeyHandler -Key Ctrl+Shift+Q -Function TabCompletePrevious
 
 # Clipboard interaction is bound by default in Windows mode, but not Emacs mode.
-Set-PSReadlineKeyHandler -Key Shift+Ctrl+C -Function Copy
-Set-PSReadlineKeyHandler -Key Ctrl+V -Function Paste
+#Set-PSReadlineKeyHandler -Key Shift+Ctrl+C -Function Copy
+#Set-PSReadlineKeyHandler -Key Ctrl+V -Function Paste
 
 # CaptureScreen is good for blog posts or email showing a transaction
 # of what you did when asking for help or demonstrating a technique.
@@ -489,3 +489,5 @@ Set-PSReadlineOption -CommandValidationHandler {
         }
     }
 }
+
+Set-PSReadlineKeyHandler -Key Escape -Function RevertLine               
