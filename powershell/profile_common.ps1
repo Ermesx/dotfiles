@@ -15,6 +15,11 @@ Enable-GitColors
 
 Import-Module posh-rake
 
+if ($PSVersionTable.PSVersion.Major -lt 5)
+{
+	. $configuration\PSReadLine\PSReadlineConfig.ps1
+}
+
 # Configure prompt
 . $configuration\configure-ps-prompt.ps1
 
