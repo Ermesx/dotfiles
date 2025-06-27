@@ -1,16 +1,20 @@
 ﻿Vagrant.configure("2") do |config|
-  config.vm.box = "gusztavvargadr/windows-11"
-  config.vm.communicator = "winrm"
-  config.vm.guest = :windows
-
-  config.vm.network "forwarded_port", guest: 3389, host: 3391, id: "rdp", auto_correct: true
-  
-  config.vm.synced_folder "../../../src", "C:\\dotfiles"
-
-  config.vm.provision "shell", path: "setup.ps1"
-
-  config.vm.provider "virtualbox" do |vb|
-    vb.memory = 4096
-    vb.cpus = 2
-  end
+    
+    config.vm.define "dotfiles-windows" do |ms|
+        ms.vm.box = "gusztavvargadr/windows-11"
+        ms.vm.guest = :windows
+        ms.vm.communicator = "winrm"
+        
+        ms.vm.synced_folder "../build/windows", "/dotfiles", type: "virtualbox"
+        ms.vm.provision "shell", path: "run-tests.ps1", args: ["-InstallScript", "C:\\dotfiles\\install.ps1"]
+    end
+      
+    config.winrm.username = "vagrant"
+    config.winrm.password = "vagrant"
+    config.winrm.timeout = 1800
+      
+    config.vm.provider "virtualbox" do |vb|
+        vb.memory = 4096
+        vb.cpus = 2
+    end
 end

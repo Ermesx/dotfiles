@@ -1,1 +1,1 @@
-﻿Write-Output "Installing dotfiles on Windows..."
+﻿Write-Output "⚙️ Installing dotfiles on Windows..."

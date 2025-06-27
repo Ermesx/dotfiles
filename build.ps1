@@ -8,7 +8,7 @@ $destination = "build/windows"
 $excludedExtension = ".sh"
 $excludedKeyword = "macos"
 
-Write-Host "🚀 Start build for Windows in '$destination'"
+Write-Host "🚀 Start build for Windows in '$destination'" -ForegroundColor Cyan
 
 # Reset the build folder if it already exists
 if (Test-Path $destination) {
@@ -41,4 +41,4 @@ foreach ($item in $allFiles) {
     Write-Progress -Activity "Copying common and windows files" -Status "$counter of $totalFiles" -PercentComplete (($counter / $totalFiles) * 100)
 }
 
-Write-Host "✅ Build for Windows completed in '$destination'"
+Write-Host "✅  Build for Windows completed in '$destination'" -ForegroundColor Green
