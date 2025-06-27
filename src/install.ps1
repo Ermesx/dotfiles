@@ -1,0 +1,1 @@
+﻿Write-Output "Installing dotfiles on Windows..."
