@@ -3,12 +3,12 @@
 set -e
 
 SOURCE_ROOT="src"
-DESTINATION="build/macos"
+DESTINATION="build/linux"
 
 EXCLUDED_EXTENSION=".ps1"
 EXCLUDED_KEYWORD="windows"
 
-echo "🚀 Start build for macOS in '$DESTINATION'"
+echo "🚀 Start build for linux in '$DESTINATION'"
 
 # Remove destination folder if it exists
 if [ -d "$DESTINATION" ]; then

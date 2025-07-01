@@ -6,7 +6,7 @@ $destination = "build/windows"
 
 # Exclude files with the
 $excludedExtension = ".sh"
-$excludedKeyword = "macos"
+$excludedKeyword = "linux"
 
 Write-Host "🚀 Start build for Windows in '$destination'" -ForegroundColor Cyan
 

@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 
 if (-not $InstallScript.Exists) {
     Write-Host "❌  The install script '$($InstallScript.FullName)' does not exist. Please provide a valid path." -ForegroundColor Red
+    Write-Host "Usage: .\run-tests.ps1 -InstallScript <path_to_install_script>" -ForegroundColor Yellow
     exit 1
 }
 
