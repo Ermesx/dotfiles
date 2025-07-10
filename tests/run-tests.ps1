@@ -32,5 +32,5 @@ if (-not (Get-Module -ListAvailable -Name Pester)) {
 
 # Run tests after the installation script
 Write-Host "🧪 Running tests..." -ForegroundColor Cyan
-Invoke-Pester -Output Detailed -Path "$PSScriptRoot\windows" 
+Invoke-Pester -Path "$PSScriptRoot\windows" 
 Write-Host "✅  Tests completed successfully." -ForegroundColor Green

@@ -30,7 +30,7 @@ foreach ($item in $allFiles) {
     $target = Join-Path $destination $relativePath
     $targetDir = Split-Path -Path $target -Parent
     
-    if (!(Test-Path $targetDir)) {
+    if (-Not (Test-Path $targetDir)) {
         New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
     }
     
