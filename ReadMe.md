@@ -1,30 +1,30 @@
-Tools and enviorment (Git + .net)
+Dotfiles for Windows & Linux
 ===========================================================
 
-! New Under Construction !
---------------------------
 
-PowerShell
-----------
-
-Modules:
-* posh-git
+Basic installation like, terminal, shell, package manager, etc.
+---------------------------------------------------------------
 
 
-Git
----
-
-There are:
-* global .gitconfig
-* global .gitignore
-
-Install tools:
---------------
+### Windows
+1. Update winget
+2. Windows terminal
+3. Install PowerShell 7
 
 
-Visual Studio Tools
+### Linux
+1. Install brew
+2. Install zsh
+
+
+Installed CLI tools
 -------------------
+1. git
 
-* Rider
+Installed Apps
+--------------
+1. Rider
+2. VS Code
+
 
 
