@@ -41,4 +41,5 @@ foreach ($item in $allFiles) {
     Write-Progress -Activity "Copying common and windows files" -Status "$counter of $totalFiles" -PercentComplete (($counter / $totalFiles) * 100)
 }
 
+Write-Progress -Activity "Copying common and windows files completed" -Completed
 Write-Host "✅  Build for Windows completed in '$destination'" -ForegroundColor Green

@@ -11,6 +11,9 @@ $windowsPath = "$PSScriptRoot\windows"
 # Read defaults configuration
 $defaults = Get-Content "$commonPath\defaults.json" | ConvertFrom-Json
 
+# TODO: check winget lists and opt-out apps if already installed with latest version
+# TODO: organize script to first check correct shell eventually install and switch to it and then install other tools
+
 if (-not $ReRun) {
     Clear-Host    
     Write-Output "⚙️ Installing dotfiles on Windows..."
@@ -32,8 +35,8 @@ if (-not $ReRun) {
 
 Write-Output "🔧 Keep going the installation script..."
 
-# Install fonts
-& "$windowsPath\terminal\install-fonts.ps1" -Fonts $defaults.fonts
+# Install or upgrade oh-my-posh
+& "$windowsPath\powershell\install-oh-my-posh.ps1" -FontName $defaults.fonts.name
 
 # Install or upgrade Windows Terminal
 & "$windowsPath\terminal\install-terminal.ps1"
