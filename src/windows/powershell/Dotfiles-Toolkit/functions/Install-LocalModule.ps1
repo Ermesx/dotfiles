@@ -3,8 +3,6 @@
     param (
         [Parameter(Mandatory = $true)]
         [string]$SourceModulePath,
-
-        [Parameter(Mandatory = $false)]
         [switch]$Force
     )
 
@@ -18,16 +16,16 @@
     $existingModule = Get-Module -Name $ModuleName -ListAvailable
     
     if ($existingModule -And $moduleManifest.ModuleVersion -le $existingModule.Version -And -Not $Force) {
-        Write-Host "👌 Module '$ModuleName' is already installed." -ForegroundColor Yellow
+        Write-Host "👌 Module $ModuleName is already installed." -ForegroundColor Yellow
         return
     }
     
     # Define the destination path in the user module directory
-    $pwsh5ModulesPath = Join-Path -Path "$env:USERPROFILE\Documents\WindowsPowerShell\Modules" -ChildPath $ModuleName
-    $pwsh7ModulesPath = Join-Path -Path "$env:USERPROFILE\Documents\PowerShell\Modules" -ChildPath $ModuleName
+    $pwsh5ModulesPath = Join-Path -Path "$HOME\Documents\WindowsPowerShell\Modules" -ChildPath $ModuleName
+    $pwsh7ModulesPath = Join-Path -Path "$HOME\Documents\PowerShell\Modules" -ChildPath $ModuleName
 
     $action = if ($existingModule) { 'Updating' } else { 'Installing' }
-    Write-Host "📦 $action module '$ModuleName' to: `n`t$pwsh7ModulesPath`n`t$pwsh5ModulesPath..." -ForegroundColor Cyan
+    Write-Host "📦 $action module $ModuleName to: `n`t$pwsh7ModulesPath`n`t$pwsh5ModulesPath..." -ForegroundColor Cyan
 
     # Check if the module already exists
     if ((Test-Path $pwsh5ModulesPath) -and (Test-Path $pwsh7ModulesPath)) {
@@ -41,5 +39,5 @@
     Copy-Item -Path $SourceModulePath -Destination $pwsh7ModulesPath -Recurse -Force
 
     $action = if ($existingModule) { 'updated' } else { 'installed' }
-    Write-Host "✅ Module '$ModuleName' $action successfully!" -ForegroundColor Green
+    Write-Host "✅ Module $ModuleName $action successfully!" -ForegroundColor Green
 }

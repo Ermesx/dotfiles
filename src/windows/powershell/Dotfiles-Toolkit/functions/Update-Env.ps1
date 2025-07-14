@@ -34,5 +34,5 @@
     Write-Verbose "New PATH value: $newPath"
     
     $env:Path = $newPath
-    Write-Output "PATH environment variable refreshed."
+    Write-Host "PATH environment variable refreshed."
 }

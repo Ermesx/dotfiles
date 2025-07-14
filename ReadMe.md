@@ -8,8 +8,8 @@ Basic installation like, terminal, shell, package manager, etc.
 
 ### Windows
 1. Update winget
-2. Windows terminal
-3. Install PowerShell 7
+2. Install PowerShell 7 
+3. Windows terminal
 
 
 ### Linux

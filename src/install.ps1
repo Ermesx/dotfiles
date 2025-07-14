@@ -8,32 +8,36 @@ $ErrorActionPreference = "Stop"
 $commonPath = "$PSScriptRoot\common"
 $windowsPath = "$PSScriptRoot\windows"
 
-# Read defaults configuration
+# Load defaults configuration
 $defaults = Get-Content "$commonPath\defaults.json" | ConvertFrom-Json
 
-# TODO: check winget lists and opt-out apps if already installed with latest version
-# TODO: organize script to first check correct shell eventually install and switch to it and then install other tools
-
-if (-not $ReRun) {
-    Clear-Host    
+if (-not $ReRun){
+    Clear-Host
     Write-Output "⚙️ Installing dotfiles on Windows..."
 
-    # Load the Dotfiles Toolkit module
-    . "$windowsPath\powershell\dotfiles-toolkit\functions\install-LocalModule.ps1"
-    Install-LocalModule -SourceModulePath "$windowsPath\powershell\Dotfiles-Toolkit" 
-    Import-Module Dotfiles-Toolkit -Force
+    # Install or upgrade Dotfiles-Toolkit if not already installed
+    & "$windowsPath\powershell\install-dotflies-toolkit.ps1"
+    
+    # Trust the PSGallery repository
+    Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 
-    # Install newest version of PowerShell if not installed
+    # Install or upgrade winget client if not already installed
+    & "$windowsPath\powershell\install-winget-client.ps1"
+
+    # Install or upgrade PowerShell if not already installed
     & "$windowsPath\powershell\install-powershell.ps1"
+}
 
-    if ($PSVersionTable.PSVersion.Major -lt 7) {
-        Write-Output "🚀 Running install script with PowerShell 7"
-        pwsh -File $PSScriptRoot\install.ps1 -ReRun -ErrorAction Stop
-        exit 0;
-    }
-} 
+# Check if the script is running in PowerShell 7 or later
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Output "🚀 Running install script with PowerShell 7"
+    pwsh -File $PSScriptRoot\install.ps1 -ReRun
+    exit 0;
+}
 
 Write-Output "🔧 Keep going the installation script..."
+
+Import-Module Dotfiles-Toolkit
 
 # Install or upgrade oh-my-posh
 & "$windowsPath\powershell\install-oh-my-posh.ps1" -FontName $defaults.fonts.name
