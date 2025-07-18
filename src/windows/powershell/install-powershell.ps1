@@ -1,12 +1,12 @@
 ﻿# Install or upgrade Dotfiles-Toolkit if not already installed
 . "$PSScriptRoot\Dotfiles-Toolkit\functions\Install-LocalModule.ps1"
-Install-LocalModule -SourceModulePath "$PSScriptRoot\Dotfiles-Toolkit" -Force
+Install-LocalModule -SourceModulePath "$PSScriptRoot\Dotfiles-Toolkit"
 Import-Module Dotfiles-Toolkit -Force
 
 # Clear the PowerShell profile to avoid duplicates
-Clear-Profile
+Clear-Profile -All
 
-Add-ToProfile -Comment "Import Dotfiles-Toolkit" -ScriptBlock {
+Add-ToProfile -Comment "Import Dotfiles-Toolkit" -Pwsh5 -ScriptBlock {
     Import-Module Dotfiles-Toolkit
 }
 
@@ -18,7 +18,7 @@ Install-OrUpdateModule -ModuleName Microsoft.WinGet.Client
 Import-Module Microsoft.WinGet.Client
 Repair-WinGetPackageManager -Latest
 
-Add-ToProfile -Comment "Import Microsoft.WinGet.Client" -ScriptBlock {
+Add-ToProfile -Comment "Import Microsoft.WinGet.Client" -Pwsh5 -ScriptBlock {
     Import-Module Microsoft.WinGet.Client
 }
 

@@ -1,5 +1,5 @@
-﻿Describe "After installing dotfiles " {
-    Context "Apps" {
+﻿Describe "After installing dotfiles" {
+    Context " Apps" {
         It "should have installed <_>" -Foreach @(
             "Oh-My-Posh",
             "Windows Terminal",
@@ -12,13 +12,14 @@
         }
     }
 
-    Context "Modules" {
-        It "should have installed <_>" -Foreach @(
+    Context " Modules" {
+        It " should have installed <_>" -Foreach @(
             "Microsoft.WinGet.Client",
             "Pester",
             "PSFzf",
             "posh-git",
-            "DockerCompletion"
+            "DockerCompletion",
+            "Terminal-Icons"
         ) {
             Get-Module -Name $_ -ListAvailable | Should -Not -BeNullOrEmpty
         }

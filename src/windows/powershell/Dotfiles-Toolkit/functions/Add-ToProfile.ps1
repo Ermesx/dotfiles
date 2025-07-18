@@ -22,6 +22,7 @@
     param (
         [string]$Comment,
         [string]$Path,
+        [switch]$Pwsh5,
         [scriptblock]$ScriptBlock
     )
     
@@ -64,8 +65,8 @@
     $pwsh7ProfilePath = Join-Path -Path "$HOME\Documents\PowerShell" -ChildPath $profileFile
     
     # Ensure the PowerShell profile exists
-    Write-Profile -ProfilePath $pwsh5ProfilePath
     Write-Profile -ProfilePath $pwsh7ProfilePath
+    if ($Pwsh5) { Write-Profile -ProfilePath $pwsh5ProfilePath }
 
     Write-Host "==> ● Added script block to PowerShell profile: $Comment"
 }
