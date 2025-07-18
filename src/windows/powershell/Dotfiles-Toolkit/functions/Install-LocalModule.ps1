@@ -1,4 +1,28 @@
 ﻿function Install-LocalModule {
+<#
+.SYNOPSIS
+    Installs or updates a PowerShell module from a local source path.
+
+.DESCRIPTION
+    This function installs or updates a PowerShell module by copying it from a specified local source path to the user's module directories for both Windows PowerShell and PowerShell Core.
+
+.PARAMETER SourceModulePath
+    The path to the local source directory containing the module to be installed or updated.
+
+.PARAMETER Force
+    A switch to force the installation or update, even if the module is already installed with the same or a newer version.
+
+.EXAMPLE
+    Install-LocalModule -SourceModulePath "C:\Modules\MyModule"
+
+    Installs the module located at "C:\Modules\MyModule" to the user's module directories.
+
+.EXAMPLE
+    Install-LocalModule -SourceModulePath "C:\Modules\MyModule" -Force
+
+    Forces the installation of the module, overwriting any existing version.
+
+#>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]

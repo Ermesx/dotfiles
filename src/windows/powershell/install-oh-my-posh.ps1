@@ -13,3 +13,7 @@ oh-my-posh enable upgrade
 # Install or upgrade Hasklig font
 Write-Host "🌀 Installing Hasklig font..." -ForegroundColor Cyan
 oh-my-posh font install $FontName
+
+Add-ToProfile -Comment "Initialize oh-my-posh" -ScriptBlock {
+    oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/jandedobbeleer.omp.json" | Invoke-Expression
+} 

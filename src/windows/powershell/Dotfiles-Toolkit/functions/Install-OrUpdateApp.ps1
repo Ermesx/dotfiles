@@ -1,11 +1,38 @@
-﻿function Install-OrUpdateApp {
+﻿using namespace Microsoft.WinGet.Client.PSObjects
+
+function Install-OrUpdateApp {
+<#
+.SYNOPSIS
+    Installs or updates an application using WinGet.
+
+.DESCRIPTION
+    This function checks if an application is installed or requires an update using WinGet. 
+    If the application is not installed, it installs it. If an update is available, it upgrades the application.
+    Optionally, it can update the PATH environment variable if a command is specified.
+
+.PARAMETER AppId
+    The ID of the application to install or update.
+
+.PARAMETER UpdateEnv
+    A switch to indicate whether the PATH environment variable should be updated.
+
+.PARAMETER Command
+    The command to check in the PATH environment variable when UpdateEnv is specified.
+
+.PARAMETER Mode
+    The installation mode (e.g., 'Silent'). Defaults to 'Silent'.
+
+.EXAMPLE
+    Install-OrUpdateApp -AppId "Microsoft.PowerShell" -UpdateEnv -Command "pwsh"
+
+#>    
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
         [string]$AppId,
         [switch]$UpdateEnv,
         [string]$Command,
-        [string]$Mode = 'Silent'
+        [PSPackageInstallMode]$Mode = [PSPackageInstallMode]::Silent
     )
     
     if ($UpdateEnv -and -not $Command) {
@@ -16,13 +43,13 @@
     $app = Get-WinGetPackage -Id "$AppId"
     if (-not $app) {
         Write-Host "🌀 Installing $AppId..." -ForegroundColor Cyan
-        Install-WinGetPackage -Id "$AppId" -Mode $Mode
+        Install-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null
         Write-Host "✅ $AppId is installed successfully with the latest version." -ForegroundColor Green
     }
     elseif ($app.IsUpdateAvailable) {
         $latestVersion = $app.AvailableVersions[0]
         Write-Host "🌀 Upgrading $AppId from $($app.InstalledVersion) to $latestVersion version..." -ForegroundColor Yellow
-        Update-WinGetPackage -Id "$AppId" -Mode $Mode
+        Update-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null
         Write-Host "🔄 $AppId has been upgraded to version $latestVersion." -ForegroundColor Green
     }
     else {
