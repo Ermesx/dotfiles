@@ -11,13 +11,16 @@ Install-OrUpdateApp -AppId "JanDeDobbeleer.OhMyPosh" -UpdateEnv -Command "oh-my-
 oh-my-posh enable upgrade
 
 # Install or upgrade Hasklig font
-Write-Host "🌀 Installing Hasklig font..." -ForegroundColor Cyan
-oh-my-posh font install $FontName
+Write-Host "🌀 Installing $FontName font..." -ForegroundColor Cyan -NoNewline
+oh-my-posh font install $FontName | Out-Null
+Write-Host "`r✅ [OK] $FontName font is installed successfully." -ForegroundColor Green
 
 Add-ToProfile -Comment "Initialize oh-my-posh" -ScriptBlock {
     oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/jandedobbeleer.omp.json" | Invoke-Expression
 }
 
+# TODO dodać config aby wpisywanie było od nowej linie (2 linie w całości)
+ 
 # Install or update Terminal-Icons
 Install-OrUpdateModule -ModuleName Terminal-Icons
 Add-ToProfile -Comment "Import Terminal-Icons" -ScriptBlock {

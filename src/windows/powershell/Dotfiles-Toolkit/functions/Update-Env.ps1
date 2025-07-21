@@ -20,33 +20,37 @@ Update-Env -AdditionalPath "C:\NewPath;D:\AnotherPath"
 
     Write-Verbose "Previous PATH value: $env:Path"
 
-    $newPath = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-    
-   if ($AdditionalPath -and $AdditionalPath.Trim() -ne "") {
+    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+    if ($AdditionalPath -and $AdditionalPath.Trim() -ne "") {
         $validPaths = @()
         $invalidPaths = @()
         $allPaths = $AdditionalPath -split ";" | Where-Object { $_.Trim() -ne "" }
-        
+        $userPaths = $userPath -split ";" | Where-Object { $_.Trim() -ne "" }
+
         foreach ($path in $allPaths) {
-            if (Test-Path $path.Trim()) {
-                $validPaths += $path.Trim()
-            } else {
-                $invalidPaths += $path.Trim()
+            if (Test-Path $path -and -not $userPaths.Contains($path)) {
+                $validPaths += $path
+            }
+            else {
+                $invalidPaths += $path
             }
         }
-        
+
         if ($invalidPaths.Count -gt 0) {
             Write-Verbose "Incorrect PATH values: $($invalidPaths -join ';')"
         }
-        
+
         if ($validPaths.Count -gt 0) {
             Write-Verbose "Additional PATH values: $($validPaths -join ';')"
-            $newPath += ";" + ($validPaths -join ";")
+            $userPath = ($userPaths -join ";") + ";" + ($validPaths -join ";")
+            [Environment]::SetEnvironmentVariable("Path", $userPath, [EnvironmentVariableTarget]::User)
         }
     }
-        
+
+    $newPath = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + $userPath
     Write-Verbose "New PATH value: $newPath"
-    
+
     $env:Path = $newPath
-    Write-Host "PATH environment variable refreshed."
+    Write-Host "🔄 PATH environment variable refreshed."
 }

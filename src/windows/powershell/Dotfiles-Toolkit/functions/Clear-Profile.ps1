@@ -46,8 +46,8 @@
 
     # Define the destination path in the user module directory
     $profileFile = "Microsoft.PowerShell_profile.ps1"
-    $pwsh5ProfilePath = Join-Path -Path "$HOME\Documents\WindowsPowerShell" -ChildPath $profileFile
-    $pwsh7ProfilePath = Join-Path -Path "$HOME\Documents\PowerShell" -ChildPath $profileFile
+    $pwsh5ProfilePath = Join-Path -Path "~\Documents\WindowsPowerShell" -ChildPath $profileFile
+    $pwsh7ProfilePath = Join-Path -Path "~\Documents\PowerShell" -ChildPath $profileFile
 
     Clear-Profile-Path -ProfilePath $pwsh7ProfilePath
     if ($All) { Clear-Profile-Path -ProfilePath $pwsh5ProfilePath }

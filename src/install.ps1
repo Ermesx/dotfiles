@@ -34,14 +34,17 @@ Import-Module Dotfiles-Toolkit
 # Install Pester testing framework for PowerShell
 & "$windowsPath\powershell\install-pester.ps1"
 
-# Install CLI tools
+# Install oh-my-posh 
 & "$windowsPath\powershell\install-oh-my-posh.ps1" -FontName $defaults.fonts.name
 
-# Zoxide for fast directory navigation
+# Install Zoxide for fast directory navigation
 & "$windowsPath\powershell\install-zoxide.ps1"
 
+# Install bat for syntax highlighting and file viewing
+& "$windowsPath\powershell\install-bat.ps1" -BatConfigFile "$commonPath\bat\config"
+
 # install PSFzf for fuzzy finding
-& "$windowsPath\powershell\install-fzf.ps1"
+& "$windowsPath\powershell\install-fzf.ps1" -FzfConfigFile "$commonPath\fzf\.fzfrc"
 
 # Install or upgrade Windows Terminal
 & "$windowsPath\terminal\install-terminal.ps1"
@@ -52,4 +55,6 @@ Import-Module Dotfiles-Toolkit
 # Install docker
 & "$windowsPath\docker\install-docker.ps1"
 
+
+# TODO: add wsl install and upgrade
 

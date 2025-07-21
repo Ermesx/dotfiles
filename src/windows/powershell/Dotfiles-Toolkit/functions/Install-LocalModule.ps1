@@ -31,29 +31,28 @@
     )
 
     # Extract the module name from the folder name
-    $ModuleName = Split-Path $SourceModulePath -Leaf
+    $moduleName = Split-Path $SourceModulePath -Leaf
            
-    $manifestPath = Join-Path -Path $SourceModulePath -ChildPath "$ModuleName.psd1"
+    $manifestPath = Join-Path -Path $SourceModulePath -ChildPath "$moduleName.psd1"
     $moduleManifest = Import-PowerShellDataFile -Path $manifestPath
 
     # Check if the module is already installed
-    $existingModule = Get-Module -Name $ModuleName -ListAvailable
+    $existingModule = Get-Module -Name $moduleName -ListAvailable
     
     if ($existingModule -And $moduleManifest.ModuleVersion -le $existingModule.Version -And -Not $Force) {
-        Write-Host "👌 Module $ModuleName is already installed." -ForegroundColor Yellow
+        Write-Host "👌 [Skip] Module $moduleName is already installed." -ForegroundColor Yellow
         return
     }
     
     # Define the destination path in the user module directory
-    $pwsh5ModulesPath = Join-Path -Path "$HOME\Documents\WindowsPowerShell\Modules" -ChildPath $ModuleName
-    $pwsh7ModulesPath = Join-Path -Path "$HOME\Documents\PowerShell\Modules" -ChildPath $ModuleName
+    $pwsh5ModulesPath = Join-Path -Path "~\Documents\WindowsPowerShell\Modules" -ChildPath $moduleName
+    $pwsh7ModulesPath = Join-Path -Path "~\Documents\PowerShell\Modules" -ChildPath $moduleName
 
     $action = if ($existingModule) { 'Updating' } else { 'Installing' }
     Write-Host "📦 $action module $ModuleName to: `n`t$pwsh7ModulesPath`n`t$pwsh5ModulesPath..." -ForegroundColor Cyan
 
     # Check if the module already exists
     if ((Test-Path $pwsh5ModulesPath) -and (Test-Path $pwsh7ModulesPath)) {
-        Write-Host "⚠️ Removing existing module at `n`t$pwsh7ModulesPath`n`t$pwsh5ModulesPath..." -ForegroundColor Yellow
         Remove-Item -Recurse -Force -Path $pwsh5ModulesPath
         Remove-Item -Recurse -Force -Path $pwsh7ModulesPath
     }    
@@ -63,5 +62,5 @@
     Copy-Item -Path $SourceModulePath -Destination $pwsh7ModulesPath -Recurse -Force
 
     $action = if ($existingModule) { 'updated' } else { 'installed' }
-    Write-Host "✅ Module $ModuleName $action successfully!" -ForegroundColor Green
+    Write-Host "✅ [OK] Module $moduleName $action successfully!" -ForegroundColor Green
 }

@@ -29,26 +29,40 @@
         [string]$ModuleName,
         [switch]$Force
     )
-    
+
+    if (-not ($Global:ModulesCache) -or $Global:ModulesCacheTimer -lt (Get-Date)) {
+        $Global:ModulesCache = Get-InstalledModule
+        $Global:ModulesCacheTimer = (Get-Date).AddDays(1)
+    }
+
     # Install Module if not present
-    $module = Get-Module -ListAvailable -Name $ModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
+    $module = $Global:ModulesCache | Where-Object { $_.Name -eq $ModuleName }  | Sort-Object -Property Version -Descending | Select-Object -First 1
     if (-not $module -or $Force) {
-        Write-Host "🌀 Installing $ModuleName..." -ForegroundColor Cyan
+        Write-Host "🌀 Installing $ModuleName..." -ForegroundColor Cyan -NoNewline
         Install-Module -Name $ModuleName -SkipPublisherCheck
-        Write-Host "✅ $ModuleName module is installed successfully with the latest version." -ForegroundColor Green
+        Write-Host "`r✅ [OK] $ModuleName module is installed successfully with the latest version." -ForegroundColor Green
         return
     }
 
+    # Check if the module is already cached
+    if (-not ($Global:ModulesFindCache) -or $Global:ModuleCacheTimer -lt (Get-Date)) {
+        $Global:ModuleFindCache = @()
+    }
+    
+    if ($Global:ModuleFindCache | Where-Object { $_.Name -ne $ModuleName }) {
+        $Global:ModuleFindCache.Add(@{ Name = $ModuleName; Module = Find-Module -Name $ModuleName -ErrorAction SilentlyContinue })
+    }
+
     # Upgrade Module
-    $availableModule = Find-module -Name $ModuleName
+    $availableModule = $Global:ModuleFindCache | Where-Object { $_.Name -eq $ModuleName } | Select-Object -ExpandProperty Module
     $currentVersion = $module.Version
     $latestVersion = $availableModule.Version
     if ($currentVersion -lt $latestVersion) {
-        Write-Host "🌀 Upgrading $ModuleName from $currentVersion to $latestVersion version..." -ForegroundColor Yellow
+        Write-Host "🌀 Upgrading $ModuleName from $currentVersion to $latestVersion version..." -ForegroundColor Yellow -NoNewline
         Update-Module -Name $ModuleName
-        Write-Host "🔄 $ModuleName module has been upgraded to version $latestVersion." -ForegroundColor Green
+        Write-Host "`r🔄 [OK] $ModuleName module has been upgraded to version $latestVersion." -ForegroundColor Green
     }
     else {
-        Write-Host "✅ $ModuleName module is already up-to-date." -ForegroundColor Yello
+        Write-Host "👌 [Skip] $ModuleName module is already up-to-datewith version: $currentVersion." -ForegroundColor Yellow
     }
 }

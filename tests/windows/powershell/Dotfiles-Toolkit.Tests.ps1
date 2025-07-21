@@ -10,8 +10,8 @@
         }
 
         It "should exist in the user's PowerShell Modules folder" -ForEach @(
-            "$HOME\Documents\PowerShell\Modules\Dotfiles-Toolkit",
-            "$HOME\Documents\WindowsPowerShell\Modules\Dotfiles-Toolkit"
+            "~\Documents\PowerShell\Modules\Dotfiles-Toolkit",
+            "~\Documents\WindowsPowerShell\Modules\Dotfiles-Toolkit"
         ) {
             Test-Path $_ | Should -BeTrue
         }
