@@ -2,5 +2,8 @@
   "fonts": {
     "name": "hasklig",
     "exactName": "Hasklug Nerd Font"
+  },
+  "shell": {
+    "theme": "quick-term"
   }
 }

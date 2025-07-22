@@ -34,7 +34,7 @@
         # Ensure the profile directory exists
         try {
             if (Test-Path $ProfilePath) {
-                Clear-Content -Path $ProfilePath
+                Clear-Content -Path $ProfilePath | Out-Null
                 Write-Host "📄 Profile cleared: $ProfilePath"
             } else {
                 Write-Host "❌ Profile does not exist: $ProfilePath"

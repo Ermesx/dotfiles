@@ -38,9 +38,14 @@
     # Install Module if not present
     $module = $Global:ModulesCache | Where-Object { $_.Name -eq $ModuleName }  | Sort-Object -Property Version -Descending | Select-Object -First 1
     if (-not $module -or $Force) {
-        Write-Host "🌀 Installing $ModuleName..." -ForegroundColor Cyan -NoNewline
+        Write-Pretty "🌀 Installing " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline
+        Write-Pretty "__$($ModuleName)__" -NoNewline
+        
         Install-Module -Name $ModuleName -SkipPublisherCheck
-        Write-Host "`r✅ [OK] $ModuleName module is installed successfully with the latest version." -ForegroundColor Green
+        
+        Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
+        Write-Pretty "__$($ModuleName)__" -NoNewline
+        Write-Host " module is installed successfully."
         return
     }
 
@@ -58,11 +63,24 @@
     $currentVersion = $module.Version
     $latestVersion = $availableModule.Version
     if ($currentVersion -lt $latestVersion) {
-        Write-Host "🌀 Upgrading $ModuleName from $currentVersion to $latestVersion version..." -ForegroundColor Yellow -NoNewline
+        Write-Pretty "🌀 Upgrading " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline
+        Write-Pretty "__$($ModuleName)__" -NoNewline
+        Write-Host "($currentVersion" -ForegroundColor Yellow -NoNewline
+        Write-Host " => " -NoNewline
+        Write-Host "$latestVersion)" -ForegroundColor Yellow -NoNewline
+        
         Update-Module -Name $ModuleName
-        Write-Host "`r🔄 [OK] $ModuleName module has been upgraded to version $latestVersion." -ForegroundColor Green
+        
+        Write-Pretty "`r🔄 [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
+        Write-Pretty "__$($ModuleName)__" -NoNewline
+        Write-Host " => $latestVersion" -ForegroundColor Green -NoNewline;
+        Write-Host " module has been upgraded." 
+        
     }
     else {
-        Write-Host "👌 [Skip] $ModuleName module is already up-to-datewith version: $currentVersion." -ForegroundColor Yellow
+        Write-Pretty "👌 [Skip] " -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
+        Write-Pretty "__$($ModuleName)__" -NoNewline
+        Write-Host " ($currentVersion)" -ForegroundColor Yellow -NoNewline
+        Write-Host " module is already up-to-date."
     }
 }

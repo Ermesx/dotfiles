@@ -68,5 +68,7 @@
     Write-Profile -ProfilePath $pwsh7ProfilePath
     if ($Pwsh5) { Write-Profile -ProfilePath $pwsh5ProfilePath }
 
-    Write-Host "==> ● Added script block to PowerShell profile: $Comment"
+    Write-Host "==> ● "-NoNewline
+    Write-Host "Added script block to PowerShell profile: " -ForegroundColor DarkGray -NoNewline
+    Write-Host "$Comment" -ForegroundColor Cyan
 }

@@ -48,18 +48,36 @@ function Install-OrUpdateApp {
 
     $app = $Global:AppsCache | Where-Object { $_.Id -eq $AppId } | Select-Object -First 1
     if (-not $app) {
-        Write-Host "🌀 Installing $AppId..." -ForegroundColor Cyan -NoNewline
+        Write-Pretty "🌀 Installing " -ForegroundColor '0,255,0' -FallbackForegroundColor Cyan -NoNewline; 
+        Write-Pretty "__$($AppId)__" -NoNewline
+        
         Install-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null
-        Write-Host "`r✅ [OK] $AppId is installed successfully with the latest version." -ForegroundColor Green
+        
+        Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline; 
+        Write-Pretty "__$($AppId)__" -NoNewline; 
+        Write-Host " is installed successfully with the latest version." -ForegroundColor Green
     }
     elseif ($app.IsUpdateAvailable) {
         $latestVersion = $app.AvailableVersions[0]
-        Write-Host "🌀 Upgrading $AppId from $($app.InstalledVersion) to $latestVersion version..." -ForegroundColor Yellow
+        Write-Pretty "🌀 Upgrading " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline;
+        Write-Pretty "__$($AppId)__" -NoNewline
+        Write-Host "($($app.InstalledVersion)" -ForegroundColor Cyan -NoNewline;
+        Write-Host  " => " -NoNewline;
+        Write-Host "$latestVersion)" -ForegroundColor Cyan -NoNewline; 
+        
         Update-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null
-        Write-Host "`r🔄 [OK] $AppId has been upgraded to version $latestVersion." -ForegroundColor Green
+        
+        Write-Pretty "`r🔄 [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline;
+        Write-Pretty "__$($AppId)__" -NoNewline
+        Write-Host " => ($latestVersion)" -ForegroundColor Green -NoNewline
+        Write-Host " has been upgraded successfully." 
+        
     }
     else {
-        Write-Host "👌 [Skip] $AppId is already up-to-date with version: $($app.InstalledVersion)." -ForegroundColor Yellow
+        Write-Pretty "👌 [Skip] " -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline;
+        Write-Pretty "__$($AppId)__" -NoNewline
+        Write-Host " ($($app.InstalledVersion))" -ForegroundColor Yellow -NoNewline
+        Write-Host " is already up-to-date."
     }
 
     # Update the PATH environment variable to include the new installation

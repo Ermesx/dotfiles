@@ -40,27 +40,34 @@
     $existingModule = Get-Module -Name $moduleName -ListAvailable
     
     if ($existingModule -And $moduleManifest.ModuleVersion -le $existingModule.Version -And -Not $Force) {
-        Write-Host "👌 [Skip] Module $moduleName is already installed." -ForegroundColor Yellow
+        Write-Pretty "👌 [Skip]" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
+        Write-Host " Module " -NoNewline;
+        Write-Pretty "__$($moduleName)__" -NoNewline
+        Write-Host " is already installed."
         return
     }
     
     # Define the destination path in the user module directory
-    $pwsh5ModulesPath = Join-Path -Path "~\Documents\WindowsPowerShell\Modules" -ChildPath $moduleName
-    $pwsh7ModulesPath = Join-Path -Path "~\Documents\PowerShell\Modules" -ChildPath $moduleName
+    $pwsh5ModulesPath = Join-Path -Path '~\Documents\WindowsPowerShell\Modules' -ChildPath $moduleName
+    $pwsh7ModulesPath = Join-Path -Path '~\Documents\PowerShell\Modules' -ChildPath $moduleName
 
     $action = if ($existingModule) { 'Updating' } else { 'Installing' }
-    Write-Host "📦 $action module $ModuleName to: `n`t$pwsh7ModulesPath`n`t$pwsh5ModulesPath..." -ForegroundColor Cyan
+    Write-Pretty "📦 $action module " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline
+    Write-Pretty "__$($ModuleName)__" -NoNewline
+    Write-Host " to: `n`t$pwsh7ModulesPath`n`t$pwsh5ModulesPath..."
 
     # Check if the module already exists
     if ((Test-Path $pwsh5ModulesPath) -and (Test-Path $pwsh7ModulesPath)) {
-        Remove-Item -Recurse -Force -Path $pwsh5ModulesPath
-        Remove-Item -Recurse -Force -Path $pwsh7ModulesPath
+        Remove-Item -Recurse -Force -Path $pwsh5ModulesPath | Out-Null
+        Remove-Item -Recurse -Force -Path $pwsh7ModulesPath | Out-Null
     }    
 
     # Copy the module directory and its contents
-    Copy-Item -Path $SourceModulePath -Destination $pwsh5ModulesPath -Recurse -Force
-    Copy-Item -Path $SourceModulePath -Destination $pwsh7ModulesPath -Recurse -Force
+    Copy-Item -Path $SourceModulePath -Destination $pwsh5ModulesPath -Recurse -Force | Out-Null
+    Copy-Item -Path $SourceModulePath -Destination $pwsh7ModulesPath -Recurse -Force | Out-Null
 
     $action = if ($existingModule) { 'updated' } else { 'installed' }
-    Write-Host "✅ [OK] Module $moduleName $action successfully!" -ForegroundColor Green
+    Write-Pretty "✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
+    Write-Pretty "__$($moduleName)__" -NoNewline
+    Write-Host " module is $action successfully!" 
 }

@@ -1,8 +1,12 @@
-﻿Describe "Dotfiles-Toolkit installation" {
+﻿# Requires -Module Pester
+# Requires -Module Dotfiles-Toolkit
+
+Describe "Dotfiles-Toolkit installation" {
+    
     BeforeAll {
         Import-Module Dotfiles-Toolkit -Force
     }
-    
+
     Context "module" {
         It "should be installed" {
             $module = Get-Module -Name Dotfiles-Toolkit -ListAvailable
@@ -22,9 +26,11 @@
             "Install-LocalModule",
             "Install-OrUpdateApp",
             "Install-OrUpdateModule",
-            "Update-Env"
+            "Update-Env",
+            "Update-ScriptBlock",
+            "Write-Pretty"
         ) {
             Get-Command $_ | should -Not -BeNullOrEmpty
         }
-    }    
+    }
 }

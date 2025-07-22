@@ -13,6 +13,7 @@
 Update-Env -AdditionalPath "C:\NewPath;D:\AnotherPath"
     Appends `C:\NewPath` and `D:\AnotherPath` to the PATH environment variable if they are valid.
 #>
+
     [CmdletBinding()]
     param (
         [string]$AdditionalPath = ""
@@ -20,7 +21,7 @@ Update-Env -AdditionalPath "C:\NewPath;D:\AnotherPath"
 
     Write-Verbose "Previous PATH value: $env:Path"
 
-    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    $userPath = Get-EnvVar -Name "Path" -Scope ([System.EnvironmentVariableTarget]::User)
 
     if ($AdditionalPath -and $AdditionalPath.Trim() -ne "") {
         $validPaths = @()
@@ -29,7 +30,7 @@ Update-Env -AdditionalPath "C:\NewPath;D:\AnotherPath"
         $userPaths = $userPath -split ";" | Where-Object { $_.Trim() -ne "" }
 
         foreach ($path in $allPaths) {
-            if (Test-Path $path -and -not $userPaths.Contains($path)) {
+            if ((Test-Path $path) -and -not ($userPaths.Contains($path))) {
                 $validPaths += $path
             }
             else {
@@ -44,11 +45,12 @@ Update-Env -AdditionalPath "C:\NewPath;D:\AnotherPath"
         if ($validPaths.Count -gt 0) {
             Write-Verbose "Additional PATH values: $($validPaths -join ';')"
             $userPath = ($userPaths -join ";") + ";" + ($validPaths -join ";")
-            [Environment]::SetEnvironmentVariable("Path", $userPath, [EnvironmentVariableTarget]::User)
+            Set-EnvVar -Name "Path" -Value $userPath -Scope ([System.EnvironmentVariableTarget]::User)
         }
     }
 
-    $newPath = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + $userPath
+    $machinePath = Get-EnvVar -Name "Path" -Scope ([System.EnvironmentVariableTarget]::Machine)
+    $newPath = $machinePath + ";" + $userPath
     Write-Verbose "New PATH value: $newPath"
 
     $env:Path = $newPath
