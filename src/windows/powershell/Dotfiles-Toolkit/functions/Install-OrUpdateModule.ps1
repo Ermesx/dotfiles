@@ -41,7 +41,7 @@
         Write-Pretty "🌀 Installing " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline
         Write-Pretty "__$($ModuleName)__" -NoNewline
         
-        Install-Module -Name $ModuleName -SkipPublisherCheck
+        Install-Module -Name $ModuleName -SkipPublisherCheck | Out-Null
         
         Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
         Write-Pretty "__$($ModuleName)__" -NoNewline

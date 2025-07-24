@@ -1,18 +1,21 @@
 ﻿# git repository greeter
-$global:lastRepository = $null
+$Global:lastRepository = $null
 
 function Test-DirectoryForNewRepository {
     $currentRepository = git rev-parse --show-toplevel 2>$null
-    if ($currentRepository -and ($currentRepository -ne $global:lastRepository)) {
-        onefetch | Write-Host
-        $global:lastRepository = $currentRepository
+    if ($currentRepository -and ($currentRepository -ne $Global:lastRepository)) {
+        Write-Host
+        onefetch --nerd-fonts | Write-Host
+        $Global:lastRepository = $currentRepository
     }
 }
+
+Register-EngineEvent ChangeDirectory -Action { Test-DirectoryForNewRepository } | Out-Null
 
 # Override the Set-Location command to check for a new repository
 function Set-Location {
     Microsoft.PowerShell.Management\Set-Location @args
-    Test-DirectoryForNewRepository
+    New-Event -SourceIdentifier ChangeDirectory 
 }
 
 #Check the repository also when opening a shell directly in a repository directory

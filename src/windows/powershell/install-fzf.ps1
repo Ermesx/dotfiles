@@ -15,8 +15,8 @@ Install-OrUpdateModule -ModuleName PSfzf
 $script = Update-ScriptBlock -ScriptBlockTemplate {
     Import-Module PSfzf
     Set-PsFzfOption -TabExpansion
-    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
-    Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
+    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+h'
+    Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion } -BriefDescription "Run fzf Tab completion"
     $env:FZF_DEFAULT_OPTS_FILE = "{{filePath}}"
 } -Values @{ filePath = Join-Path $HOME $filename }
 
@@ -27,3 +27,6 @@ Install-OrUpdateApp -AppId "GnuWin32.File" -UpdateEnv -Command "file" -Additiona
 
 # $env:FZF_DEFAULT_COMMAND = "fd --type f --hidden --exclude .git" - zainstalować pozostałe toole
 # sPSFZF ma tylko $env:_PSFZF_FZF_DEFAULT_OPTS - można dać np. --height 50% 
+
+
+#TODO: dodać wyszukiwanie plików, directories i commands - wzorować się na artykule, zainstalować fd, esa i ripgrep, dodać wyszukiwanie w plikach

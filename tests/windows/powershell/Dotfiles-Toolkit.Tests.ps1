@@ -2,7 +2,7 @@
 # Requires -Module Dotfiles-Toolkit
 
 Describe "Dotfiles-Toolkit installation" {
-    
+
     BeforeAll {
         Import-Module Dotfiles-Toolkit -Force
     }
@@ -28,7 +28,8 @@ Describe "Dotfiles-Toolkit installation" {
             "Install-OrUpdateModule",
             "Update-Env",
             "Update-ScriptBlock",
-            "Write-Pretty"
+            "Write-Pretty",
+            "Update-KeyBinding"
         ) {
             Get-Command $_ | should -Not -BeNullOrEmpty
         }

@@ -1,39 +1,31 @@
 ﻿# PSReadline configuration
-Set-PSReadLineOption -EditMode Emacs
-
-# Clipboard interaction is bound by default in Windows mode, but not Emacs mode.
-Set-PSReadLineKeyHandler -Key Ctrl+C -Function Copy
-Set-PSReadLineKeyHandler -Key Ctrl+v -Function Paste
+Set-PSReadLineOption -EditMode Windows
 
 # CaptureScreen is good for blog posts or email showing a transaction
 # of what you did when asking for help or demonstrating a technique.
-Set-PSReadLineKeyHandler -Chord 'Ctrl+D,Ctrl+C' -Function CaptureScreen
+Set-PSReadLineKeyHandler -Key Ctrl+p -Function CaptureScreen
 
 # Interactive Tab completion and fallback to Ctrl+spacebar
 Set-PSReadLineKeyHandler -Key Ctrl+Spacebar -Function MenuComplete
 
+# Change from NextWord to ForwardWord (on the end of word)
+Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function ForwardWord 
+
+# Delete line or right from cursor
+Set-PSReadLineKeyHandler -Key Ctrl+Alt+Backspace -Function BackwardKillInput
+Set-PSReadLineKeyHandler -Key Shift+Alt+Backspace -Function KillLine
+
+# Capitalize, uppercase, and lowercase words
+Set-PSReadLineKeyHandler -Key Alt+c -Function CapitalizeWord
+Set-PSReadLineKeyHandler -Key Alt+u -Function UpcaseWord
+Set-PSReadLineKeyHandler -Key Alt+l -Function DowncaseWord
+
+# Validate input and accept
+Set-PSReadLineKeyHandler -Key Ctrl+Enter -Function ValidateAndAcceptLine
+
 # Predictcion history
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -PredictionViewStyle ListView
-
-# `ForwardChar` accepts the entire suggestion text when the cursor is at the end of the line.
-# This custom binding makes `RightArrow` behave similarly - accepting the next word instead of the entire suggestion text.
-Set-PSReadLineKeyHandler -Key RightArrow `
-                         -BriefDescription ForwardCharAndAcceptNextSuggestionWord `
-                         -LongDescription "Move cursor one character to the right in the current editing line and accept the next word in suggestion when it's at the end of current editing line" `
-                         -ScriptBlock {
-    param($key, $arg)
-
-    $line = $null
-    $cursor = $null
-    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
-
-    if ($cursor -lt $line.Length) {
-        [Microsoft.PowerShell.PSConsoleReadLine]::ForwardChar($key, $arg)
-    } else {
-        [Microsoft.PowerShell.PSConsoleReadLine]::AcceptNextSuggestionWord($key, $arg)
-    }
-}
+Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+Set-PSReadLineOption -PredictionViewStyle InlineView
 
 # The next four key handlers are designed to make entering matched quotes
 # parens, and braces a nicer experience.  I'd like to include functions
@@ -242,20 +234,16 @@ Set-PSReadLineKeyHandler -Key "Alt+'" `
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$ast, [ref]$tokens, [ref]$errors, [ref]$cursor)
 
     $tokenToChange = $null
-    foreach ($token in $tokens)
-    {
+    for ($i = 0; $i -lt $tokens.Count; $i++) {
+        $token = $tokens[$i]
         $extent = $token.Extent
-        if ($extent.StartOffset -le $cursor -and $extent.EndOffset -ge $cursor)
-        {
+        if ($extent.StartOffset -le $cursor -and $extent.EndOffset -ge $cursor) {
             $tokenToChange = $token
-
-            # If the cursor is at the end (it's really 1 past the end) of the previous token,
-            # we only want to change the previous token if there is no token under the cursor
-            if ($extent.EndOffset -eq $cursor -and $foreach.MoveNext())
-            {
-                $nextToken = $foreach.Current
-                if ($nextToken.Extent.StartOffset -eq $cursor)
-                {
+    
+            # If the cursor is at the end of the current token, check if the next token starts at the cursor position.
+            if ($extent.EndOffset -eq $cursor -and ($i + 1) -lt $tokens.Count) {
+                $nextToken = $tokens[$i + 1]
+                if ($nextToken.Extent.StartOffset -eq $cursor) {
                     $tokenToChange = $nextToken
                 }
             }
