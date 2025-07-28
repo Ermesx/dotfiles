@@ -26,8 +26,8 @@ Installed Apps
 1. Rider
 2. VS Code
 
-# 🔑 Custom PSReadLine Keybindings Cheat Sheet
 
+# 🔑 Custom PSReadLine Keybindings Cheat Sheet
 
 ### ✂️ Text Editing
 
@@ -62,7 +62,7 @@ Installed Apps
 | `Ctrl+l`        | ClearScreen           | Clear the terminal and redraw the prompt at the top  |
 | `Ctrl+p`        | CaptureScreen         | 📸 Copy selected lines to clipboard (for logs/debug) |
 
-### 🔍 Fuzzy Search with fzf
+### 🔍 Fuzzy Search with fzf (PSfzf module)
 
 | Shortcut | Function                | Description                        |
 |----------|-------------------------|------------------------------------|
@@ -70,3 +70,25 @@ Installed Apps
 | `Ctrl+h` | FzfReverseHistorySelect | Search command history using `fzf` |
 
 ---
+
+# 🛠️ fzf configuration
+
+1. search
+   - files (fd)
+   - directories (fd)
+   - commands and parameters (get-help)
+   - string in files (rg)
+2. exclude folders for files and directories (fd and rg)
+   - .git, 
+   - node_modules, etc.
+3. can switch between files and directories and commands on the fly
+4. do preview of selected item
+   - file (bat)
+   - directory (esa tree)
+   - commands and parameters (get-help)
+   - string in file (rg)
+5. search shortcut for all types `Ctrl+t` 
+
+fd --type file --color=always --exclude .git
+
+fd --type directory {}

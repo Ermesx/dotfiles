@@ -4,6 +4,14 @@
     "exactName": "Hasklug Nerd Font"
   },
   "shell": {
-    "theme": "quick-term"
+    "theme": "quick-term",
+    "fzf": {
+      "binding": {
+        "searchKey": "ctrl+t",
+        "historyKey": "ctrl+f"
+      },
+      "psfzfOpts": "--style default --height 50%",
+      "defaultCommand": "fd --hidden --exclude .git --exclude .cache --exclude node_modules --exclude bin --exclude obj --exclude .vscode --exclude .idea"
+    }
   }
 }

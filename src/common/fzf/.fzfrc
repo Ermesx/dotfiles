@@ -1,16 +1,32 @@
---preview "bat --style=numbers,changes --color=always --line-range=:500 {}"
---bind "focus:transform-header:file --brief {}"
---color "fg:-1,fg+:#d0d0d0,bg:#282c34,bg+:#414752"
---color "hl:#5f87af,hl+:#5fd7ff,info:#b6af5b,marker:#87ff00"
---color "prompt:#d60000,spinner:#af5fff,pointer:#00ffff,header:#87afaf"
---color "border:#4a4a4a,preview-bg:#1a1a1a,label:#aeaeae,query:#d9d9d9"
---border "rounded"
---preview-window "border-rounded"
---prompt "> "
---marker "> "
---pointer "=>"
---separator "─"
---scrollbar "│"
---layout "reverse-list"
---info "right"
+--style="full"
+
+--layout="reverse-list"
+
+--border="rounded"
+--list-border="rounded"
+--preview-border="rounded"
+--input-border="rounded"
+--header-border="rounded"
+
+--border-label=" Search " 
+--input-label=" Input " 
+--header-label=" File Type "
+
+--bind="result:transform-list-label:echo '{q}'"
+--bind="focus:transform-preview-label:echo ' Previewing [%s] ' {}"
+
+--info="inline-right"
+--pointer="=>"
+
+--color="border:#aaaaaa,label:#cccccc,query:#d9d9d9"
+--color="preview-border:#9999cc,preview-label:#ccccff"
+--color="list-border:#669966,list-label:#99cc99"
+--color="input-border:#996666,input-label:#ffcccc"
+--color="header-border:#6699cc,header-label:#99ccff"
+--color=hl:#5f87af,hl+:#5fd7ff,info:#b6af5b,marker:#87ff00
+--color=prompt:#d60000,spinner:#af5fff,pointer:#ffff00,header:#87afaf
 --ansi
+
+--preview="if exist {}\\* ( eza -T --colour=always --icons=always {} ) else if exist {} ( bat --style=numbers,changes --color=always --line-range=:500 {} ) else ( pwsh -NoLogo -NoProfile -Command Get-Help {} )"
+
+--bind="focus:transform-header:file --brief {}"

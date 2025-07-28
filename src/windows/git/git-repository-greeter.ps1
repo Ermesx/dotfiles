@@ -15,8 +15,8 @@ Register-EngineEvent ChangeDirectory -Action { Test-DirectoryForNewRepository } 
 # Override the Set-Location command to check for a new repository
 function Set-Location {
     Microsoft.PowerShell.Management\Set-Location @args
-    New-Event -SourceIdentifier ChangeDirectory 
+    New-Event -SourceIdentifier ChangeDirectory | Out-Null
 }
 
-#Check the repository also when opening a shell directly in a repository directory
+# Check the repository also when opening a shell directly in a repository directory
 Test-DirectoryForNewRepository
