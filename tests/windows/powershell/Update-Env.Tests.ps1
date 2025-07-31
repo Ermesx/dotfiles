@@ -1,32 +1,26 @@
-﻿# Requires -Module Pester
-# Requires -Module Dotfiles-Toolkit
+﻿#Requires -Modules Pester, Dotfiles-Toolkit
 
 Describe 'Update-Env' {
-    
+
     BeforeAll {
         Import-Module Dotfiles-Toolkit -Force
     }
-    
+
     InModuleScope Dotfiles-Toolkit {
         BeforeAll {
 
-            Mock Test-Path { return $true }
+            Mock Test-Path { $true }
 
             Mock Get-EnvVar {
                 param ($Name, $Scope)
-                switch ($Scope)
-                {
-                    'User'    {
-                        return 'C:\User1;C:\User2'
-                    }
-                    'Machine' {
-                        return 'C:\Machine1'
-                    }
+                switch ($Scope) {
+                    'User'    { return 'C:\User1;C:\User2' }
+                    'Machine' { return 'C:\Machine1' }
                 }
             }
 
             Mock Set-EnvVar { }
-            
+
             Mock Write-Host { }
         }
 

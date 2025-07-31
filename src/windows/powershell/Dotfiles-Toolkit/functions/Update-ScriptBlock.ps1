@@ -1,4 +1,6 @@
-﻿function Update-ScriptBlock {
+﻿#Requires -Modules PSMustache, PSScriptAnalyzer
+
+function Update-ScriptBlock {
 <#
 .SYNOPSIS
     Creates a new script block by replacing placeholders with actual values.
@@ -47,13 +49,12 @@
     )
     
     # Replace placeholders with actual values
-    $stringBuilder = New-Object System.Text.StringBuilder($ScriptBlockTemplate.ToString())
-    $Values.Keys | ForEach-Object { [void]$stringBuilder.Replace("{{$_}}", $Values[$_]) }
-    $script = $stringBuilder.ToString()
+    $script = ConvertFrom-MustacheTemplate -Template $ScriptBlockTemplate.ToString() -Values $Values | Invoke-Formatter
 
     # Check if the script block is valid
     $errors = $null
     [System.Management.Automation.PSParser]::Tokenize($script, [ref]$errors) | Out-Null
+
     
     if ($errors) {
         $errorMessages = $errors | ForEach-Object { "Line $( $_.Line): $( $_.Message )" }

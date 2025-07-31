@@ -63,5 +63,3 @@ Add-ToProfile -Comment "Initialize fzf key bindings" -ScriptBlock (
 
 
 #TODO: dodać wyszukiwanie plików, directories i commands - wzorować się na artykule, zainstalować fd, esa i ripgrep, dodać wyszukiwanie w plikach
-
-#export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'

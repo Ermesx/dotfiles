@@ -12,7 +12,7 @@
 RootModule = 'Dotfiles-Toolkit.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.9.10'
+ModuleVersion = '1.10.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -52,7 +52,9 @@ Copyright = '(c) Wojciech Gadziński. All rights reserved.'
 
 # Modules that must be imported into the global environment prior to importing this module
 RequiredModules = @(
-    'Microsoft.WinGet.Client'
+    'Microsoft.WinGet.Client',
+    'PSMustache',
+    'PSScriptAnalyzer'
 )
 
 # Assemblies that must be loaded prior to importing this module

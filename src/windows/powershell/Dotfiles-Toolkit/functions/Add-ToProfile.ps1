@@ -1,4 +1,6 @@
-﻿function Add-ToProfile {
+﻿#Requires -Modules PSScriptAnalyzer
+
+function Add-ToProfile {
 <#
 .SYNOPSIS
     Adds a script block to the PowerShell profile for future sessions.
@@ -49,7 +51,7 @@
         }
     
         if ($ScriptBlock) {
-            Add-Content -Path $ProfilePath -Value $ScriptBlock.ToString().Trim()
+            $ScriptBlock.ToString() | Invoke-Formatter | Add-Content -Path $ProfilePath 
         }
     
         if ($Path) {

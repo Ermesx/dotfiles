@@ -39,10 +39,11 @@
     # Check if the module is already installed
     $existingModule = Get-Module -Name $moduleName -ListAvailable
     
-    if ($existingModule -And $moduleManifest.ModuleVersion -le $existingModule.Version -And -Not $Force) {
+    if ($existingModule -And $existingModule.Version -eq $moduleManifest.ModuleVersion -And -Not $Force) {
         Write-Pretty "👌 [Skip]" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
         Write-Host " Module " -NoNewline;
         Write-Pretty "__$($moduleName)__" -NoNewline
+        Write-Host " ($($existingModule.Version))" -ForegroundColor Yellow -NoNewline
         Write-Host " is already installed."
         return
     }

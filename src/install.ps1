@@ -31,8 +31,8 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
 Write-Host "🔧 Keep going the installation script..."
 Import-Module Dotfiles-Toolkit                                                  
 
-# Install Pester testing framework for PowerShell
-& "$windowsPath\powershell\install-pester.ps1"
+# Install dependencies for PowerShell modules and tests
+& "$windowsPath\powershell\install-modules-dependencies.ps1"
 
 # Install oh-my-posh 
 & "$windowsPath\powershell\install-oh-my-posh.ps1" -FontName $defaults.fonts.name -Theme $defaults.shell.theme
@@ -55,6 +55,5 @@ Import-Module Dotfiles-Toolkit
 
 # Install docker
 & "$windowsPath\docker\install-docker.ps1"
-
 
 # TODO: add wsl install and upgrade

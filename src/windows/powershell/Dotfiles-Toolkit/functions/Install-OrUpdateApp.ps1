@@ -44,7 +44,6 @@ function Install-OrUpdateApp {
 
     if (-not ($Global:AppsCache) -or $Global:AppsCacheTimer -lt (Get-Date)) {
         $Global:AppsCache = Get-WinGetPackage
-#        $Global:InstalledAppsCache = @()
         $Global:AppsCacheTimer = (Get-Date).AddDays(1)
     }
 
@@ -54,7 +53,7 @@ function Install-OrUpdateApp {
         Write-Pretty "__$($AppId)__" -NoNewline
         
         Install-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null        
-        $installedApp = Get-WinGetPackage -Id $AppId | Select-Object -First 1
+        $installedApp = Get-WinGetPackage -Id $AppId |  Select-Object -First 1
         $Global:AppsCache += $installedApp
         
         Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline; 
@@ -72,7 +71,8 @@ function Install-OrUpdateApp {
         Write-Host ")" -ForegroundColor Cyan -NoNewline
         
         Update-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null
-        $Global:AppsCache += $app
+        $installedApp = Get-WinGetPackage -Id $AppId | Select-Object -First 1
+        $Global:AppsCache += $installedApp
         
         Write-Pretty "`r🔄 [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
         Write-Pretty "__$($AppId)__" -NoNewline

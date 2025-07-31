@@ -1,5 +1,4 @@
-﻿# Requires -Module Pester
-# Requires -Module Dotfiles-Toolkit
+﻿#Requires -Modules Pester, Dotfiles-Toolkit
 
 Describe "Dotfiles-Toolkit installation" {
 

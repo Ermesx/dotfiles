@@ -23,10 +23,12 @@ Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor G
 Write-Pretty "__$($FontName)__" -NoNewline;
 Write-Host " font is installed successfully."
 
-$script = Update-ScriptBlock -ScriptBlockTemplate {
-    oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/{{Theme}}.omp.json" | Invoke-Expression
-} -Values @{ Theme = $Theme}
-Add-ToProfile -Comment "Initialize oh-my-posh" -ScriptBlock $script
+
+Add-ToProfile -Comment "Initialize oh-my-posh" -ScriptBlock (
+    Update-ScriptBlock -ScriptBlockTemplate {
+        oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/{{Theme}}.omp.json" | Invoke-Expression
+    } -Values @{ Theme = $Theme }
+)
  
 # Install or update Terminal-Icons
 Install-OrUpdateModule -ModuleName Terminal-Icons

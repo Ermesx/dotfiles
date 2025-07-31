@@ -1,35 +1,48 @@
-﻿# Requires -Module Pester
-# Requires -Module Dotfiles-Toolkit
+﻿#Requires -Modules Pester, Dotfiles-Toolkit
 
 Describe "After installing dotfiles" {
 
     BeforeAll {
         Import-Module Dotfiles-Toolkit -Force
+        $script:allApps = Get-WinGetPackage
+        $script:allModules = Get-Module -ListAvailable
     }
-    
-    Context " Apps" {
+    Context "Apps" {
         It "should have installed <_>" -Foreach @(
-            "Oh-My-Posh",
+            "PowerShell",
+            "Oh My Posh",
             "Windows Terminal",
             "Git",
-            "Docker",
-            "Zoxide",
-            "Fzf"
+            "GitQL",
+            "lazygit",
+            "onefetch",
+            "Git Credential Manager (User)",
+            "Docker Desktop",
+            "zoxide",
+            "fzf",
+            "fd",
+            "eza",
+            "bat",
+            "RipGrep MSVC",
+            "file"
         ) {
-            Get-WinGetPackage -Name $_ | Should -Not -BeNullOrEmpty
+            $name = $_
+            $script:allApps | Where-Object { $_.Name -like "*$name*" } | Should -Not -BeNullOrEmpty
         }
     }
-
-    Context " Modules" {
-        It " should have installed <_>" -Foreach @(
+    Context "Modules" {
+        It "should have installed <_>" -Foreach @(
             "Microsoft.WinGet.Client",
             "Pester",
             "PSFzf",
             "posh-git",
             "DockerCompletion",
-            "Terminal-Icons"
+            "Terminal-Icons",
+            "PSScriptAnalyzer",
+            "PSMustache"
         ) {
-            Get-Module -Name $_ -ListAvailable | Should -Not -BeNullOrEmpty
+            $name = $_
+            $script:allModules | Where-Object { $_.Name -eq $name } | Should -Not -BeNullOrEmpty
         }
     }
 }

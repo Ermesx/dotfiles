@@ -53,16 +53,18 @@
     }
 
     # Check if the module is already cached
-    if (-not ($Global:ModulesFindCache) -or $Global:ModuleCacheTimer -lt (Get-Date)) {
-        $Global:ModuleFindCache = @{}
+    if (-not ($Global:ModulesFindCache) -or $Global:ModulesFindCacheTimer -lt (Get-Date)) {
+        $Global:ModulesFindCache = @{}
+        $Global:ModulesFindCacheTimer = (Get-Date).AddDays(1)
     }
 
-    if (-not $Global:ModuleFindCache.ContainsKey($ModuleName)) {
-        $Global:ModuleFindCache[$ModuleName] = Find-Module -Name $ModuleName -ErrorAction SilentlyContinue
+    if (-not $Global:ModulesFindCache.ContainsKey($ModuleName)) {
+        $foundModule = Find-Module -Name $ModuleName | Select-Object -First 1
+        $Global:ModulesFindCache.Add($ModuleName, $foundModule)
     }
 
     # Upgrade Module
-    $availableModule = $Global:ModuleFindCache | Where-Object { $_.Name -eq $ModuleName } | Select-Object -ExpandProperty Module
+    $availableModule = $Global:ModulesFindCache[$ModuleName]
     $currentVersion = $module.Version
     $latestVersion = $availableModule.Version
     if ($currentVersion -lt $latestVersion) {
