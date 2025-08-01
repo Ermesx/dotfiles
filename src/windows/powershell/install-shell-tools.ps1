@@ -47,17 +47,16 @@ Add-ToProfile -Comment "Initialize fzf key bindings" -ScriptBlock (
     Update-ScriptBlock -ScriptBlockTemplate {
         Import-Module PSfzf
         Set-PsFzfOption -TabExpansion
-        Set-PsFzfOption -PSReadlineChordProvider '{{searchKey}}' -PSReadlineChordReverseHistory '{{historyKey}}'
+        Set-PsFzfOption -PSReadlineChordProvider '{{defaults.binding.searchKey}}' `
+                        -PSReadlineChordReverseHistory '{{defaults.binding.historyKey}}'
         Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion } -BriefDescription "Run fzf Tab completion"
+        
         $env:FZF_DEFAULT_OPTS_FILE = "{{filePath}}"
-        $env:FZF_DEFAULT_COMMAND = "{{defaultCommand}}"
-        $env:_PSFZF_FZF_DEFAULT_OPTS = "{{psfzfOpts}}"
+        $env:FZF_DEFAULT_COMMAND = "{{defaults.defaultCommand}}"
+        $env:_PSFZF_FZF_DEFAULT_OPTS = "{{defaults.psfzfOpts}}"
     } -Values @{
-        searchKey = $Config.fzf.defaults.binding.searchKey
-        historyKey = $Config.fzf.defaults.binding.historyKey
+        defaults = $Config.fzf.defaults
         filePath = Join-Path $HOME $fzfFileName
-        defaultCommand = $Config.fzf.defaults.defaultCommand
-        psfzfOpts = $Config.fzf.defaults.psfzfOpts
     }
 )
 

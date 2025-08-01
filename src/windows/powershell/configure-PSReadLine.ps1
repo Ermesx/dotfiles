@@ -1,6 +1,15 @@
 ﻿# PSReadline configuration
 Set-PSReadLineOption -EditMode Windows
 
+# Predictcion history
+Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+Set-PSReadLineOption -PredictionViewStyle InlineView
+
+# Better arrows history navigation
+Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
+Set-PSReadlineKeyHandler -Key DownArrow -Function HistorySearchForward
+
 # CaptureScreen is good for blog posts or email showing a transaction
 # of what you did when asking for help or demonstrating a technique.
 Set-PSReadLineKeyHandler -Key Ctrl+p -Function CaptureScreen
@@ -11,10 +20,6 @@ Set-PSReadLineKeyHandler -Key Ctrl+Spacebar -Function MenuComplete
 # Change from NextWord to ForwardWord (on the end of word)
 Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function ForwardWord 
 
-# Delete line or right from cursor
-Set-PSReadLineKeyHandler -Key Ctrl+Alt+Backspace -Function BackwardKillInput
-Set-PSReadLineKeyHandler -Key Shift+Alt+Backspace -Function KillLine
-
 # Capitalize, uppercase, and lowercase words
 Set-PSReadLineKeyHandler -Key Alt+c -Function CapitalizeWord
 Set-PSReadLineKeyHandler -Key Alt+u -Function UpcaseWord
@@ -22,10 +27,6 @@ Set-PSReadLineKeyHandler -Key Alt+l -Function DowncaseWord
 
 # Validate input and accept
 Set-PSReadLineKeyHandler -Key Ctrl+Enter -Function ValidateAndAcceptLine
-
-# Predictcion history
-Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-Set-PSReadLineOption -PredictionViewStyle InlineView
 
 # The next four key handlers are designed to make entering matched quotes
 # parens, and braces a nicer experience.  I'd like to include functions

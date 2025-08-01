@@ -1,8 +1,21 @@
-﻿param (
-    [switch]$ReRun
-)
+﻿$ErrorActionPreference = "Stop"
 
-$ErrorActionPreference = "Stop"
+Clear-Host
+
+#region Prepare PowerShell 7
+# Check if the script is running in PowerShell 7
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+        Write-Host "🌀 Installing PowerShell 7..." --NoNewline
+        winget install --id Microsoft.Powershell --accept-source-agreements --accept-package-agreements --silent
+        $env:PATH += ";$env:ProgramFiles\PowerShell\7"
+    }
+    
+    Write-Host "`r🚀 Running install script with PowerShell 7"
+    pwsh -NoLogo -NoProfile -File $PSScriptRoot\install.ps1
+    exit 0;
+}
+#endregion
 
 # Default paths
 $commonPath = "$PSScriptRoot\common"
@@ -11,31 +24,17 @@ $windowsPath = "$PSScriptRoot\windows"
 # Load defaults configuration
 $defaults = Get-Content "$commonPath\defaults.json" | ConvertFrom-Json
 
-#region Perpare Powershell environment
-if (-not $ReRun) {
-    Clear-Host
-    Write-Host "⚙️ Installing dotfiles on Windows..."
+# Installing... !!
+Write-Host "⚙️ Installing dotfiles on Windows..."
 
-    # Install or upgrade PowerShell if not already installed and necessary tools
-    & "$windowsPath\powershell\install-powershell.ps1"
-}
-
-# Check if the script is running in PowerShell 7 or later
-if ($PSVersionTable.PSVersion.Major -lt 7) {
-    Write-Host "🚀 Running install script with PowerShell 7"
-    pwsh -NoLogo -NoProfile -File $PSScriptRoot\install.ps1 -ReRun
-    exit 0;
-}
-#endregion
-
-Write-Host "🔧 Keep going the installation script..."
-Import-Module Dotfiles-Toolkit                                                  
+# Upgrade PowerShell necessary tools
+& "$windowsPath\powershell\install-powershell.ps1"
 
 # Install dependencies for PowerShell modules and tests
 & "$windowsPath\powershell\install-modules-dependencies.ps1"
 
 # Install oh-my-posh 
-& "$windowsPath\powershell\install-oh-my-posh.ps1" -FontName $defaults.fonts.name -Theme $defaults.shell.theme
+& "$windowsPath\powershell\install-oh-my-posh.ps1" -Fonts $defaults.fonts -Theme $defaults.shell.theme
 
 # install PSFzf for fuzzy finding
 & "$windowsPath\powershell\install-shell-tools.ps1" -Config @{

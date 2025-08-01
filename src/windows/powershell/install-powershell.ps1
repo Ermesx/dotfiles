@@ -6,7 +6,7 @@ Import-Module Dotfiles-Toolkit -Force
 # Clear the PowerShell profile to avoid duplicates
 Clear-Profile -All
 
-Add-ToProfile -Comment "Import Dotfiles-Toolkit" -Pwsh5 -ScriptBlock {
+Add-ToProfile -Comment "Import Dotfiles-Toolkit" -ScriptBlock {
     Import-Module Dotfiles-Toolkit
 }
 
@@ -18,7 +18,7 @@ Install-OrUpdateModule -ModuleName Microsoft.WinGet.Client
 Import-Module Microsoft.WinGet.Client
 Repair-WinGetPackageManager -Latest
 
-Add-ToProfile -Comment "Import Microsoft.WinGet.Client" -Pwsh5 -ScriptBlock {
+Add-ToProfile -Comment "Import Microsoft.WinGet.Client" -ScriptBlock {
     Import-Module Microsoft.WinGet.Client
 }
 

@@ -5,8 +5,10 @@ $sourceRoot = "src"
 $destination = "build/windows"
 
 # Exclude files with the
-$excludedExtension = ".sh"
+$excludedExtensions = @(".sh", ".xlsx", ".txt")
 $excludedKeyword = "linux"
+
+$validatedExtensions = @(".ps1", ".psm1", ".psd1")
 
 Write-Host "🚀 Start build for Windows in '$destination'" -ForegroundColor Cyan
 
@@ -18,14 +20,14 @@ New-Item -ItemType Directory -Path $destination | Out-Null
 
 # Get all files from the src directory (excluding .sh files and files containing 'macos' in the name)
 $allFiles = Get-ChildItem -Path $sourceRoot -Recurse -File | Where-Object {
-    ($_.Extension -ne $excludedExtension) -and ($_.FullName.ToLower() -notlike "*$excludedKeyword*")
+    ($excludedExtensions -notcontains $_.Extension) -and ($_.FullName.ToLower() -notlike "*$excludedKeyword*")
 }
 
 $totalFiles = $allFiles.Count
 $counter = 0
 $allErrors = @{}
 
-$filesToValidate = $allFiles | Where-Object { @(".ps1", ".psm1", ".psd1") -contains $_.Extension }
+$filesToValidate = $allFiles | Where-Object { $validatedExtensions -contains $_.Extension }
 $totalValidateFiles = $filesToValidate.Count
 
 foreach ($item in $filesToValidate) {

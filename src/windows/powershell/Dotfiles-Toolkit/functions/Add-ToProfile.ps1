@@ -51,11 +51,11 @@ function Add-ToProfile {
         }
     
         if ($ScriptBlock) {
-            $ScriptBlock.ToString() | Invoke-Formatter | Add-Content -Path $ProfilePath 
+            $ScriptBlock.ToString().Trim() | Invoke-Formatter | Add-Content -Path $ProfilePath 
         }
     
         if ($Path) {
-            Get-Content -Path $Path -Raw | Add-Content -Path $ProfilePath
+            Get-Content -Path $Path -Raw | Invoke-Formatter | Add-Content -Path $ProfilePath
         }
     
         Add-Content -Path $ProfilePath -Value "`n"

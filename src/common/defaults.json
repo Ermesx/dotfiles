@@ -7,11 +7,11 @@
     "theme": "quick-term",
     "fzf": {
       "binding": {
-        "searchKey": "ctrl+t",
-        "historyKey": "ctrl+f"
+        "searchKey": "ctrl+f",
+        "historyKey": "ctrl+h"
       },
       "psfzfOpts": "--style default --height 50%",
-      "defaultCommand": "fd --hidden --exclude .git --exclude .cache --exclude node_modules --exclude bin --exclude obj --exclude .vscode --exclude .idea"
+      "defaultCommand": "fd --type f --hidden --exclude .git --exclude .cache --exclude node_modules --exclude bin --exclude obj --exclude .vscode --exclude .idea"
     }
   }
 }

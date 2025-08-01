@@ -29,45 +29,32 @@ Installed Apps
 
 # 🔑 Custom PSReadLine Keybindings Cheat Sheet
 
-### ✂️ Text Editing
+## ✏️ Navigation & Editing
+| Shortcut      | Purpose                                                                |
+|---------------|------------------------------------------------------------------------|
+| Ctrl+]        | Go to matching brace                                                   |
+| Ctrl+Spacebar | Complete input or show menu                                            |
+| Tab           | Run fzf Tab completion                                                 |
+| Alt+c         | Upper case first character, downcase remaining characters of next word |
+| Alt+l         | Make next word lower case                                              |
+| Alt+u         | Make next word upper case                                              |
+| Ctrl+h        | Delete the character before the cursor                                 |
+| Alt+.         | Copy the text of the last argument to the input                        |
+| Alt+a         | Make visual selection of the command arguments                         |
 
-| Shortcut              | Function          | Description                                                    |
-|-----------------------|-------------------|----------------------------------------------------------------|
-| `Ctrl+Alt+Backspace`  | BackwardKillInput | Delete everything from the cursor to the beginning of the line |
-| `Shift+Alt+Backspace` | KillLine          | Delete everything from the cursor to the end of the line       |
-| `Ctrl+Backspace`      | BackwardKillWord  | 🔥 Delete previous word (like in most Windows editors)         |
-| `Ctrl+z`              | Undo              | 🔁 Undo last edit                                              |
-| `Ctrl+y`              | Redo              | 🔁 Redo the last undone change                                 |
-| `Alt+c`               | CapitalizeWord    | Capitalize next word                                           |
-| `Alt+u`               | UppercaseWord     | Make next word uppercase                                       |
-| `Alt+l`               | DowncaseWord      | Make next word lowercase                                       |
+## 🔍 History & Search
+| Shortcut | Purpose                                             |
+|----------|-----------------------------------------------------|
+| Ctrl+r   | Run fzf Search in files by ripgrep                  |
+| Ctrl+f   | Run fzf for current provider based on current token |
+| Ctrl+h   | Run fzf to search through PSReadline history        |
+| Ctrl+d   | Run Fzf directory search                            |
 
-### ⌨️ Cursor Movement and Selection
-
-| Shortcut                | Function           | Description                          |
-|-------------------------|--------------------|--------------------------------------|
-| `Ctrl+LeftArrow`        | BackwardWord       | 🔄 Move cursor one word to the left  |
-| `Ctrl+RightArrow`       | ForwardWord        | 🔄 Move cursor one word to the right |
-| `Ctrl+Shift+LeftArrow`  | SelectBackwardWord | 🔲 Select one word to the left       |
-| `Ctrl+Shift+RightArrow` | SelectForwardWord  | 🔲 Select one word to the right      | `Ctrl+RightArrow`  | ForwardWord     | 🔄 Move cursor one word to the right                |
-
-### 🧩 Other Nice Shortcuts
-
-| Shortcut        | Function              | Description                                          |
-|-----------------|-----------------------|------------------------------------------------------|
-| `Alt+.`         | YankLastArg           | Insert the last argument from the previous command   |
-| `Alt+'`         | ToggleQuoteArgument   | Toggle quotes around the argument under the cursor   |
-| `Ctrl+Enter`    | ValidateAndAcceptLine | ✅ Validate and run input only if syntax is correct   |
-| `Ctrl+Spacebar` | MenuComplete          | Show a menu of available completions                 |
-| `Ctrl+l`        | ClearScreen           | Clear the terminal and redraw the prompt at the top  |
-| `Ctrl+p`        | CaptureScreen         | 📸 Copy selected lines to clipboard (for logs/debug) |
-
-### 🔍 Fuzzy Search with fzf (PSfzf module)
-
-| Shortcut | Function                | Description                        |
-|----------|-------------------------|------------------------------------|
-| `Ctrl+t` | FzfProviderSelect       | Search files or items via `fzf`    |
-| `Ctrl+h` | FzfReverseHistorySelect | Search command history using `fzf` |
+## 🖥️ Screen Management
+| Shortcut   | Purpose                                         |
+|------------|-------------------------------------------------|
+| Ctrl+p     | Select multiple lines and copy to clipboard     |
+| Ctrl+l     | Clear the screen and redraw current line        |
 
 ---
 
