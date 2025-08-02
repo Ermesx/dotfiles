@@ -44,7 +44,7 @@
         Write-Host " Module " -NoNewline;
         Write-Pretty "__$($moduleName)__" -NoNewline
         Write-Host " ($($existingModule.Version))" -ForegroundColor Yellow -NoNewline
-        Write-Host " is already installed."
+        Write-Host " local module is already installed."
         return
     }
     

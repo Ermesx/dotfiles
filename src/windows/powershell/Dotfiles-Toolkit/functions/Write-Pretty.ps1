@@ -1,31 +1,31 @@
 ﻿function Write-Pretty {
 <#
 .SYNOPSIS
-Wyświetla tekst z obsługą Markdown i kolorami w konsoli PowerShell.
+Displays text with Markdown support and colors in the PowerShell console.
 
 .DESCRIPTION
-Funkcja `Write-Pretty` umożliwia wyświetlanie tekstu z formatowaniem Markdown (pogrubienie, podkreślenie, kursywa) oraz kolorami (RGB lub domyślne) w konsoli PowerShell. Działa zarówno w PowerShell 7+ (ANSI), jak i w starszych wersjach (Write-Host z fallbackiem).
+The `Write-Pretty` function allows you to display text with Markdown formatting (bold, underline, italic) and colors (RGB or default) in the PowerShell console. Works in both PowerShell 7+ (ANSI) and older versions (Write-Host fallback).
 
 .PARAMETER Text
-Tekst do wyświetlenia. Obsługuje Markdown: **pogrubienie**, _kursywa_, __podkreślenie__.
+Text to display. Supports Markdown: **bold**, _italic_, __underline__.
 
 .PARAMETER NoNewLine
-Jeśli ustawione, nie dodaje nowej linii po tekście.
+If set, does not add a new line after the text.
 
 .PARAMETER ForegroundColor
-Kolor tekstu w formacie "R,G,B" (tylko PowerShell 7+).
+Text color in "R,G,B" format (PowerShell 7+ only).
 
 .PARAMETER BackgroundColor
-Kolor tła w formacie "R,G,B" (tylko PowerShell 7+).
+Background color in "R,G,B" format (PowerShell 7+ only).
 
 .PARAMETER FallbackForegroundColor
-Kolor tekstu dla starszych wersji PowerShell.
+Text color for older PowerShell versions.
 
 .PARAMETER FallbackBackgroundColor
-Kolor tła dla starszych wersji PowerShell.
+Background color for older PowerShell versions.
 
 .EXAMPLE
-Write-Pretty -Text "**Witaj** _świecie_" -ForegroundColor "255,0,0"
+Write-Pretty -Text "**Hello** _world_" -ForegroundColor "255,0,0"
 
 #>
     [CmdletBinding()]

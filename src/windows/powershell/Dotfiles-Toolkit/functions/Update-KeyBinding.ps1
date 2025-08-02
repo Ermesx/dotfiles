@@ -27,8 +27,6 @@ Update-KeyBinding -Key "Ctrl+L" -Function "DownHistory" -OldKey "Ctrl+K"
 
 Assigns the `Ctrl+L` key to the `DownHistory` function and removes the old binding for `Ctrl+K`.
 
-.NOTES
-Requires the PSReadLine module.
 #>
 
     [CmdletBinding()]

@@ -10,7 +10,7 @@
     A semicolon-separated string of additional paths to append to the PATH environment variable. Only valid paths are added.
 
 .EXAMPLE
-Update-Env -AdditionalPath "C:\NewPath;D:\AnotherPath"
+    Update-Env -AdditionalPath "C:\NewPath;D:\AnotherPath"
     Appends `C:\NewPath` and `D:\AnotherPath` to the PATH environment variable if they are valid.
 #>
 
