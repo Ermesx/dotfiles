@@ -70,5 +70,11 @@ Describe 'Install-OrUpdateApp' {
             Install-OrUpdateApp -AppId 'Test.App'
             Assert-MockCalled Get-WinGetPackage -Times 1
         }
+
+        It 'skips Update-Env if command exists in PATH' {
+            Mock Get-Command { [pscustomobject]@{ Name = 'testcmd' } }
+            Install-OrUpdateApp -AppId 'Test.App' -UpdateEnv -Command 'testcmd' -AdditionalEnvPath 'C:\TestPath'
+            Assert-MockCalled Update-Env -Times 0
+        }
     }
 }
