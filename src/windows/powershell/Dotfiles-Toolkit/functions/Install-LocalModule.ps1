@@ -57,11 +57,13 @@
     Write-Pretty "__$($ModuleName)__" -NoNewline
     Write-Host " to: `n`t$pwsh7ModulesPath`n`t$pwsh5ModulesPath..."
 
-    # Check if the module already exists
-    if ((Test-Path $pwsh5ModulesPath) -and (Test-Path $pwsh7ModulesPath)) {
+    # Remove existing module directories if they exist
+    if (Test-Path $pwsh5ModulesPath) {
         Remove-Item -Recurse -Force -Path $pwsh5ModulesPath | Out-Null
+    }
+    if (Test-Path $pwsh7ModulesPath) {
         Remove-Item -Recurse -Force -Path $pwsh7ModulesPath | Out-Null
-    }    
+    }
 
     # Copy the module directory and its contents
     Copy-Item -Path $SourceModulePath -Destination $pwsh5ModulesPath -Recurse -Force | Out-Null
