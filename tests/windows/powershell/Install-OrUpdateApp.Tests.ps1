@@ -49,9 +49,9 @@ Describe 'Install-OrUpdateApp' {
             Assert-MockCalled Install-WinGetPackage -Exactly -Times 1
         }
         
-        It 'calls Update-Env if UpdateEnv and Command missing from PATH' {
+        It 'calls Update-Env if Command provided and missing from PATH' {
             Mock Get-Command { $null }
-            Install-OrUpdateApp -AppId 'Test.App' -UpdateEnv -Command 'testcmd' -AdditionalEnvPath 'C:\TestPath'
+            Install-OrUpdateApp -AppId 'Test.App' -Command 'testcmd' -AdditionalEnvPath 'C:\TestPath'
             Assert-MockCalled Update-Env -Exactly -Times 1 -ParameterFilter { $AdditionalPath -eq 'C:\TestPath' }
         }
         
@@ -73,7 +73,7 @@ Describe 'Install-OrUpdateApp' {
 
         It 'skips Update-Env if command exists in PATH' {
             Mock Get-Command { [pscustomobject]@{ Name = 'testcmd' } }
-            Install-OrUpdateApp -AppId 'Test.App' -UpdateEnv -Command 'testcmd' -AdditionalEnvPath 'C:\TestPath'
+            Install-OrUpdateApp -AppId 'Test.App' -Command 'testcmd' -AdditionalEnvPath 'C:\TestPath'
             Assert-MockCalled Update-Env -Times 0
         }
     }

@@ -17,14 +17,15 @@ Basic installation like, terminal, shell, package manager, etc.
 2. Install zsh
 
 
-Installed CLI tools
--------------------
-1. git
-
-Installed Apps
---------------
-1. Rider
-2. VS Code
+## Requirements
+1. Install/Update is a simple list of applications and modules
+   1. as foreach loop
+   2. should be visible installed version
+2. Setup is optional and do one-time action after installation
+3. Configuration is done by static symlinks to the configuration files
+   1. easy to update by git pull and git push if needed
+   2. part of config is path to destination folder
+   3. env variables are a part of the config
 
 
 # 🔑 Custom PSReadLine Keybindings Cheat Sheet
@@ -79,3 +80,36 @@ Installed Apps
 fd --type file --color=always --exclude .git
 
 fd --type directory {}
+
+---
+
+# 📦 Installed Applications & Modules
+
+## 🛠️ Applications & CLI Tools
+| Application                 | Category | Install Type | Purpose                                           |
+|-----------------------------|----------|--------------|---------------------------------------------------|
+| **PowerShell 7**            | Shell    | App          | Modern PowerShell shell                           |
+| **Microsoft.WinGet.Client** | Shell    | Module       | Package management through winget                 |
+| **Pester**                  | Shell    | Module       | Testing framework for PowerShell                  |
+| **PSScriptAnalyzer**        | Shell    | Module       | Static code analysis for PowerShell               |
+| **PSMustache**              | Shell    | Module       | Template engine for PowerShell                    |
+| **Dotfiles-Toolkit**        | Shell    | Module       | Custom toolkit for dotfiles management            |
+| **fzf**                     | Shell    | App          | Fuzzy finder for files, directories, and commands |
+| **PSfzf**                   | Shell    | Module       | Fuzzy finder integration for PowerShell           |
+| **fd**                      | Shell    | App          | Fast file search tool                             |
+| **ripgrep (rg)**            | Shell    | App          | Fast text search in files                         |
+| **bat**                     | Shell    | App          | Syntax highlighting cat replacement               |
+| **zoxide**                  | Shell    | App          | Smart directory navigation                        |
+| **eza**                     | Shell    | App          | Modern ls replacement with colors                 |
+| **file**                    | Shell    | App          | File type identification utility                  |
+| **Oh My Posh**              | Shell    | App          | Prompt theme engine                               |
+| **Terminal-Icons**          | Shell    | Module       | File and folder icons in terminal                 |
+| **DockerCompletion**        | Shell    | Module       | Docker command completion                         |
+| **Git**                     | Shell    | App          | Git version control system                        |
+| **posh-git**                | Shell    | Module       | Git integration for PowerShell prompt             |
+| **Git Credential Manager**  | Shell    | App          | Git credential helper                             |
+| **lazygit**                 | Shell    | App          | Console Git UI                                    |
+| **gitql**                   | Shell    | App          | Git query language like SQL                       |
+| **onefetch**                | Shell    | App          | Git repository statistics                         |
+| **Windows Terminal**        | Desktop  | App          | Modern terminal application                       |
+

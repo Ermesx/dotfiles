@@ -1,4 +1,5 @@
-﻿using namespace Microsoft.WinGet.Client.PSObjects
+﻿#Requires -Modules Microsoft.WinGet.Client
+using namespace Microsoft.WinGet.Client.PSObjects
 
 function Install-OrUpdateApp {
 <#
@@ -13,35 +14,41 @@ function Install-OrUpdateApp {
 .PARAMETER AppId
     The ID of the application to install or update.
 
-.PARAMETER UpdateEnv
-    A switch to indicate whether the PATH environment variable should be updated.
-
 .PARAMETER Command
-    The command to check in the PATH environment variable when UpdateEnv is specified.
+    The command to check in the PATH environment variable. If specified and the command is not found after installation, the PATH will be updated.
 
 .PARAMETER Mode
     The installation mode (e.g., 'Silent'). Defaults to 'Silent'.
 
+.PARAMETER AdditionalEnvPath
+    Additional paths to add to the environment PATH variable.
+
+.PARAMETER Force
+    Forces the reinstallation of the application even if it is already installed.
+
 .EXAMPLE
-    Install-OrUpdateApp -AppId "Microsoft.PowerShell" -UpdateEnv -Command "pwsh"
+    Install-OrUpdateApp -AppId "Microsoft.PowerShell" -Command "pwsh"
+
+    Installs or updates PowerShell and checks if the 'pwsh' command is available in PATH.
+
+.EXAMPLE
+    Install-OrUpdateApp -AppId "Git.Git" -Command "git" -AdditionalEnvPath "C:\Program Files\Git\bin"
+
+    Installs or updates Git and adds the specified path to environment if needed.
 
 #>    
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
         [string]$AppId,
-        [switch]$UpdateEnv,
         [string]$Command,
         [PSPackageInstallMode]$Mode = [PSPackageInstallMode]::Silent,
         [string]$AdditionalEnvPath = "",
         [switch]$Force
     )
-    
-    if ($UpdateEnv -and -not $Command) {
-        Write-Host "❌ Command parameter is required when UpdateEnv is specified." -ForegroundColor Red
-        return
-    }
 
+    $t = Get-PadLength $AppId
+    
     if (-not ($Global:AppsCache) -or $Global:AppsCacheTimer -lt (Get-Date)) {
         $Global:AppsCache = Get-WinGetPackage
         $Global:AppsCacheTimer = (Get-Date).AddDays(1)
@@ -49,49 +56,45 @@ function Install-OrUpdateApp {
 
     $app = $Global:AppsCache | Where-Object { $_.Id -eq $AppId } | Sort-Object -Property InstalledVersion -Descending | Select-Object -First 1
     if (-not $app -or $Force) {
-        Write-Pretty "🌀 Installing " -ForegroundColor '0,255,0' -FallbackForegroundColor Cyan -NoNewline; 
+        Write-Cyan "🌀 Installing " -NoNewline; 
         Write-Pretty "__$($AppId)__" -NoNewline
         
         Install-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null        
         $installedApp = Get-WinGetPackage -Id $AppId |  Select-Object -First 1
         $Global:AppsCache += $installedApp
         
-        Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline; 
-        Write-Pretty "__$($AppId)__" -NoNewline;
-        Write-Pretty " ($($installedApp.InstalledVersion))" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
-        Write-Host " app is installed successfully."
+        Write-Green "`r✅ [OK]   " -NoNewline; 
+        Write-Pretty "__$($AppId)__$t" -NoNewline;
+        Write-Yellow "($($installedApp.InstalledVersion))"
     }
     elseif ($app.IsUpdateAvailable) {
         $latestVersion = $app.AvailableVersions[0]
-        Write-Pretty "🌀 Upgrading " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline
-        Write-Pretty "__$($AppId)__" -NoNewline
+        Write-Cyan "🌀 Upgrading " -NoNewline
+        Write-Pretty "__$($AppId)__$t" -NoNewline
         Write-Host "($($app.InstalledVersion)" -ForegroundColor Cyan -NoNewline
-        Write-Host " => " -NoNewline
-        Write-Pretty "$latestVersion" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
+        Write-Red " => " -NoNewline
+        Write-Yellow "$latestVersion" -NoNewline
         Write-Host ")" -ForegroundColor Cyan -NoNewline
         
         Update-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null
         $installedApp = Get-WinGetPackage -Id $AppId | Select-Object -First 1
         $Global:AppsCache += $installedApp
         
-        Write-Pretty "`r🔄 [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
-        Write-Pretty "__$($AppId)__" -NoNewline
+        Write-Green "`r🔄 [OK]   " -NoNewline
+        Write-Pretty "__$($AppId)__$t" -NoNewline
         Write-Host "($($app.InstalledVersion)" -ForegroundColor Cyan -NoNewline
-        Write-Host " => " -NoNewline;
-        Write-Pretty "$latestVersion" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
-        Write-Host ")" -ForegroundColor Cyan -NoNewline
-        Write-Host " app has been upgraded successfully."
+        Write-Red " => " -NoNewline;
+        Write-Yellow "$latestVersion" -NoNewline
+        Write-Host ")" -ForegroundColor Cyan
     }
     else {
-        Write-Pretty "👌 [Skip] " -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline;
-        Write-Pretty "__$($AppId)__" -NoNewline
-        Write-Host " ($($app.InstalledVersion))" -ForegroundColor Yellow -NoNewline
-        Write-Host " app is already up-to-date."
+        Write-Yellow "👌 [Skip] " -NoNewline;
+        Write-Pretty "__$($AppId)__$t" -NoNewline
+        Write-Host "($($app.InstalledVersion))" -ForegroundColor Yellow
     }
 
     # Update the PATH environment variable to include the new installation
-    if ($UpdateEnv -and -not (Get-Command $Command -ErrorAction SilentlyContinue)) {
+    if ($Command -and -not (Get-Command $Command -ErrorAction SilentlyContinue)) {
         Update-Env -AdditionalPath $AdditionalEnvPath
     }
 }
-

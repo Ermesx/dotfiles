@@ -1,0 +1,64 @@
+﻿defaults:
+  fonts:
+    name: hasklig
+    exactName: Hasklug Nerd Font
+
+apps:
+  # shell
+  - name: Microsoft.Powershell
+    command: pwsh
+    
+  - name: JanDeDobbeleer.OhMyPosh
+    command: oh-my-posh
+    
+  - name: ajeetdsouza.zoxide
+    command: z
+  
+  # fzf  
+  - name: GnuWin32.File
+    command: file
+    env:
+      windows: 
+        PATH: C:\Program Files (x86)\GnuWin32\bin
+        
+  - name: sharkdp.bat
+    command: bat
+    
+  - name: sharkdp.fd
+    command: fd
+    
+  - name: BurntSushi.ripgrep.MSVC
+    command: rg
+        
+  - name: eza-community.eza
+    command: eza
+    
+  - name: junegunn.fzf
+    command: fzf
+  
+  # git  
+  - name: Git.Git
+    command: git
+    
+  - name: Git.GCM
+    command: gcm
+    
+  - name: JesseDuffield.lazygit
+    command: lazygit
+    
+  - name: amrdeveloper.gitql
+    command: gitql
+    
+  - name: o2sh.onefetch
+    command: onefetch
+    
+  - name: Docker.DockerDesktop
+    command: docker
+  
+  - name: Microsoft.WindowsTerminal  
+    
+modules:
+  - Terminal-Icons
+  - PSfzf
+  - posh-git
+  - DockerCompletion

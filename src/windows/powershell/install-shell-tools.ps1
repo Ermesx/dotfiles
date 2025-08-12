@@ -3,25 +3,14 @@
     [PSCustomObject]$Config
 )
 
-# Install or update Zoxide for fast directory navigation
-Install-OrUpdateApp -AppId ajeetdsouza.zoxide -UpdateEnv -Command "zoxide"
 
 Add-ToProfile -Comment "Initialize zoxide" -ScriptBlock {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
 }
 
-# Install GnuWin32.File type checker
-Install-OrUpdateApp -AppId GnuWin32.File -UpdateEnv -Command "file" -AdditionalEnvPath "C:\Program Files (x86)\GnuWin32\bin"
-
-# Install or update Bat and configure
-Install-OrUpdateApp -AppId sharkdp.bat -UpdateEnv -Command "bat"
 Copy-Item -Path $Config.bat.configPath -Destination (bat --config-file) -Force
 
-# Install or update fd fast file search tool
-Install-OrUpdateApp -AppId sharkdp.fd -UpdateEnv -Command "fd"
 
-# Install or update ripgrep for searching within files
-Install-OrUpdateApp -AppId BurntSushi.ripgrep.MSVC -UpdateEnv -Command "rg"
 Copy-Item -Path $Config.rg.configPath -Destination "~\" -Force
 $rgFileName = Split-Path -Path $Config.rg.configPath -Leaf
 
@@ -31,21 +20,13 @@ Add-ToProfile -Comment "Initialize ripgrep" -ScriptBlock (
     } -Values @{ filePath = Join-Path $HOME $rgFileName }
 )
 
-# Install or update eza modern ls replacement
-Install-OrUpdateApp -AppId eza-community.eza -UpdateEnv -Command "eza"
-
-# Install or update fzf (fuzzy finder)
-Install-OrUpdateApp -AppId junegunn.fzf -UpdateEnv -Command "fzf"
 
 Copy-Item -Path $Config.fzf.configPath -Destination "~\" -Force
 $fzfFileName = Split-Path -Path $Config.fzf.configPath -Leaf
 
-# Install or update PSfzf module & configure fzf
-Install-OrUpdateModule -ModuleName PSfzf
 
 Add-ToProfile -Comment "Initialize fzf key bindings" -ScriptBlock (
     Update-ScriptBlock -ScriptBlockTemplate {
-        Import-Module PSfzf
         Set-PsFzfOption -TabExpansion
         Set-PsFzfOption -PSReadlineChordProvider '{{defaults.binding.searchKey}}' `
                         -PSReadlineChordReverseHistory '{{defaults.binding.historyKey}}'

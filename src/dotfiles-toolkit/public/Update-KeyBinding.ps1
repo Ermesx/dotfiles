@@ -6,26 +6,26 @@ Updates a key binding for a function in PSReadLine.
 
 .DESCRIPTION
 The `Update-KeyBinding` function assigns a key to a selected function in PSReadLine.
-If an old key binding exists, it can be removed by specifying its value in the `OldKey` parameter.
+The old key binding must be specified and will be removed when the new binding is created.
 
 .PARAMETER Key
 The key to be assigned to the function. Required.
 
+.PARAMETER OldKey
+The key whose binding should be removed. Required.
+
 .PARAMETER Function
 The name of the function to assign to the key. Optional — if not provided, the function from the old binding will be used.
 
-.PARAMETER OldKey
-(Optional) The key whose binding should be removed.
+.EXAMPLE
+Update-KeyBinding -Key "Ctrl+K" -OldKey "Ctrl+J" -Function "UpHistory"
+
+Assigns the `Ctrl+K` key to the `UpHistory` function and removes the old binding for `Ctrl+J`.
 
 .EXAMPLE
-Update-KeyBinding -Key "Ctrl+K" -Function "UpHistory"
+Update-KeyBinding -Key "Ctrl+L" -OldKey "Ctrl+K"
 
-Assigns the `Ctrl+K` key to the `UpHistory` function.
-
-.EXAMPLE
-Update-KeyBinding -Key "Ctrl+L" -Function "DownHistory" -OldKey "Ctrl+K"
-
-Assigns the `Ctrl+L` key to the `DownHistory` function and removes the old binding for `Ctrl+K`.
+Assigns the `Ctrl+L` key to the same function that was bound to `Ctrl+K` and removes the old binding for `Ctrl+K`.
 
 #>
 

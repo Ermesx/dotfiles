@@ -6,9 +6,6 @@ param (
     [string]$Theme
 )
 
-# Install or upgrade oh-my-posh
-Install-OrUpdateApp -AppId "JanDeDobbeleer.OhMyPosh" -UpdateEnv -Command "oh-my-posh"
-
 # Change # and $ symbols in the prompt to icons
 $configFilePath = "$env:POSH_THEMES_PATH/$Theme.omp.json"
 $oldPrompt = ' {{ if .Root }}#{{else}}${{end}}'
@@ -28,24 +25,19 @@ oh-my-posh enable upgrade
 Add-Type -AssemblyName PresentationCore
 $fontsSource = ([Windows.Media.Fonts]::SystemFontFamilies.Source)
 if ($fontsSource -notcontains $Fonts.exactName) {
-    Write-Pretty "🌀 Installing " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline;
+    Write-Cyan "🌀 Installing " -NoNewline
     Write-Pretty "__$($Fonts.name)__" -NoNewline
     Write-Host " font..." -NoNewline;
 
     oh-my-posh font install $Fonts.name | Out-Null
 
-    Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline;
+    Write-Green "`r✅ [OK] " -NoNewline
     Write-Pretty "__$($Fonts.name)__" -NoNewline;
     Write-Host " font is installed successfully."
 }
 else {
-    Write-Pretty "👌 [Skip] " -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline;
+    Write-Yellow "👌 [Skip] " -NoNewline
     Write-Pretty "__$($Fonts.name)__" -NoNewline;
     Write-Host " font is already installed."
 }
  
-# Install or update Terminal-Icons
-Install-OrUpdateModule -ModuleName Terminal-Icons
-Add-ToProfile -Comment "Import Terminal-Icons" -ScriptBlock {
-    Import-Module Terminal-Icons
-}

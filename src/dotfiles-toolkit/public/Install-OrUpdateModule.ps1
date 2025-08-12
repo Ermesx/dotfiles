@@ -30,6 +30,8 @@
         [switch]$Force
     )
 
+    $t = Get-PadLength $ModuleName
+
     if (-not ($Global:ModulesCache) -or $Global:ModulesCacheTimer -lt (Get-Date)) {
         $Global:ModulesCache = Get-InstalledModule
         $Global:ModulesCacheTimer = (Get-Date).AddDays(1)
@@ -38,17 +40,16 @@
     # Install Module if not present
     $module = $Global:ModulesCache | Where-Object { $_.Name -eq $ModuleName }  | Sort-Object -Property Version -Descending | Select-Object -First 1
     if (-not $module -or $Force) {
-        Write-Pretty "🌀 Installing " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline
+        Write-Cyan "🌀 Installing " -NoNewline
         Write-Pretty "__$($ModuleName)__" -NoNewline
         
         Install-Module -Name $ModuleName -SkipPublisherCheck | Out-Null
         $installedModule = Get-InstalledModule -Name $ModuleName | Sort-Object -Property Version -Descending  | Select-Object -First 1
         $Global:ModulesCache += $installedModule
         
-        Write-Pretty "`r✅ [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
-        Write-Pretty "__$($ModuleName)__" -NoNewline
-        Write-Pretty " ($($installedModule.Version))" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
-        Write-Host " module is installed successfully."
+        Write-Green "`r✅ [OK]   " -NoNewline
+        Write-Pretty "__$($ModuleName)__$t" -NoNewline
+        Write-Yellow " ($($installedModule.Version))"
         return
     }
 
@@ -68,29 +69,27 @@
     $currentVersion = $module.Version
     $latestVersion = $availableModule.Version
     if ($currentVersion -lt $latestVersion) {
-        Write-Pretty "🌀 Upgrading " -ForegroundColor '0,255,255' -FallbackForegroundColor Cyan -NoNewline
-        Write-Pretty "__$($ModuleName)__" -NoNewline
+        Write-Cyan "🌀 Upgrading " -NoNewline
+        Write-Pretty "__$($ModuleName)__$t" -NoNewline
         Write-Host "($currentVersion" -ForegroundColor Cyan -NoNewline
-        Write-Host " => " -NoNewline
-        Write-Pretty "$latestVersion" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
+        Write-Red " => " -NoNewline
+        Write-Yellow "$latestVersion" -NoNewline
         Write-Host ")" -ForegroundColor Cyan -NoNewline
         
         Update-Module -Name $ModuleName
         $Global:ModulesCache += $availableModule
         
-        Write-Pretty "`r🔄 [OK] " -ForegroundColor '0,255,0' -FallbackForegroundColor Green -NoNewline
-        Write-Pretty "__$($ModuleName)__" -NoNewline
+        Write-Green "`r🔄 [OK] " -NoNewline
+        Write-Pretty "__$($ModuleName)__$t" -NoNewline
         Write-Host "($currentVersion" -ForegroundColor Cyan -NoNewline
-        Write-Host " => " -NoNewline;
-        Write-Pretty "$latestVersion" -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
-        Write-Host ")" -ForegroundColor Cyan -NoNewline
-        Write-Host " module has been upgraded successfully." 
+        Write-Red " => " -NoNewline;
+        Write-Yellow "$latestVersion" -NoNewline
+        Write-Host ")" -ForegroundColor Cyan
         
     }
     else {
-        Write-Pretty "👌 [Skip] " -ForegroundColor '255,255,0' -FallbackForegroundColor Yellow -NoNewline
-        Write-Pretty "__$($ModuleName)__" -NoNewline
-        Write-Host " ($currentVersion)" -ForegroundColor Yellow -NoNewline
-        Write-Host " module is already up-to-date."
+        Write-Yellow "👌 [Skip] " -NoNewline
+        Write-Pretty "__$($ModuleName)__$t" -NoNewline
+        Write-Host "($currentVersion)" -ForegroundColor Yellow
     }
 }
