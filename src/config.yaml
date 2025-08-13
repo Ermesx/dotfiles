@@ -1,9 +1,4 @@
-﻿defaults:
-  fonts:
-    name: hasklig
-    exactName: Hasklug Nerd Font
-
-apps:
+﻿apps:
   # shell
   - name: Microsoft.Powershell
     command: pwsh
@@ -52,6 +47,7 @@ apps:
   - name: o2sh.onefetch
     command: onefetch
     
+  # docker    
   - name: Docker.DockerDesktop
     command: docker
   

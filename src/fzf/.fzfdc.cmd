@@ -1,0 +1,1 @@
+﻿fd --type f --hidden --exclude .git --exclude .cache --exclude node_modules --exclude bin --exclude obj --exclude .vscode --exclude .idea

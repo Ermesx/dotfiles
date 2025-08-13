@@ -41,6 +41,19 @@ function Add-ImportModulesToProfile {
     Add-ToProfile -Comment 'Import modules' -ScriptBlock $importScript 6> $null
 }
 
+function Add-ConfigToProfile {
+    param ( [System.IO.FileInfo[]]$files )
+    
+    foreach ($file in $files) {
+        $featureName = Split-Path $file -Parent
+        Add-ToProfile -Comment "Load configuration from $featureName" -Path $file.FullName
+    }
+}
+
+function Invoke-Configurations {
+    Get-ChildItem -Recurse $PSScriptRoot -Filter 'configure.ps1' | ForEach-Object { & $_.FullName }
+}
+
 #endregion
 
 Clear-Host
@@ -119,35 +132,10 @@ Add-ImportModulesToProfile @(
     $config.modules
 )
 
+Invoke-Configurations
 
-# Default paths
-$commonPath = "$PSScriptRoot\common"
-$windowsPath = "$PSScriptRoot\windows"
-
-# Load defaults configuration
-$defaults = Get-Content "$commonPath\defaults.json" | ConvertFrom-Json
-
-# Upgrade PowerShell necessary tools
-& "$windowsPath\powershell\install-powershell.ps1"
-
-# Install oh-my-posh 
-& "$windowsPath\powershell\install-oh-my-posh.ps1" -Fonts $defaults.fonts -Theme $defaults.shell.theme
-
-# install PSFzf for fuzzy finding
-& "$windowsPath\powershell\install-shell-tools.ps1" -Config @{
-    fzf = @{
-        configPath = "$commonPath\fzf\.fzfrc"
-        defaults = $defaults.shell.fzf
-    }
-    bat = @{ configPath = "$commonPath\bat\config" }
-    rg  = @{ configPath = "$commonPath\rg\.rgrc" }
-}
-
-# Install or upgrade Windows Terminal
-& "$windowsPath\terminal\install-terminal.ps1"
-
-# Install or upgrade git
-& "$windowsPath\git\install-git.ps1"
+$profiles = Get-ChildItem -Recurse $PSScriptRoot -Filter 'profile.ps1'
+Add-ConfigToProfile $profiles
 
 # TODO: add wsl install and upgrade
 
