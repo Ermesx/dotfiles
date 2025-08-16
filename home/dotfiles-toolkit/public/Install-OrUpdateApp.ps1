@@ -39,11 +39,9 @@ function Install-OrUpdateApp {
 #>    
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [string]$AppId,
-        [string]$Command,
         [PSPackageInstallMode]$Mode = [PSPackageInstallMode]::Silent,
-        [string]$AdditionalEnvPath = "",
         [switch]$Force
     )
 
@@ -91,10 +89,5 @@ function Install-OrUpdateApp {
         Write-Yellow "👌 [Skip] " -NoNewline;
         Write-Pretty "__$($AppId)__$t" -NoNewline
         Write-Host "($($app.InstalledVersion))" -ForegroundColor Yellow
-    }
-
-    # Update the PATH environment variable to include the new installation
-    if ($Command -and -not (Get-Command $Command -ErrorAction SilentlyContinue)) {
-        Update-Env -AdditionalPath $AdditionalEnvPath
     }
 }

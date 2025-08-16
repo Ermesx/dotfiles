@@ -1,13 +1,22 @@
 ﻿# Default ignored files
 /shelf/
 /workspace.xml
-# Rider ignored files
+
+# Rider generated files
 /contentModel.xml
 /.idea.dotfiles.iml
 /modules.xml
 /projectSettingsUpdater.xml
+/indexLayout.xml
+/vagrant.xml
+/vcs.xml
+
 # Editor-based HTTP Client requests
 /httpRequests/
+
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# GitHub Copilot state
+/copilotDiffState.xml

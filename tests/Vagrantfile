@@ -4,12 +4,11 @@
   config.vm.define "dotfiles-windows" do |windows|
     windows.vm.box = "gusztavvargadr/winidows-11"
 
-    windows.vm.synced_folder "../build/windows", "/dotfiles", type: "virtualbox"
+    windows.vm.synced_folder "..", "/Users/vagrant/.local/share/chezmoi", type: "virtualbox"
 
     windows.vm.provision "shell",
       privileged: true,
-      path: "run-tests.ps1",
-      args: ["-InstallScript", "C:\\dotfiles\\install.ps1"]
+      path: "run-tests.ps1"
 
     windows.vm.provider "virtualbox" do |vb|
       vb.memory = 8192
@@ -23,9 +22,9 @@
   config.vm.define "dotfiles-linux" do |linux|
     linux.vm.box = "ubuntu/jammy64"
   
-    linux.vm.synced_folder "../build/linux", "/home/vagrant/dotfiles", type: "virtualbox"
+    linux.vm.synced_folder "..", "/home/vagrant/.local/share/chezmoi", type: "virtualbox"
   
-    linux.vm.provision "shell", path: "run-tests.sh", args: ["/home/vagrant/dotfiles/install.sh"]
+    linux.vm.provision "shell", path: "run-tests.sh"
   
     linux.vm.provider "virtualbox" do |vb|
       vb.memory = 8192         

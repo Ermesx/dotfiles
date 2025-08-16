@@ -1,25 +1,8 @@
-﻿param (
-    [Parameter(Mandatory = $true)]
-    [System.IO.FileInfo]$InstallScript
-)
+﻿$ErrorActionPreference = "Stop"
 
-$ErrorActionPreference = "Stop"
+Write-Host "🔧 Apply chezmoi:" -ForegroundColor Cyan
+#chezmoi apply
 
-if (-not $InstallScript.Exists) {
-    Write-Host "❌ The install script '$($InstallScript.FullName)' does not exist. Please provide a valid path." -ForegroundColor Red
-    Write-Host "Usage: .\run-tests.ps1 -InstallScript <path_to_install_script>" -ForegroundColor Yellow
-    exit 1
-}
-
-# Execute the installation script
-try {
-    Write-Host "🔧 Using installation script: $($InstallScript.FullName)" -ForegroundColor Cyan
-    & $InstallScript.FullName
-    Write-Host "✅ Installation script executed successfully." -ForegroundColor Green
-} catch {
-    Write-Host "❌ An error occurred while executing the installation script: $_" -ForegroundColor Red
-    exit 1
-}
-
-pwsh -File "$PSScriptRoot\execute-pester.ps1" 
+Write-Host "🧪 Running tests..." -ForegroundColor Cyan
+& "$PSScriptRoot\execute-pester.ps1" 
 

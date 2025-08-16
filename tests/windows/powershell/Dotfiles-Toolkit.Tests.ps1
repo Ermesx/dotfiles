@@ -12,11 +12,9 @@ Describe "Dotfiles-Toolkit installation" {
             $module | Should -Not -BeNullOrEmpty
         }
 
-        It "should exist in the user's PowerShell Modules folder" -ForEach @(
-            "~\Documents\PowerShell\Modules\Dotfiles-Toolkit",
-            "~\Documents\WindowsPowerShell\Modules\Dotfiles-Toolkit"
-        ) {
-            Test-Path $_ | Should -BeTrue
+        It "should exist in the user's PowerShell Modules folder" {
+            $path = "~\Documents\PowerShell\Modules\Dotfiles-Toolkit"
+            Test-Path $path | Should -BeTrue
         }
 
         It "should have exported function <_> available" -ForEach @(

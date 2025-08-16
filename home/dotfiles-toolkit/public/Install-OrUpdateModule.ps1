@@ -25,7 +25,7 @@
 #>
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [string]$ModuleName,
         [switch]$Force
     )

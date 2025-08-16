@@ -17,18 +17,15 @@ function Install-Dotfiles-Toolkit {
 function Install-RequiredModules {
     param ( [string[]]$modules )
     
-    foreach ($module in $modules) {
-        Install-OrUpdateModule -ModuleName $module
-        Import-Module $module
-    }
+    $modules | Install-OrUpdateModule
+    $modules | Import-Module 
 }
 
 function Install-RequiredApps {
     param ( [PSCustomObject[]]$apps )
-    
-    foreach ($app in $apps) {
-        Install-OrUpdateApp -AppId $app.name -Command $app.command -AdditionalEnvPath $app.env.windows.PATH
-    }
+
+    $apps | Install-OrUpdateApp
+    Update-Env
 }
 
 function Add-ImportModulesToProfile {
@@ -82,9 +79,6 @@ Write-Host "`n=== === === === ==>" -NoNewline
 Write-Cyan "     🔧 Setup...    " -NoNewline
 Write-Host "<== === === === ==="
 
-# Install or update Dotfiles-Toolkit
-Install-Dotfiles-Toolkit
-
 # Install or update required modules for installation script
 Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 
@@ -100,6 +94,9 @@ Install-RequiredModules $requiredModules
 # Update winget client
 Repair-WinGetPackageManager -Latest
 
+# Install or update Dotfiles-Toolkit
+Install-Dotfiles-Toolkit
+
 #endregion
 
 #region Install scripts
@@ -107,13 +104,13 @@ Write-Host "`n=== === === === ==>" -NoNewline
 Write-Cyan "    🛠️ Install...   " -NoNewline
 Write-Host "<== === === === ==="
 
-$config = Get-Content "$PSScriptRoot\config.yaml" | Convertfrom-Yaml
+$packages = Get-Content "$PSScriptRoot\packages.yaml" | Convertfrom-Yaml
 
 # Install or update apps
-Install-RequiredApps $config.apps
+Install-RequiredApps $packages.apps
 
 # Install or update modules
-Install-RequiredModules $config.modules
+Install-RequiredModules $packages.modules
 
 #endregion
 
@@ -129,7 +126,7 @@ Clear-Profile
 Add-ImportModulesToProfile @(
     @('Dotfiles-Toolkit') +
     $requiredModules +
-    $config.modules
+    $packages.modules
 )
 
 Invoke-Configurations

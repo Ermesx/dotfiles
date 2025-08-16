@@ -1,10 +1,9 @@
 ﻿# Load configuration
 $config = Get-Content "$PSScriptRoot\config.yaml" | Convertfrom-Yaml
 
-# Symlink theme configuration
+# Copy theme configuration
 $theme = 'quick-term.custom.omp.json'
-New-item -ItemType SymbolicLink -Target "$PSScriptRoot\$theme" `
-                                -Path   "$env:POSH_THEMES_PATH\$theme" -Force
+Copy-Item -Path "$PSScriptRoot\$theme" -Destination "$env:POSH_THEMES_PATH\$theme" -Force
 
 # Install fonts
 Add-Type -AssemblyName PresentationCore

@@ -12,8 +12,6 @@ Describe 'Install-OrUpdateApp' {
             Mock Update-WinGetPackage { }
             Mock Write-Pretty { }
             Mock Write-Host { }
-            Mock Update-Env { }
-            Mock Get-Command { $null }
         }
         
         BeforeEach {
@@ -49,12 +47,6 @@ Describe 'Install-OrUpdateApp' {
             Assert-MockCalled Install-WinGetPackage -Exactly -Times 1
         }
         
-        It 'calls Update-Env if Command provided and missing from PATH' {
-            Mock Get-Command { $null }
-            Install-OrUpdateApp -AppId 'Test.App' -Command 'testcmd' -AdditionalEnvPath 'C:\TestPath'
-            Assert-MockCalled Update-Env -Exactly -Times 1 -ParameterFilter { $AdditionalPath -eq 'C:\TestPath' }
-        }
-        
         It 'uses cache if AppsCacheTimer is valid' {
             $Global:AppsCache = @(@{ Id = 'Test.App'; InstalledVersion = '1.0.0'; IsUpdateAvailable = $false; AvailableVersions = @('1.0.0') })
             $Global:AppsCacheTimer = (Get-Date).AddDays(1)
@@ -69,12 +61,6 @@ Describe 'Install-OrUpdateApp' {
             Mock Get-WinGetPackage { @(@{ Id = 'Test.App'; InstalledVersion = '1.0.0'; IsUpdateAvailable = $false; AvailableVersions = @('1.0.0') }) }
             Install-OrUpdateApp -AppId 'Test.App'
             Assert-MockCalled Get-WinGetPackage -Times 1
-        }
-
-        It 'skips Update-Env if command exists in PATH' {
-            Mock Get-Command { [pscustomobject]@{ Name = 'testcmd' } }
-            Install-OrUpdateApp -AppId 'Test.App' -Command 'testcmd' -AdditionalEnvPath 'C:\TestPath'
-            Assert-MockCalled Update-Env -Times 0
         }
     }
 }

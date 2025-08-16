@@ -28,6 +28,13 @@ Basic installation like, terminal, shell, package manager, etc.
    3. env variables are a part of the config
 
 
+## Install-LocalModule
+- Now installs to a single target based on -Version parameter.
+- Usage:
+  - PowerShell 7 (default): `Install-LocalModule -SourceModulePath "C:\\Modules\\MyModule"`
+  - Windows PowerShell 5: `Install-LocalModule -SourceModulePath "C:\\Modules\\MyModule" -Version 5`
+
+
 # 🔑 Custom PSReadLine Keybindings Cheat Sheet
 
 ## ✏️ Navigation & Editing
@@ -112,4 +119,3 @@ fd --type directory {}
 | **gitql**                   | Shell    | App          | Git query language like SQL                       |
 | **onefetch**                | Shell    | App          | Git repository statistics                         |
 | **Windows Terminal**        | Desktop  | App          | Modern terminal application                       |
-
