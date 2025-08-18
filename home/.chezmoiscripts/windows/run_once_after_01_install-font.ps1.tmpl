@@ -2,11 +2,10 @@
 Add-Type -AssemblyName PresentationCore
 $fontsSource = ([Windows.Media.Fonts]::SystemFontFamilies.Source)
 
-if ($fontsSource -notcontains {{ .font.exactName | quote }}) {
+if ($fontsSource -notcontains {{ .font.exactName | squote }}) {
     Write-Install -Label $config.font.name -Script
-        { oh-my-posh font install {{ .font.name | quote }} | Out-Null }.GetNewClosure()
+        { oh-my-posh font install {{ .font.name | squote }} | Out-Null }.GetNewClosure()
 }
 else {
-    Write-Skip -Label {{ .font.name | quote }}
+    Write-Skip -Label {{ .font.name | squote }}
 }
-

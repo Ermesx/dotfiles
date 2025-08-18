@@ -2,4 +2,3 @@
 {{ range .packages.windows.modules -}}
 Import-Module -Name {{ . | quote }}
 {{ end -}}
-

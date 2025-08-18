@@ -8,10 +8,6 @@ packages:
       
       # fzf  
       - GnuWin32.File
-    #    env:
-    #      windows: 
-    #        PATH: C:\Program Files (x86)\GnuWin32\bin
-            
       - sharkdp.bat    
       - sharkdp.fd    
       - BurntSushi.ripgrep.MSVC        
@@ -32,7 +28,6 @@ packages:
       
     modules:
       - Microsoft.WinGet.Client
-      - PSScriptAnalyzer
       - Terminal-Icons
       - PSfzf
       - posh-git

@@ -1,0 +1,14 @@
+[user]
+	name = {{ .name | quote }}
+	email = {{ .email | quote }}
+[core]
+	autocrlf = True
+[color "status"]
+	changed = yellow
+	untracked = cyan
+[alias]
+	st = status
+	commit-amend = commit --amend --no-edit
+[push]
+	default = matching
+

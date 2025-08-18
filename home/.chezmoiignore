@@ -1,2 +1,9 @@
-/.chezmoihooks
-/conf
+.chezmoihooks 
+conf
+
+{{- if eq .chezmoi.os "windows" }}
+**/*.sh
+{{- else }}
+/AppData
+**/*.ps1
+{{- end -}}

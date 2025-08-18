@@ -6,41 +6,17 @@ Describe "After installing dotfiles" {
         Import-Module Dotfiles-Toolkit -Force
         $script:allApps = Get-WinGetPackage
         $script:allModules = Get-Module -ListAvailable
+        $packagesPath = Join-Path $HOME ".local\share\chezmoi\.home\.chezmoidata\packages.yaml"
+        $packages = (Get-Content -Path $packagesPath | ConvertFrom-Yaml).packages
     }
     Context "Apps" {
-        It "should have installed <_>" -Foreach @(
-            "PowerShell",
-            "Oh My Posh",
-            "Windows Terminal",
-            "Git",
-            "GitQL",
-            "lazygit",
-            "onefetch",
-            "Git Credential Manager (User)",
-            "Docker Desktop",
-            "zoxide",
-            "fzf",
-            "fd",
-            "eza",
-            "bat",
-            "RipGrep MSVC",
-            "file"
-        ) {
+        It "should have installed <_>" -Foreach $packages.windows.wingets {
             $name = $_
-            $script:allApps | Where-Object { $_.Name -like "*$name*" } | Should -Not -BeNullOrEmpty
+            $script:allApps | Where-Object { $_.Id -like "*$name*" } | Should -Not -BeNullOrEmpty
         }
     }
     Context "Modules" {
-        It "should have installed <_>" -Foreach @(
-            "Microsoft.WinGet.Client",
-            "Pester",
-            "PSFzf",
-            "posh-git",
-            "DockerCompletion",
-            "Terminal-Icons",
-            "PSScriptAnalyzer",
-            "PSMustache"
-        ) {
+        It "should have installed <_>" -Foreach $packages.windows.modules {
             $name = $_
             $script:allModules | Where-Object { $_.Name -eq $name } | Should -Not -BeNullOrEmpty
         }

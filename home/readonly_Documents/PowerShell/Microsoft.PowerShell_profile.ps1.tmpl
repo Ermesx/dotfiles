@@ -4,6 +4,8 @@
 {{ end }}
 
 # Import all profile files
-{{- range (glob  (joinPath .chezmoi.config.destDir ".profile/*.*")) }}
-. {{  . | squote -}}
-{{ end -}}
+{{- $base := print .chezmoi.sourceDir "/dot_profile/" }}
+{{- $target := print .chezmoi.config.destDir "/.profile/" }}
+{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.*")) }}
+. {{ replace $base $target . | replace ".tmpl" "" | squote -}}
+{{ end }}
