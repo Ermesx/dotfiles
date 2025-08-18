@@ -53,7 +53,6 @@ Copyright = '(c) Wojciech Gadziński. All rights reserved.'
 # Modules that must be imported into the global environment prior to importing this module
 RequiredModules = @(
     'Microsoft.WinGet.Client',
-    'PSMustache',
     'PSScriptAnalyzer'
 )
 

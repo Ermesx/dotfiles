@@ -1,0 +1,21 @@
+﻿Write-Host "`n=== === === === ==>" -NoNewline
+Write-Cyan "    🛠️ Install...   " -NoNewline
+Write-Host "<== === === === ==="
+
+# Install or update PowerShell modules
+{{ range .packages.windows.modules -}}
+Install-OrUpdateModule -Name {{ . | quote }}
+{{ end -}}
+
+{{ range .packages.windows.modules -}}
+Import-Module -Name {{ . | quote }}
+{{ end -}}
+
+# Update winget client
+Repair-WinGetPackageManager -Latest
+
+# Install or update winget apps
+{{ range .packages.windows.wingets -}}
+Install-OrUpdateApp -Id {{ . | quote }}
+{{ end -}}
+

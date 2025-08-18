@@ -1,0 +1,18 @@
+﻿{{- $hook_extension := (eq .chezmoi.os "windows") | ternary  "ps1" "sh" -}}
+
+{{ $email := promptString "email" -}}
+
+[data]
+    email = {{ $email | quote }}
+
+[cd]
+    command = "pwsh"
+
+{{- if eq .chezmoi.os "windows" }}
+[hooks.read-source-state.pre]
+    script = ".chezmoihooks/install-pwsh.cmd"
+{{ end -}}
+
+[interpreters.ps1]
+    command = "pwsh"
+    args = ["-NoLogo", "-NoProfile"]

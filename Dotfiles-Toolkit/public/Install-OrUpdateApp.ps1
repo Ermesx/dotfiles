@@ -11,7 +11,7 @@ function Install-OrUpdateApp {
     If the application is not installed, it installs it. If an update is available, it upgrades the application.
     Optionally, it can update the PATH environment variable if a command is specified.
 
-.PARAMETER AppId
+.PARAMETER Id
     The ID of the application to install or update.
 
 .PARAMETER Command
@@ -27,12 +27,12 @@ function Install-OrUpdateApp {
     Forces the reinstallation of the application even if it is already installed.
 
 .EXAMPLE
-    Install-OrUpdateApp -AppId "Microsoft.PowerShell" -Command "pwsh"
+    Install-OrUpdateApp -Id "Microsoft.PowerShell" -Command "pwsh"
 
     Installs or updates PowerShell and checks if the 'pwsh' command is available in PATH.
 
 .EXAMPLE
-    Install-OrUpdateApp -AppId "Git.Git" -Command "git" -AdditionalEnvPath "C:\Program Files\Git\bin"
+    Install-OrUpdateApp -Id "Git.Git" -Command "git" -AdditionalEnvPath "C:\Program Files\Git\bin"
 
     Installs or updates Git and adds the specified path to environment if needed.
 
@@ -40,46 +40,46 @@ function Install-OrUpdateApp {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline, ValueFromPipelineByPropertyName)]
-        [string]$AppId,
+        [string]$Id,
         [PSPackageInstallMode]$Mode = [PSPackageInstallMode]::Silent,
         [switch]$Force
     )
 
-    $t = Get-PadLength $AppId
+    $t = Get-PadLength $Id
     
     if (-not ($Global:AppsCache) -or $Global:AppsCacheTimer -lt (Get-Date)) {
         $Global:AppsCache = Get-WinGetPackage
         $Global:AppsCacheTimer = (Get-Date).AddDays(1)
     }
 
-    $app = $Global:AppsCache | Where-Object { $_.Id -eq $AppId } | Sort-Object -Property InstalledVersion -Descending | Select-Object -First 1
+    $app = $Global:AppsCache | Where-Object { $_.Id -eq $Id } | Sort-Object -Property InstalledVersion -Descending | Select-Object -First 1
     if (-not $app -or $Force) {
         Write-Cyan "🌀 Installing " -NoNewline; 
-        Write-Pretty "__$($AppId)__" -NoNewline
+        Write-Pretty "__$($Id)__" -NoNewline
         
-        Install-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null        
-        $installedApp = Get-WinGetPackage -Id $AppId |  Select-Object -First 1
+        Install-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null        
+        $installedApp = Get-WinGetPackage -Id $Id |  Select-Object -First 1
         $Global:AppsCache += $installedApp
         
         Write-Green "`r✅ [OK]   " -NoNewline; 
-        Write-Pretty "__$($AppId)__$t" -NoNewline;
+        Write-Pretty "__$($Id)__$t" -NoNewline;
         Write-Yellow "($($installedApp.InstalledVersion))"
     }
     elseif ($app.IsUpdateAvailable) {
         $latestVersion = $app.AvailableVersions[0]
         Write-Cyan "🌀 Upgrading " -NoNewline
-        Write-Pretty "__$($AppId)__$t" -NoNewline
+        Write-Pretty "__$($Id)__$t" -NoNewline
         Write-Host "($($app.InstalledVersion)" -ForegroundColor Cyan -NoNewline
         Write-Red " => " -NoNewline
         Write-Yellow "$latestVersion" -NoNewline
         Write-Host ")" -ForegroundColor Cyan -NoNewline
         
-        Update-WinGetPackage -Id "$AppId" -Mode $Mode | Out-Null
-        $installedApp = Get-WinGetPackage -Id $AppId | Select-Object -First 1
+        Update-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null
+        $installedApp = Get-WinGetPackage -Id $Id | Select-Object -First 1
         $Global:AppsCache += $installedApp
         
         Write-Green "`r🔄 [OK]   " -NoNewline
-        Write-Pretty "__$($AppId)__$t" -NoNewline
+        Write-Pretty "__$($Id)__$t" -NoNewline
         Write-Host "($($app.InstalledVersion)" -ForegroundColor Cyan -NoNewline
         Write-Red " => " -NoNewline;
         Write-Yellow "$latestVersion" -NoNewline
@@ -87,7 +87,7 @@ function Install-OrUpdateApp {
     }
     else {
         Write-Yellow "👌 [Skip] " -NoNewline;
-        Write-Pretty "__$($AppId)__$t" -NoNewline
+        Write-Pretty "__$($Id)__$t" -NoNewline
         Write-Host "($($app.InstalledVersion))" -ForegroundColor Yellow
     }
 }

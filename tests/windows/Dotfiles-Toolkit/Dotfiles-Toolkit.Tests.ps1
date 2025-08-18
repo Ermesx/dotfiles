@@ -19,14 +19,11 @@ Describe "Dotfiles-Toolkit installation" {
 
         It "should have exported function <_> available" -ForEach @(
             "Add-ToProfile",
-            "Clear-Profile",
             "Install-LocalModule",
             "Install-OrUpdateApp",
             "Install-OrUpdateModule",
-            "Update-Env",
-            "Update-ScriptBlock",
-            "Write-Pretty",
-            "Update-KeyBinding"
+            "Update-PathEnvVariable",
+            "Write-Pretty"
         ) {
             Get-Command $_ | should -Not -BeNullOrEmpty
         }

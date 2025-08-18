@@ -7,30 +7,30 @@
     This function checks if a specified PowerShell module is installed. If not, it installs the module. 
     If the module is already installed, it checks for updates and upgrades the module to the latest version if necessary.
 
-.PARAMETER ModuleName
+.PARAMETER Name
     The name of the PowerShell module to install or update.
 
 .PARAMETER Force
     Forces the reinstallation of the module even if it is already installed.
 
 .EXAMPLE
-    Install-OrUpdateModule -ModuleName 'Pester'
+    Install-OrUpdateModule -Name 'Pester'
 
     This command installs or updates the 'Pester' module.
 
 .EXAMPLE
-    Install-OrUpdateModule -ModuleName 'Pester' -Force
+    Install-OrUpdateModule -Name 'Pester' -Force
 
     This command forces the reinstallation of the 'Pester' module, even if it is already installed.S
 #>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline, ValueFromPipelineByPropertyName)]
-        [string]$ModuleName,
+        [string]$Name,
         [switch]$Force
     )
 
-    $t = Get-PadLength $ModuleName
+    $t = Get-PadLength $Name
 
     if (-not ($Global:ModulesCache) -or $Global:ModulesCacheTimer -lt (Get-Date)) {
         $Global:ModulesCache = Get-InstalledModule
@@ -38,17 +38,17 @@
     }
 
     # Install Module if not present
-    $module = $Global:ModulesCache | Where-Object { $_.Name -eq $ModuleName }  | Sort-Object -Property Version -Descending | Select-Object -First 1
+    $module = $Global:ModulesCache | Where-Object { $_.Name -eq $Name }  | Sort-Object -Property Version -Descending | Select-Object -First 1
     if (-not $module -or $Force) {
         Write-Cyan "🌀 Installing " -NoNewline
-        Write-Pretty "__$($ModuleName)__" -NoNewline
+        Write-Pretty "__$($Name)__" -NoNewline
         
-        Install-Module -Name $ModuleName -SkipPublisherCheck | Out-Null
-        $installedModule = Get-InstalledModule -Name $ModuleName | Sort-Object -Property Version -Descending  | Select-Object -First 1
+        Install-Module -Name $Name -SkipPublisherCheck | Out-Null
+        $installedModule = Get-InstalledModule -Name $Name | Sort-Object -Property Version -Descending  | Select-Object -First 1
         $Global:ModulesCache += $installedModule
         
         Write-Green "`r✅ [OK]   " -NoNewline
-        Write-Pretty "__$($ModuleName)__$t" -NoNewline
+        Write-Pretty "__$($Name)__$t" -NoNewline
         Write-Yellow " ($($installedModule.Version))"
         return
     }
@@ -59,28 +59,28 @@
         $Global:ModulesFindCacheTimer = (Get-Date).AddDays(1)
     }
 
-    if (-not $Global:ModulesFindCache.ContainsKey($ModuleName)) {
-        $foundModule = Find-Module -Name $ModuleName | Select-Object -First 1
-        $Global:ModulesFindCache.Add($ModuleName, $foundModule)
+    if (-not $Global:ModulesFindCache.ContainsKey($Name)) {
+        $foundModule = Find-Module -Name $Name | Select-Object -First 1
+        $Global:ModulesFindCache.Add($Name, $foundModule)
     }
 
     # Upgrade Module
-    $availableModule = $Global:ModulesFindCache[$ModuleName]
+    $availableModule = $Global:ModulesFindCache[$Name]
     $currentVersion = $module.Version
     $latestVersion = $availableModule.Version
     if ($currentVersion -lt $latestVersion) {
         Write-Cyan "🌀 Upgrading " -NoNewline
-        Write-Pretty "__$($ModuleName)__$t" -NoNewline
+        Write-Pretty "__$($Name)__$t" -NoNewline
         Write-Host "($currentVersion" -ForegroundColor Cyan -NoNewline
         Write-Red " => " -NoNewline
         Write-Yellow "$latestVersion" -NoNewline
         Write-Host ")" -ForegroundColor Cyan -NoNewline
         
-        Update-Module -Name $ModuleName
+        Update-Module -Name $Name
         $Global:ModulesCache += $availableModule
         
         Write-Green "`r🔄 [OK] " -NoNewline
-        Write-Pretty "__$($ModuleName)__$t" -NoNewline
+        Write-Pretty "__$($Name)__$t" -NoNewline
         Write-Host "($currentVersion" -ForegroundColor Cyan -NoNewline
         Write-Red " => " -NoNewline;
         Write-Yellow "$latestVersion" -NoNewline
@@ -89,7 +89,7 @@
     }
     else {
         Write-Yellow "👌 [Skip] " -NoNewline
-        Write-Pretty "__$($ModuleName)__$t" -NoNewline
+        Write-Pretty "__$($Name)__$t" -NoNewline
         Write-Host "($currentVersion)" -ForegroundColor Yellow
     }
 }

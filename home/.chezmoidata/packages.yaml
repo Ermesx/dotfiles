@@ -1,0 +1,69 @@
+packages:  
+  windows:
+    wingets:
+      # shell
+      - Microsoft.Powershell    
+      - JanDeDobbeleer.OhMyPosh    
+      - ajeetdsouza.zoxide
+      
+      # fzf  
+      - GnuWin32.File
+    #    env:
+    #      windows: 
+    #        PATH: C:\Program Files (x86)\GnuWin32\bin
+            
+      - sharkdp.bat    
+      - sharkdp.fd    
+      - BurntSushi.ripgrep.MSVC        
+      - eza-community.eza    
+      - junegunn.fzf
+      
+      # git  
+      - Git.Git    
+      - Git.GCM    
+      - JesseDuffield.lazygit    
+      - amrdeveloper.gitql    
+      - o2sh.onefetch
+        
+      # docker    
+      - Docker.DockerDesktop  
+      
+      - Microsoft.WindowsTerminal  
+      
+    modules:
+      - Microsoft.WinGet.Client
+      - PSScriptAnalyzer
+      - Terminal-Icons
+      - PSfzf
+      - posh-git
+      - DockerCompletion
+      - powershell-yaml
+  
+  linux:
+      brews:
+          # shell
+          - zsh
+          - oh-my-zsh
+          - zoxide
+          
+          # fzf  
+          - fzf  
+          - fd  
+          - ripgrep    
+          - eza    
+          - fzf-tab
+          
+          # git  
+          - git    
+          - lazygit    
+          - gitql    
+          - onefetch
+          
+          # docker    
+          - docker  
+      
+      casks:
+          
+      modules:
+          - zsh-autosuggestions
+          - zsh-syntax-highlighting
