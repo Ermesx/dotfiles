@@ -1,4 +1,3 @@
 ﻿# Update the PATH environment variable for the current session
-
 $additionalPaths = {{ .env.windows.PATH | join ";" | quote }}
 Update-SessionPATH -AdditionalPaths $additionalPaths

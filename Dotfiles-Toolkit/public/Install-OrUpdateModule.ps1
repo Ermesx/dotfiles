@@ -30,8 +30,6 @@
         [switch]$Force
     )
 
-    $t = Get-PadLength $Name
-
     if (-not ($Global:ModulesCache) -or $Global:ModulesCacheTimer -lt (Get-Date)) {
         $Global:ModulesCache = Get-InstalledModule
         $Global:ModulesCacheTimer = (Get-Date).AddDays(1)
@@ -39,17 +37,14 @@
 
     # Install Module if not present
     $module = $Global:ModulesCache | Where-Object { $_.Name -eq $Name }  | Sort-Object -Property Version -Descending | Select-Object -First 1
-    if (-not $module -or $Force) {
-        Write-Cyan "🌀 Installing " -NoNewline
-        Write-Pretty "__$($Name)__" -NoNewline
+    if (-not $module -or $Force) {        
+        $installModule = Find-Module -Name $Name | Select-Object -First 1
         
-        Install-Module -Name $Name -SkipPublisherCheck | Out-Null
-        $installedModule = Get-InstalledModule -Name $Name | Sort-Object -Property Version -Descending  | Select-Object -First 1
-        $Global:ModulesCache += $installedModule
-        
-        Write-Green "`r✅ [OK]   " -NoNewline
-        Write-Pretty "__$($Name)__$t" -NoNewline
-        Write-Yellow " ($($installedModule.Version))"
+        Write-Install -Label $Name -Version $installModule.Version -Script 
+            { Install-Module -Name $Name -SkipPublisherCheck | Out-Null }.GetNewClosure()
+
+        # Update the cache
+        $Global:ModulesCache += $installModule
         return
     }
 
@@ -69,27 +64,13 @@
     $currentVersion = $module.Version
     $latestVersion = $availableModule.Version
     if ($currentVersion -lt $latestVersion) {
-        Write-Cyan "🌀 Upgrading " -NoNewline
-        Write-Pretty "__$($Name)__$t" -NoNewline
-        Write-Host "($currentVersion" -ForegroundColor Cyan -NoNewline
-        Write-Red " => " -NoNewline
-        Write-Yellow "$latestVersion" -NoNewline
-        Write-Host ")" -ForegroundColor Cyan -NoNewline
+        Write-Upgrade -Label $Name -FromVersion $currentVersion -ToVersion $latestVersion -Script 
+            { Update-Module -Name $Name }.GetNewClosure()
         
-        Update-Module -Name $Name
+        # Update the cache
         $Global:ModulesCache += $availableModule
-        
-        Write-Green "`r🔄 [OK] " -NoNewline
-        Write-Pretty "__$($Name)__$t" -NoNewline
-        Write-Host "($currentVersion" -ForegroundColor Cyan -NoNewline
-        Write-Red " => " -NoNewline;
-        Write-Yellow "$latestVersion" -NoNewline
-        Write-Host ")" -ForegroundColor Cyan
-        
     }
     else {
-        Write-Yellow "👌 [Skip] " -NoNewline
-        Write-Pretty "__$($Name)__$t" -NoNewline
-        Write-Host "($currentVersion)" -ForegroundColor Yellow
+        Write-Skip -Label $Name -Version $currentVersion
     }
 }

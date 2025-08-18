@@ -1,0 +1,9 @@
+# Pofiles hashes
+{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.*")) }}
+# {{ include . | sha256sum -}}
+{{ end }}
+
+# Import all profile files
+{{- range (glob  (joinPath .chezmoi.config.destDir ".profile/*.*")) }}
+. {{  . | squote -}}
+{{ end -}}

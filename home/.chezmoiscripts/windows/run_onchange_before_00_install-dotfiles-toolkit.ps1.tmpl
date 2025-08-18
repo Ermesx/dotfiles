@@ -1,13 +1,12 @@
-﻿
-# Re-install Dotfiles-Toolkit module if it has changed
+﻿# Re-install Dotfiles-Toolkit module if it has changed
 {{ $moduleName := "Dotfiles-Toolkit" -}}
 {{ $mpdulePath := joinPath .chezmoi.workingTree $moduleName -}}
 
-{{ range (glob (joinPath $mpdulePath "/**/**.*")) }}
+{{ range (glob (joinPath $mpdulePath "/**/*.*")) }}
 # {{ include . | sha256sum -}}
 {{ end }}
 
 $modulesPath = $env:PSModulePath -split ';' | Select-Object -First 1
 
-Copy-Item -Path '{{ $mpdulePath }}' -Destination "$modulesPath" -Recurse -Force
+Copy-Item -Path {{ $mpdulePath | squote }} -Destination "$modulesPath" -Recurse -Force
 Import-Module {{ $moduleName }} -Force

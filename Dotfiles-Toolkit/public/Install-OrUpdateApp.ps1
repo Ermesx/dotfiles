@@ -44,8 +44,6 @@ function Install-OrUpdateApp {
         [PSPackageInstallMode]$Mode = [PSPackageInstallMode]::Silent,
         [switch]$Force
     )
-
-    $t = Get-PadLength $Id
     
     if (-not ($Global:AppsCache) -or $Global:AppsCacheTimer -lt (Get-Date)) {
         $Global:AppsCache = Get-WinGetPackage
@@ -53,41 +51,28 @@ function Install-OrUpdateApp {
     }
 
     $app = $Global:AppsCache | Where-Object { $_.Id -eq $Id } | Sort-Object -Property InstalledVersion -Descending | Select-Object -First 1
-    if (-not $app -or $Force) {
-        Write-Cyan "🌀 Installing " -NoNewline; 
-        Write-Pretty "__$($Id)__" -NoNewline
+    if (-not $app -or $Force) {        
+        $app = Find-WinGetPackage -Id $Id | Select-Object -First 1
         
-        Install-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null        
-        $installedApp = Get-WinGetPackage -Id $Id |  Select-Object -First 1
-        $Global:AppsCache += $installedApp
-        
-        Write-Green "`r✅ [OK]   " -NoNewline; 
-        Write-Pretty "__$($Id)__$t" -NoNewline;
-        Write-Yellow "($($installedApp.InstalledVersion))"
+        Write-Install -Label $Id -Version $app.Version -Script {
+            Install-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null
+        }
+
+        # Update the cache
+        $Global:AppsCache += $app
     }
     elseif ($app.IsUpdateAvailable) {
         $latestVersion = $app.AvailableVersions[0]
-        Write-Cyan "🌀 Upgrading " -NoNewline
-        Write-Pretty "__$($Id)__$t" -NoNewline
-        Write-Host "($($app.InstalledVersion)" -ForegroundColor Cyan -NoNewline
-        Write-Red " => " -NoNewline
-        Write-Yellow "$latestVersion" -NoNewline
-        Write-Host ")" -ForegroundColor Cyan -NoNewline
-        
-        Update-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null
+        Write-Upgrade -Label $Id -FromVersion $app.InstalledVersion -ToVersion $latestVersion -Script {
+            Update-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null
+        }
+
+        # Update the cache
         $installedApp = Get-WinGetPackage -Id $Id | Select-Object -First 1
         $Global:AppsCache += $installedApp
         
-        Write-Green "`r🔄 [OK]   " -NoNewline
-        Write-Pretty "__$($Id)__$t" -NoNewline
-        Write-Host "($($app.InstalledVersion)" -ForegroundColor Cyan -NoNewline
-        Write-Red " => " -NoNewline;
-        Write-Yellow "$latestVersion" -NoNewline
-        Write-Host ")" -ForegroundColor Cyan
     }
     else {
-        Write-Yellow "👌 [Skip] " -NoNewline;
-        Write-Pretty "__$($Id)__$t" -NoNewline
-        Write-Host "($($app.InstalledVersion))" -ForegroundColor Yellow
+        Write-Skip -Label $Id -Version $app.InstalledVersion
     }
 }

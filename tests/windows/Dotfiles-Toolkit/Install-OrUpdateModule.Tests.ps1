@@ -11,8 +11,9 @@ Describe 'Install-OrUpdateModule' {
             Mock Install-Module { }
             Mock Find-Module { @{ Name = 'TestModule'; Version = [version]'5.1.0' } }
             Mock Update-Module { }
-            Mock Write-Pretty { }
-            Mock Write-Host { }
+            Mock Write-Install { }
+            Mock Write-Upgrade { }
+            Mock Write-Skip { }
         }
         
         BeforeEach {
@@ -25,28 +26,27 @@ Describe 'Install-OrUpdateModule' {
         It 'installs module if not present' {
             Mock Get-InstalledModule { @() }
             Install-OrUpdateModule -Name 'TestModule'
-            Assert-MockCalled Install-Module -Exactly -Times 1
+            Assert-MockCalled Write-Install -Exactly -Times 1
         }
         
         It 'updates module if newer version is available' {
             Mock Get-InstalledModule { @(@{ Name = 'TestModule'; Version = [version]'5.0.0' }, @{ Name = 'TestModule2'; Version = [version]'1.0.0' }) }
             Mock Find-Module { @{ Name = 'TestModule'; Version = [version]'5.1.0' } }
             Install-OrUpdateModule -Name 'TestModule'
-            Assert-MockCalled Update-Module -Exactly -Times 1
+            Assert-MockCalled Write-Upgrade -Exactly -Times 1
         }
 
         It 'skips update if module is up-to-date' {
             Mock Get-InstalledModule { @(@{ Name = 'TestModule'; Version = [version]'5.1.0' }, @{ Name = 'TestModule2'; Version = [version]'1.0.0' }) }
             Mock Find-Module { @{ Name = 'TestModule'; Version = [version]'5.1.0' } }
             Install-OrUpdateModule -Name 'TestModule'
-            Assert-MockCalled Update-Module -Exactly -Times 0
-            Assert-MockCalled Install-Module -Exactly -Times 0
+            Assert-MockCalled Write-Skip -Exactly -Times 1
         }
 
         It 'forces reinstall if -Force is used' {
             Mock Get-InstalledModule { @(@{ Name = 'TestModule'; Version = [version]'5.1.0' }, @{ Name = 'TestModule2'; Version = [version]'1.0.0' }) }
             Install-OrUpdateModule -Name 'TestModule' -Force
-            Assert-MockCalled Install-Module -Exactly -Times 1
+            Assert-MockCalled Write-Install -Exactly -Times 1
         }
 
         It 'uses cache if ModulesCacheTimer is valid' {
