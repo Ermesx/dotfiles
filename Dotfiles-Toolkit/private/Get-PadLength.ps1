@@ -4,5 +4,5 @@
         [string]$Text
     )
     
-    return " " * (32 - $Text.Length)
+    return " " * (36 - $Text.Length)
 }

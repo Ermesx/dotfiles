@@ -1,9 +1,9 @@
-.chezmoihooks 
-conf
+conf/
 
 {{- if eq .chezmoi.os "windows" }}
 **/*.sh
 {{- else }}
-/AppData
+readonly_AppData/
+readonly_Documents/
 **/*.ps1
 {{- end -}}

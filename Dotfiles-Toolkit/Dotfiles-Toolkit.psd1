@@ -12,7 +12,7 @@
 RootModule = 'Dotfiles-Toolkit.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.11.2'
+ModuleVersion = '1.11.5'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()

@@ -1,13 +1,15 @@
 ﻿#Requires -Modules Pester, Dotfiles-Toolkit
 
 Describe 'Update-SessionPATH' {
-
+    
     BeforeAll {
         Import-Module Dotfiles-Toolkit -Force
-    }
-
+    }    
+    
     InModuleScope Dotfiles-Toolkit {
         BeforeAll {
+            
+            $script:OriginalPath = $env:Path
 
             Mock Test-Path { $true }
             Mock Write-Host { }
@@ -20,6 +22,10 @@ Describe 'Update-SessionPATH' {
                     'Machine' { return 'C:\Machine1' }
                 }
             }
+        }
+
+        AfterAll {
+            $env:Path = $script:OriginalPath
         }
 
         Context 'Valid path added to user PATH' {
@@ -136,6 +142,34 @@ Describe 'Update-SessionPATH' {
                     $Scope -eq [EnvironmentVariableTarget]::User -and
                     $Value -eq 'C:\User1;C:\User2;D:\Valid;E:\Another'
                 }
+            }
+        }
+
+        Context 'Handles empty AdditionalPath parameter' {
+            It 'does not call Set-EnvVar when AdditionalPath is empty' {
+                Update-SessionPATH -AdditionalPath ""
+
+                Assert-MockCalled Set-EnvVar -Exactly -Times 0
+            }
+        }
+
+        Context 'Handles invalid paths' {
+            It 'ignores invalid paths when updating PATH' {
+                Mock Test-Path {
+                    param ($Path)
+                    $result = ($Path -notlike "C:\Invalid*")
+                    return $result
+                }
+
+                Update-SessionPATH -AdditionalPath "C:\InvalidPath;D:\Valid"
+
+                Assert-MockCalled Set-EnvVar -Exactly -Times 1 -ParameterFilter {
+                    $Name -eq 'Path' -and
+                    $Scope -eq [EnvironmentVariableTarget]::User -and
+                    $Value -eq 'C:\User1;C:\User2;D:\Valid'
+                }
+
+                $env:Path | Should -Be 'C:\Machine1;C:\User1;C:\User2;D:\Valid'
             }
         }
     }

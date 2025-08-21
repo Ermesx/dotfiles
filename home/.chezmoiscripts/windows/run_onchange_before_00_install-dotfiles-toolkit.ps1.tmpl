@@ -8,5 +8,10 @@
 
 $modulesPath = $env:PSModulePath -split ';' | Select-Object -First 1
 
+Write-Host "🌀 Installing Dotfiles-Toolkit..." -NoNewline
+
 Copy-Item -Path {{ $mpdulePath | squote }} -Destination "$modulesPath" -Recurse -Force
 Import-Module {{ $moduleName }} -Force
+
+Write-Host "`r✅ [OK]   " -ForegroundColor Green -NoNewline
+Write-Host "Installed Dotfiles-Toolkit"

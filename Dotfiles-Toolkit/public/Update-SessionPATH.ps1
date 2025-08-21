@@ -23,10 +23,12 @@
     $userPath = Get-EnvVar -Name "PATH" -Scope ([System.EnvironmentVariableTarget]::User)
 
     if ($AdditionalPath -and $AdditionalPath.Trim() -ne "") {
-        $newPaths = "$userPath;$AdditionalPath" -split ";" | Select-Object { $_.Trim('\') } -Unique | Where-Object { Test-Path $_ }
+        $newPaths = "$userPath;$AdditionalPath" -split ";" | ForEach-Object { $_.TrimEnd('\') } | Where-Object { Test-Path $_ } | Select-Object -Unique
         $userPath = $newPaths -join ";"
         
-        Set-EnvVar -Name "Path" -Value $userPath -Scope ([System.EnvironmentVariableTarget]::User)
+        if ($userPath -ne "") {
+            Set-EnvVar -Name "Path" -Value $userPath -Scope ([System.EnvironmentVariableTarget]::User)
+        }
     }
 
     $machinePath = Get-EnvVar -Name "PATH" -Scope ([System.EnvironmentVariableTarget]::Machine)
@@ -35,5 +37,5 @@
     Write-Verbose "New PATH value: $newPath"
     $env:Path = $newPath
 
-    Write-Host "🔄 PATH environment variable refreshed."
+    Write-Host "🔄 env:PATH refreshed."
 }

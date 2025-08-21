@@ -1,7 +1,7 @@
-{{- $hook_extension := (eq .chezmoi.os "windows") | ternary  "ps1" "sh" -}}
+{{- $email := default (promptString "email") "john@doe.com" }}
+{{- $name := default (promptString "name") "John Doe"  }}
 
-{{- $email := promptString "email" }}
-{{- $name := promptString "name" }}
+progress = true
 
 [data]
     name = {{ $name | quote }}
@@ -12,12 +12,10 @@
 
 [diff]
     exclude = ["scripts"]
-
-{{- if eq .chezmoi.os "windows" }}
-[hooks.init.pre]
-    script = ".chezmoihooks/install-pwsh.cmd"
-{{ end -}}
-
+{{ if eq .chezmoi.os "windows" }}
+[hooks.read-source-state.pre]
+    command = {{ joinPath .chezmoi.sourceDir ".hooks/.install-pwsh.cmd" | quote }}
+{{ end }}
 [interpreters.ps1]
     command = "pwsh"
     args = ["-NoLogo", "-NoProfile"]

@@ -1,8 +1,4 @@
-﻿Write-Host "`n=== === === === ==>" -NoNewline
-Write-Cyan "    🛠️ Install...   " -NoNewline
-Write-Host "<== === === === ==="
-
-# Install or update PowerShell modules
+﻿# Install or update PowerShell modules
 {{ range .packages.windows.modules -}}
 Install-OrUpdateModule -Name {{ . | quote }}
 {{ end }}

@@ -1,14 +1,20 @@
 [user]
-	name = {{ .name | quote }}
-	email = {{ .email | quote }}
+    name = {{ .name | quote }}
+    email = {{ .email | quote }}
 [core]
-	autocrlf = True
+    autocrlf = True
 [color "status"]
-	changed = yellow
-	untracked = cyan
+    changed = yellow
+    untracked = cyan
 [alias]
-	st = status
-	commit-amend = commit --amend --no-edit
+    st = status
+    commit-amend = commit --amend --no-edit
 [push]
-	default = matching
-
+    default = matching
+[credential]
+    helper =
+    helper = {{ .chezmoi.config.destDir -}}/AppData/Local/Programs/Git\\ Credential\\ Manager/git-credential-manager.exe
+{{- if env "VAGRANT" }}
+[safe]
+    directory = %(prefix)///vboxsvr/Users_vagrant_.local_share_chezmoi/
+{{ end -}}

@@ -3,6 +3,11 @@
 # {{ include . | sha256sum -}}
 {{ end }}
 
+# Import modules
+{{ range .packages.windows.modules -}}
+Import-Module -Name {{ . | squote }}
+{{ end }}
+
 # Import all profile files
 {{- $base := print .chezmoi.sourceDir "/dot_profile/" }}
 {{- $target := print .chezmoi.config.destDir "/.profile/" }}

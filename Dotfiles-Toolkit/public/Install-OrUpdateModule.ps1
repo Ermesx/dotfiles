@@ -40,8 +40,8 @@
     if (-not $module -or $Force) {        
         $installModule = Find-Module -Name $Name | Select-Object -First 1
         
-        Write-Install -Label $Name -Version $installModule.Version -Script 
-            { Install-Module -Name $Name -SkipPublisherCheck | Out-Null }.GetNewClosure()
+        $script = { Install-Module -Name $Name -SkipPublisherCheck | Out-Null }.GetNewClosure()
+        Write-Install -Label $Name -Version $installModule.Version -Script $script
 
         # Update the cache
         $Global:ModulesCache += $installModule
@@ -64,8 +64,8 @@
     $currentVersion = $module.Version
     $latestVersion = $availableModule.Version
     if ($currentVersion -lt $latestVersion) {
-        Write-Upgrade -Label $Name -FromVersion $currentVersion -ToVersion $latestVersion -Script 
-            { Update-Module -Name $Name }.GetNewClosure()
+        $script = { Update-Module -Name $Name | Out-Null }.GetNewClosure()
+        Write-Upgrade -Label $Name -FromVersion $currentVersion -ToVersion $latestVersion -Script $Script
         
         # Update the cache
         $Global:ModulesCache += $availableModule

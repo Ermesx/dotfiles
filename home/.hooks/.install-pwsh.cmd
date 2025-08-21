@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 
 where /q pwsh
 if errorlevel 1 (

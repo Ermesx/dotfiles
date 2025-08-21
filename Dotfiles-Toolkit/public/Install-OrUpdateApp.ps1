@@ -54,18 +54,16 @@ function Install-OrUpdateApp {
     if (-not $app -or $Force) {        
         $app = Find-WinGetPackage -Id $Id | Select-Object -First 1
         
-        Write-Install -Label $Id -Version $app.Version -Script {
-            Install-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null
-        }
+        $script = { Install-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null }.GetNewClosure()
+        Write-Install -Label $Id -Version $app.Version -Script $script
 
         # Update the cache
         $Global:AppsCache += $app
     }
     elseif ($app.IsUpdateAvailable) {
         $latestVersion = $app.AvailableVersions[0]
-        Write-Upgrade -Label $Id -FromVersion $app.InstalledVersion -ToVersion $latestVersion -Script {
-            Update-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null
-        }
+        $script = { Update-WinGetPackage -Id "$Id" -Mode $Mode | Out-Null }.GetNewClosure()
+        Write-Upgrade -Label $Id -FromVersion $app.InstalledVersion -ToVersion $latestVersion -Script $script
 
         # Update the cache
         $installedApp = Get-WinGetPackage -Id $Id | Select-Object -First 1

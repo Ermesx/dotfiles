@@ -33,6 +33,7 @@ packages:
       - posh-git
       - DockerCompletion
       - powershell-yaml
+      - Pester
   
   linux:
       brews:

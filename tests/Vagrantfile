@@ -8,7 +8,10 @@
 
     windows.vm.provision "shell",
       privileged: true,
-      path: "run-tests.ps1"
+      path: "run-tests.ps1",
+      env: {
+        "VAGRANT" => "1"
+      }
 
     windows.vm.provider "virtualbox" do |vb|
       vb.memory = 8192
@@ -24,7 +27,11 @@
   
     linux.vm.synced_folder "..", "/home/vagrant/.local/share/chezmoi", type: "virtualbox"
   
-    linux.vm.provision "shell", path: "run-tests.sh"
+    linux.vm.provision "shell", 
+        path: "run-tests.sh",
+        env: {
+          "VAGRANT" => "1"
+        }
   
     linux.vm.provider "virtualbox" do |vb|
       vb.memory = 8192         
