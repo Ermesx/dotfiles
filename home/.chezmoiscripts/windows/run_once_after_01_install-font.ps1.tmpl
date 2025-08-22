@@ -3,7 +3,7 @@ Add-Type -AssemblyName PresentationCore
 $fontsSource = ([Windows.Media.Fonts]::SystemFontFamilies.Source)
 
 if ($fontsSource -notcontains {{ .font.exactName | squote }}) {
-    Write-Install -Label $config.font.name -Script
+    Write-Install -Label {{ .font.name | squote }} -Script
         { oh-my-posh font install {{ .font.name | squote }} | Out-Null }.GetNewClosure()
 }
 else {
