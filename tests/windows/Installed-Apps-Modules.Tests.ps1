@@ -9,12 +9,14 @@ Describe "After installing dotfiles" {
         $packagesPath = Join-Path $HOME ".local\share\chezmoi\.home\.chezmoidata\packages.yaml"
         $packages = (Get-Content -Path $packagesPath | ConvertFrom-Yaml).packages
     }
+    
     Context "Apps" {
         It "should have installed <_>" -Foreach $packages.windows.wingets {
-            $name = $_
-            $script:allApps | Where-Object { $_.Id -like "*$name*" } | Should -Not -BeNullOrEmpty
+            $id = $_
+            $script:allApps | Where-Object { $_.Id -like "*$id*" } | Should -Not -BeNullOrEmpty
         }
     }
+    
     Context "Modules" {
         It "should have installed <_>" -Foreach $packages.windows.modules {
             $name = $_
