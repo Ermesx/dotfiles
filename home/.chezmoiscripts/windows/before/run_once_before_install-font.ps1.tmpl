@@ -1,0 +1,7 @@
+﻿# Install fonts
+Add-Type -AssemblyName PresentationCore
+$fontsSource = ([Windows.Media.Fonts]::SystemFontFamilies.Source)
+
+if ($fontsSource -notcontains {{ .font.exactName | squote }}) {
+    oh-my-posh font install {{ .font.name | squote }}
+}

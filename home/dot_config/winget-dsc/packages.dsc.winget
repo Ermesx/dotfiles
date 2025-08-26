@@ -1,0 +1,228 @@
+﻿# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+properties:
+  
+  resources:
+    # terminal shell
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-Microsoft.WindowsTerminal
+      directives:
+        description: Install Microsoft.WindowsTerminal
+      settings:
+        id: Microsoft.WindowsTerminal
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-Microsoft.Powershell
+      directives:
+        description: Install Microsoft.Powershell
+      settings:
+        id: Microsoft.Powershell
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-JanDeDobbeleer.OhMyPosh
+      directives:
+        description: Install JanDeDobbeleer.OhMyPosh
+      settings:
+        id: JanDeDobbeleer.OhMyPosh
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-ajeetdsouza.zoxide
+      directives:
+        description: Install ajeetdsouza.zoxide
+      settings:
+        id: ajeetdsouza.zoxide
+        source: winget
+
+    # fzf 
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-GnuWin32.File
+      directives:
+        description: Install GnuWin32.File
+      settings:
+        id: GnuWin32.File
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-sharkdp.bat
+      directives:
+        description: Install sharkdp.bat
+      settings:
+        id: sharkdp.bat
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-sharkdp.fd
+      directives:
+        description: Install sharkdp.fd
+      settings:
+        id: sharkdp.fd
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-BurntSushi.ripgrep.MSVC
+      directives:
+        description: Install BurntSushi.ripgrep.MSVC
+      settings:
+        id: BurntSushi.ripgrep.MSVC
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-eza-community.eza
+      directives:
+        description: Install eza-community.eza
+      settings:
+        id: eza-community.eza
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-junegunn.fzf
+      directives:
+        description: Install junegunn.fzf
+      settings:
+        id: junegunn.fzf
+        source: winget
+
+    # git
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-Git.Git
+      directives:
+        description: Install Git.Git
+      settings:
+        id: Git.Git
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-Git.GCM
+      dependsOn:
+        - winget-Git.Git
+      directives:
+        description: Install Git.GCM
+      settings:
+        id: Git.GCM
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-JesseDuffield.lazygit
+      dependsOn:
+        - winget-Git.Git
+      directives:
+        description: Install JesseDuffield.lazygit
+      settings:
+        id: JesseDuffield.lazygit
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-amrdeveloper.gitql
+      dependsOn:
+        - winget-Git.Git
+      directives:
+        description: Install amrdeveloper.gitql
+      settings:
+        id: amrdeveloper.gitql
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-o2sh.onefetch
+      dependsOn:
+        - winget-Git.Git
+      directives:
+        description: Install o2sh.onefetch
+      settings:
+        id: o2sh.onefetch
+        source: winget
+
+    # docker
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-Docker.DockerDesktop
+      directives:
+        description: Install Docker.DockerDesktop
+      settings:
+        id: Docker.DockerDesktop
+        source: winget
+    
+    # Chrome
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      directives:
+        description: Install Google Chrome
+        securityContext: elevated
+      settings:
+        id: Google.Chrome
+        source: winget
+    
+    # VSCode
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      directives:
+        description: Install Visual Studio Code
+        securityContext: elevated
+      settings:
+        id: Microsoft.VisualStudioCode
+        source: winget
+    
+    # Rider
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      directives:
+        description: Install JetBrains Rider
+        securityContext: elevated
+      settings:
+        id: JetBrains.Rider
+        source: winget
+    
+    # PowerShell modules
+    - resource: PowerShellModule/PSModuleResource
+      id: module-Terminal-Icons
+      directives:
+        description: Ensure module Terminal-Icons present
+      settings:
+        Module_Nam: Terminal-Icons
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-PSfzf
+      dependsOn:
+        - winget-junegunn.fzf
+      directives:
+        description: Ensure module PSfzf present
+      settings:
+        Module_Nam: PSfzf
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-posh-git
+      dependsOn:
+        - winget-Git.Git
+      directives:
+        description: Ensure module posh-git present
+      settings:
+        Module_Nam: posh-git
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-DockerCompletion
+      dependsOn:
+        - winget-Docker.DockerDesktop
+      directives:
+        description: Ensure module DockerCompletion present
+      settings:
+        Module_Nam: DockerCompletion
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-powershell-yaml
+      directives:
+        description: Ensure module powershell-yaml present
+      settings:
+        Module_Nam: powershell-yaml
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-Pester
+      directives:
+        description: Ensure module Pester present
+      settings:
+        Module_Nam: Pester
+        RequiredVersion: 5.7.1
+        Ensure: Present
+  
+  configurationVersion: 0.2.0

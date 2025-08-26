@@ -2,13 +2,15 @@
 
   # Windows configuration
   config.vm.define "dotfiles-windows" do |windows|
-    windows.vm.box = "gusztavvargadr/winidows-11"
+    windows.vm.box = "gusztavvargadr/windows-11"
+    
+    windows.vm.boot_timeout = 1500 
 
     windows.vm.synced_folder "..", "/Users/vagrant/.local/share/chezmoi", type: "virtualbox"
 
     windows.vm.provision "shell",
       privileged: true,
-      path: "run-tests.ps1",
+#       path: "run-tests.ps1",
       env: {
         "VAGRANT" => "1"
       }

@@ -1,40 +1,4 @@
 packages:  
-  windows:
-    wingets:
-      # shell
-      - Microsoft.Powershell    
-      - JanDeDobbeleer.OhMyPosh    
-      - ajeetdsouza.zoxide
-      
-      # fzf  
-      - GnuWin32.File
-      - sharkdp.bat    
-      - sharkdp.fd    
-      - BurntSushi.ripgrep.MSVC        
-      - eza-community.eza    
-      - junegunn.fzf
-      
-      # git  
-      - Git.Git    
-      - Git.GCM    
-      - JesseDuffield.lazygit    
-      - amrdeveloper.gitql    
-      - o2sh.onefetch
-        
-      # docker    
-      - Docker.DockerDesktop  
-      
-      - Microsoft.WindowsTerminal  
-      
-    modules:
-      - Microsoft.WinGet.Client
-      - Terminal-Icons
-      - PSfzf
-      - posh-git
-      - DockerCompletion
-      - powershell-yaml
-      - Pester
-  
   linux:
       brews:
           # shell

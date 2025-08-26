@@ -6,11 +6,13 @@
 # {{ include . | sha256sum -}}
 {{ end }}
 
-$modulesPath = $env:PSModulePath -split ';' | Select-Object -First 1
+$modulesPath = $env:PSModulePath -split ';' | Select-Object -First 1 | Join-Path -ChildPath {{ $moduleName | squote }}
 
 Write-Host "🌀 Installing Dotfiles-Toolkit..." -NoNewline
 
-Copy-Item -Path {{ $mpdulePath | squote }} -Destination "$modulesPath" -Recurse -Force
+Copy-Item -Path {{  $mpdulePath | squote }} -Destination "$modulesPath" -Recurse -Force
+Install-Module -Name 'Microsoft.WinGet.Client'
+
 Import-Module {{ $moduleName }} -Force
 
 Write-Host "`r✅ [OK]   " -ForegroundColor Green -NoNewline
