@@ -4,20 +4,22 @@
   config.vm.define "dotfiles-windows" do |windows|
     windows.vm.box = "gusztavvargadr/windows-11"
     
-    windows.vm.boot_timeout = 1500 
+    windows.vm.boot_timeout = 2000
+    windows.winrm.timeout = 2000
+    windows.winrm.retry_delay = 30
 
     windows.vm.synced_folder "..", "/Users/vagrant/.local/share/chezmoi", type: "virtualbox"
 
     windows.vm.provision "shell",
       privileged: true,
-#       path: "run-tests.ps1",
+      path: "run-tests.ps1",
       env: {
         "VAGRANT" => "1"
       }
 
     windows.vm.provider "virtualbox" do |vb|
       vb.memory = 8192
-      vb.cpus = 4       
+      vb.cpus = 4
 
       vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
     end

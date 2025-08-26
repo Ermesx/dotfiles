@@ -11,7 +11,7 @@ function Download-File {
     )
     $name = Split-Path -Path $Url -Leaf
 
-    Write-Host "► Downloading $name" -ForegroundColor Cyan
+    Write-Output "► Downloading $name" -ForegroundColor Cyan
     Invoke-RestMethod -Uri $Url -OutFile $Destination
 }
 
@@ -25,7 +25,7 @@ function Get-EnvVar {
 
 # Resrouces
 $GITHUB_URL = "https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/$BRANCH/home/dot_config/winget-dsc"
-$wingets = [ 'packages.dsc.winget', 'windows.dsc.winget' ]
+$wingets = @('packages.dsc.winget', 'windows.dsc.winget')
 $dest = "~\.config\winget-dsc"
 
 if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
@@ -33,22 +33,22 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     $wingets | Foreach-Object { Download-File -Url "$GITHUB_URL/$_" -Destination (Join-Path $dest $_) }
 
     # Install packages
-    Write-Host "► Installing packages" -ForegroundColor Cyan
+    Write-Output "► Installing packages" -ForegroundColor Cyan
     winget configure --enable
     $wingets | Foreach-Object {
         winget configure -f (Join-Path $dest $_) --accept-configuration-agreements --disable-interactivity
     }
 
     # Refresh PATH to include user PATH additions without needing to restart the shell
-    Write-Host "► Refreshing PATH" -ForegroundColor Cyan
+    Write-Output "► Refreshing PATH" -ForegroundColor Cyan
     $userPath = Get-EnvVar -Name "PATH" -Scope "User"
     $machinePath = Get-EnvVar -Name "PATH" -Scope "Machine"
     $env:PATH = "$userPath;$machinePath"
-    
+
     # Install chezmoi and apply dotfiles
     iex "&{$(irm 'https://get.chezmoi.io/ps1')} init --apply $GITHUB_USERNAME"
 }
 else {
-    Write-Host "winget is not installed. Please install winget first." -ForegroundColor Red
+    Write-Output "winget is not installed. Please install winget first." -ForegroundColor Red
     exit 1
 }
