@@ -25,7 +25,7 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     if (-Not (Test-Path -Path $dest)) {
         New-Item -ItemType Directory -Path $dest | Out-Null
     }
-    
+
     # Download winget-dsc configuration files
     $wingets | Foreach-Object { Download-File -Url "$GITHUB_URL/$_" -Destination (Join-Path $dest $_) }
 
@@ -42,6 +42,11 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     $machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
     $env:PATH = "$userPath;$machinePath"
 
+    # Trust PSGallery repository
+    if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
+        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+    }
+    
     # Install chezmoi and apply dotfiles
     chezmoi init --apply $GITHUB_USERNAME
 }

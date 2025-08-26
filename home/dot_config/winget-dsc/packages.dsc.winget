@@ -1,4 +1,4 @@
-﻿# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
 properties:  
   resources:
     # terminal shell
@@ -169,14 +169,6 @@ properties:
         source: winget
     
     # PowerShell modules
-    - resource: PowerShellModule/PSModuleRepositoryResource
-      id: module-PSGallery
-      directives:
-        description: Ensure PSGallery repository present
-      settings:
-        InstallationPolicy: Trusted
-        Ensure: Present
-
     - resource: PowerShellModule/PSModuleResource
       id: module-Terminal-Icons
       directives:
