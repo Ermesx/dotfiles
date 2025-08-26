@@ -12,14 +12,14 @@ Describe "After installing dotfiles" {
     
     Context "Apps" {
         It "should have installed <_>" -Foreach $script:wingets {
-            $id = $_
+            $id = $_.settings.id
             $script:allApps | Where-Object { $_.Id -eq $id } | Should -Not -BeNullOrEmpty
         }
     }
     
     Context "Modules" {
         It "should have installed <_>" -Foreach $script:modules {
-            $name = $_
+            $name = $_.settings.Module_Name
             $script:allModules | Where-Object { $_.Name -eq $name } | Should -Not -BeNullOrEmpty
         }
     }
