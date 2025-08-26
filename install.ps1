@@ -15,14 +15,6 @@ function Download-File {
     Invoke-RestMethod -Uri $Url -OutFile $Destination
 }
 
-function Get-EnvVar {
-    param (
-        [string]$Name,
-        [System.EnvironmentVariableTarget]$Scope
-    )
-    return [System.Environment]::GetEnvironmentVariable($Name, $Scope)
-}
-
 # Resrouces
 $GITHUB_URL = "https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/$BRANCH/home/dot_config/winget-dsc"
 $wingets = @('packages.dsc.winget', 'windows.dsc.winget')
@@ -41,13 +33,13 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     Write-Host "► Installing packages" -ForegroundColor Cyan
     winget configure --enable
     $wingets | Foreach-Object {
-        winget configure -f (Join-Path $dest $_) --accept-configuration-agreements --disable-interactivity
+        winget configure -f (Join-Path $dest $_) --accept-configuration-agreements --disable-interactivity --suppress-initial-details
     }
 
     # Refresh PATH to include user PATH additions without needing to restart the shell
     Write-Host "► Refreshing PATH" -ForegroundColor Cyan
-    $userPath = Get-EnvVar -Name "PATH" -Scope "User"
-    $machinePath = Get-EnvVar -Name "PATH" -Scope "Machine"
+    $userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+    $machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
     $env:PATH = "$userPath;$machinePath"
 
     # Install chezmoi and apply dotfiles

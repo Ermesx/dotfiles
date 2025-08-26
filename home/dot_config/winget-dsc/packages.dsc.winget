@@ -1,6 +1,5 @@
 ﻿# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
-properties:
-  
+properties:  
   resources:
     # terminal shell
     - resource: Microsoft.WinGet.DSC/WinGetPackage
@@ -170,12 +169,20 @@ properties:
         source: winget
     
     # PowerShell modules
+    - resource: PowerShellModule/PSModuleRepositoryResource
+      id: module-PSGallery
+      directives:
+        description: Ensure PSGallery repository present
+      settings:
+        InstallationPolicy: Trusted
+        Ensure: Present
+
     - resource: PowerShellModule/PSModuleResource
       id: module-Terminal-Icons
       directives:
         description: Ensure module Terminal-Icons present
       settings:
-        Module_Nam: Terminal-Icons
+        Module_Name: Terminal-Icons
         Ensure: Present
 
     - resource: PowerShellModule/PSModuleResource
@@ -185,7 +192,7 @@ properties:
       directives:
         description: Ensure module PSfzf present
       settings:
-        Module_Nam: PSfzf
+        Module_Name: PSfzf
         Ensure: Present
 
     - resource: PowerShellModule/PSModuleResource
@@ -195,7 +202,7 @@ properties:
       directives:
         description: Ensure module posh-git present
       settings:
-        Module_Nam: posh-git
+        Module_Name: posh-git
         Ensure: Present
 
     - resource: PowerShellModule/PSModuleResource
@@ -205,7 +212,7 @@ properties:
       directives:
         description: Ensure module DockerCompletion present
       settings:
-        Module_Nam: DockerCompletion
+        Module_Name: DockerCompletion
         Ensure: Present
 
     - resource: PowerShellModule/PSModuleResource
@@ -213,7 +220,7 @@ properties:
       directives:
         description: Ensure module powershell-yaml present
       settings:
-        Module_Nam: powershell-yaml
+        Module_Name: powershell-yaml
         Ensure: Present
 
     - resource: PowerShellModule/PSModuleResource
@@ -221,10 +228,10 @@ properties:
       directives:
         description: Ensure module Pester present
       settings:
-        Module_Nam: Pester
+        Module_Name: Pester
         RequiredVersion: 5.7.1
         Ensure: Present
-        
+    
     # chezmoi
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       directives:
