@@ -1,0 +1,10 @@
+# Add Environment Variables
+{{- range .env.windows }}
+{{- if eq .action "set" }}
+$env:{{ .var }} = {{ .value | squote }}
+{{ else if eq .action "extend" }} 
+if ($env:{{ .var }} -notlike "*{{ .value }}*") {
+    $env:{{ .var }} = "$env:{{ .var }};{{ .value }}"
+}
+{{ end -}}
+{{ end -}}
