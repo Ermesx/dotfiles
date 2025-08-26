@@ -1,5 +1,5 @@
-﻿param (
-    [Parameter(Mandatory = $true)]
+﻿[CmdletBinding()]
+param (
     [string]$BRANCH = 'develop',
     [string]$GITHUB_USERNAME = 'Ermesx'
 )
@@ -46,7 +46,7 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     $env:PATH = "$userPath;$machinePath"
 
     # Install chezmoi and apply dotfiles
-    iex "&{$(irm 'https://get.chezmoi.io/ps1')} init --apply $GITHUB_USERNAME"
+    chezmoi init --apply $GITHUB_USERNAME
 }
 else {
     Write-Output "winget is not installed. Please install winget first." -ForegroundColor Red

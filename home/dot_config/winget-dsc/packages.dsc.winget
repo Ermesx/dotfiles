@@ -224,5 +224,14 @@ properties:
         Module_Nam: Pester
         RequiredVersion: 5.7.1
         Ensure: Present
+        
+    # chezmoi
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      directives:
+        description: Install chezmoi
+        securityContext: elevated
+      settings:
+        id: twpayne.chezmoi
+        source: winget
   
   configurationVersion: 0.2.0
