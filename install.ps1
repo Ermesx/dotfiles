@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param (
     [string]$BRANCH = 'develop',
     [string]$GITHUB_USERNAME = 'Ermesx'
