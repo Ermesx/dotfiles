@@ -14,6 +14,7 @@
 [credential]
     helper =
     helper = {{ .chezmoi.config.destDir -}}/AppData/Local/Programs/Git\\ Credential\\ Manager/git-credential-manager.exe
+{{/* Only for tests proposes */}}
 {{- if env "VAGRANT" }}
 [safe]
     directory = %(prefix)///vboxsvr/Users_vagrant_.local_share_chezmoi/

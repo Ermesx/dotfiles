@@ -1,12 +1,12 @@
-﻿#Requires -Modules Pester, Dotfiles-Toolkit
+﻿#Requires -Modules Pester, Write-Pretty
 
 Describe 'Write-Pretty' {
 
     BeforeAll {
-        Import-Module Dotfiles-Toolkit -Force
+        Import-Module Write-Pretty -Force
     }
     
-    InModuleScope Dotfiles-Toolkit {
+    InModuleScope Write-Pretty {
 
         Context 'Basic Markdown parsing' {
             It 'renders bold, italic and underline in PS7' {

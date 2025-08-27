@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
-properties:  
+properties:
   resources:
     # terminal shell
     - resource: Microsoft.WinGet.DSC/WinGetPackage
@@ -169,6 +169,14 @@ properties:
         source: winget
     
     # PowerShell modules
+    - resource: PowerShellModule/PSModuleResource
+      id: module-Microsoft.WinGet.Client
+      directives:
+        description: Ensure module Microsoft.WinGet.Client present
+      settings:
+        Module_Name: Microsoft.WinGet.Client
+        Ensure: Present
+        
     - resource: PowerShellModule/PSModuleResource
       id: module-Terminal-Icons
       directives:
