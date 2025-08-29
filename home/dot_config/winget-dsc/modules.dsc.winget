@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+properties:
+  resources:
+    # PowerShell modules
+    - resource: PowerShellModule/PSModuleResource
+      id: module-Microsoft.WinGet.Client
+      directives:
+        description: Ensure module Microsoft.WinGet.Client present
+      settings:
+        Module_Name: Microsoft.WinGet.Client
+        Ensure: Present
+        
+    - resource: PowerShellModule/PSModuleResource
+      id: module-Terminal-Icons
+      directives:
+        description: Ensure module Terminal-Icons present
+      settings:
+        Module_Name: Terminal-Icons
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-PSfzf
+      directives:
+        description: Ensure module PSfzf present
+      settings:
+        Module_Name: PSfzf
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-posh-git
+      directives:
+        description: Ensure module posh-git present
+      settings:
+        Module_Name: posh-git
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-DockerCompletion
+      directives:
+        description: Ensure module DockerCompletion present
+      settings:
+        Module_Name: DockerCompletion
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-powershell-yaml
+      directives:
+        description: Ensure module powershell-yaml present
+      settings:
+        Module_Name: powershell-yaml
+        Ensure: Present
+
+    - resource: PowerShellModule/PSModuleResource
+      id: module-Pester
+      directives:
+        description: Ensure module Pester present
+      settings:
+        Module_Name: Pester
+        RequiredVersion: 5.7.1
+        Ensure: Present
+  
+  configurationVersion: 0.2.0

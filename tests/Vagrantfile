@@ -10,8 +10,6 @@
 
     windows.vm.synced_folder "..", "/Users/vagrant/.local/share/chezmoi", type: "virtualbox"
 
-    windows.vm.provision "shell", path: "run-tests.ps1"
-      
     windows.vm.provider "virtualbox" do |vb|
       vb.memory = 8192
       vb.cpus = 4
@@ -25,8 +23,6 @@
     linux.vm.box = "ubuntu/jammy64"
   
     linux.vm.synced_folder "..", "/home/vagrant/.local/share/chezmoi", type: "virtualbox"
-  
-    linux.vm.provision "shell", path: "run-tests.sh"
         
     linux.vm.provider "virtualbox" do |vb|
       vb.memory = 8192         

@@ -17,7 +17,7 @@ function Download-File {
 
 # Resrouces
 $GITHUB_URL = "https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/$BRANCH/home/dot_config/winget-dsc"
-$wingets = @('packages.dsc.winget', 'windows.dsc.winget')
+$wingets = @('packages.dsc.winget', 'modules.dsc.winget', 'windows.dsc.winget')
 $dest = Join-Path $HOME ".config\winget-dsc"
 
 if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
