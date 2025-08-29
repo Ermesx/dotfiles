@@ -3,9 +3,11 @@ Describe "After installing dotfiles" {
 
     BeforeDiscovery {
         $packagesPath = Join-Path $HOME ".local\share\chezmoi\home\dot_config\winget-dsc\packages.dsc.winget"
-        $resources = (Get-Content -Path $packagesPath | ConvertFrom-Yaml).properties.resources
-        $script:wingets = $resources | Where-Object { $_.resource -eq 'Microsoft.WinGet.DSC/WinGetPackage' } 
-        $script:modules = $resources | Where-Object { $_.resource -eq 'PowerShellModule/PSModuleResource' } 
+        $modulesPath = Join-Path $HOME ".local\share\chezmoi\home\dot_config\winget-dsc\modules.dsc.winget"
+        $packages = (Get-Content -Path $packagesPath | ConvertFrom-Yaml).resources
+        $modules = (Get-Content -Path $modulesPath | ConvertFrom-Yaml).properties.resources
+        $script:packages = $packages | Where-Object { $_.type -eq 'Microsoft.WinGet/Package' } 
+        $script:modules = $modules | Where-Object { $_.resource -eq 'PowerShellModule/PSModuleResource' } 
     }
     
     BeforeAll {
@@ -14,7 +16,7 @@ Describe "After installing dotfiles" {
     }
 
     Context "Apps" {
-        It "should have installed <_>" -Foreach $script:wingets.settings.id {
+        It "should have installed <_>" -Foreach $script:packages.properties.id {
             $id = $_
             $script:allApps | Where-Object { $_.Id -eq $id } | Should -Not -BeNullOrEmpty
         }
