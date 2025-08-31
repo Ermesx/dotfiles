@@ -1,4 +1,4 @@
-﻿#Requires -Modules Pester, Write-Pretty
+#Requires -Modules Pester, Write-Pretty
 
 Describe 'Write-Pretty' {
 

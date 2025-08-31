@@ -1,4 +1,4 @@
-﻿# Define global variables for static colors
+# Define global variables for static colors
 
 $Global:Colors = @{
     'Green' = @{ ForegroundColor = '0,255,0'; FallbackForegroundColor = 'Green' }
