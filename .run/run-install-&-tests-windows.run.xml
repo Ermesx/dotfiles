@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run-install-&amp;-tests-windows" type="PowerShellRunType" factoryName="PowerShell" scriptUrl="run-tests.ps1" executablePath="C:\Program Files\PowerShell\7\pwsh.exe">
-    <envs />
-    <method v="2" />
-  </configuration>
-</component>
