@@ -1,25 +1,16 @@
-﻿param (
-    [Parameter(Mandatory = $true)]
-    [System.IO.FileInfo]$InstallScript
+param (
+    [string]$BRANCH = 'develop'
 )
-
 $ErrorActionPreference = "Stop"
 
-if (-not $InstallScript.Exists) {
-    Write-Host "❌ The install script '$($InstallScript.FullName)' does not exist. Please provide a valid path." -ForegroundColor Red
-    Write-Host "Usage: .\run-tests.ps1 -InstallScript <path_to_install_script>" -ForegroundColor Yellow
-    exit 1
-}
+# Set environment variable to indicate we are in a Vagrant environment
+[System.Environment]::SetEnvironmentVariable("VAGRANT", "1", "User")
+$env:VAGRANT = "1"
 
-# Execute the installation script
-try {
-    Write-Host "🔧 Using installation script: $($InstallScript.FullName)" -ForegroundColor Cyan
-    & $InstallScript.FullName
-    Write-Host "✅ Installation script executed successfully." -ForegroundColor Green
-} catch {
-    Write-Host "❌ An error occurred while executing the installation script: $_" -ForegroundColor Red
-    exit 1
-}
+Write-Host "Install dotfiles:" -ForegroundColor Cyan
+$script = 'https://raw.githubusercontent.com/Ermesx/dotfiles/refs/heads/migration-to-chezmoi/install.ps1'
+Invoke-Expression "&{$(Invoke-RestMethod $script)} -BRANCH '$BRANCH'"
 
-pwsh -File "$PSScriptRoot\execute-pester.ps1" 
+Write-Host "🧪 Running tests..." -ForegroundColor Cyan
+pwsh -NoProfile -NoLogo -ExecutionPolicy Bypass -File "C:\vagrant\execute-pester.ps1" 
 

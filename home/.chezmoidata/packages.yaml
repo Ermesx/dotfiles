@@ -1,0 +1,29 @@
+packages:
+  linux:
+    brews:
+      # shell
+      - zsh
+      - oh-my-zsh
+      - zoxide
+      
+      # fzf  
+      - fzf
+      - fd
+      - ripgrep
+      - eza
+      - fzf-tab
+      
+      # git  
+      - git
+      - lazygit
+      - gitql
+      - onefetch
+      
+      # docker    
+      - docker
+    
+    casks:
+    
+    modules:
+      - zsh-autosuggestions
+      - zsh-syntax-highlighting

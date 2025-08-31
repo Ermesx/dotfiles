@@ -1,0 +1,23 @@
+{{- $email := "vagrant@local" }}
+{{- $name := "Vagrant User"  }}
+
+{{- if not (env "VAGRANT") }}
+    {{- $email := default (promptString "email") "john@doe.com" }}
+    {{- $name := default (promptString "name") "John Doe"  }}
+{{- end }}
+
+progress = true
+
+[data]
+    name = {{ $name | quote }}
+    email = {{ $email | quote }}
+
+[cd]
+    command = "pwsh"
+
+[diff]
+    exclude = ["scripts"]
+
+[interpreters.ps1]
+    command = "pwsh"
+    args = ["-NoLogo", "-NoProfile"]

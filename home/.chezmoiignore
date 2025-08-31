@@ -1,0 +1,9 @@
+conf/
+
+{{- if eq .chezmoi.os "windows" }}
+**/*.sh
+{{- else }}
+readonly_AppData/
+readonly_Documents/
+**/*.ps1
+{{- end -}}

@@ -1,0 +1,21 @@
+# Pofiles hashes
+{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.*")) }}
+# {{ include . | sha256sum -}}
+{{ end }}
+
+# Import installed modules
+{{ $modules := fromYaml (include (joinPath .chezmoi.sourceDir "dot_config/winget-dsc/modules.dsc.winget")) }}
+{{- range $modules.properties.resources }}
+{{- if eq .resource "PowerShellModule/PSModuleResource" -}}
+Import-Module -Name {{ .settings.Module_Name | squote }}
+{{ end -}}
+{{ end }}
+# Import Custom Modules
+Import-Module -Name 'Write-Pretty' -Force
+
+# Import all profile files
+{{- $base := print .chezmoi.sourceDir "/dot_profile/" }}
+{{- $target := print .chezmoi.config.destDir "/.profile/" }}
+{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.*")) }}
+. {{ replace $base $target . | replace ".tmpl" "" | squote -}}
+{{ end }}
