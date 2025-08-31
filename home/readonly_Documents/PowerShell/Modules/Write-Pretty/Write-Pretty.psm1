@@ -1,4 +1,4 @@
-﻿# Load all functions
+# Load all functions
 Get-ChildItem -Path "$PSScriptRoot\private" -Recurse -Filter *.ps1 | ForEach-Object { . $_.FullName }
 Get-ChildItem -Path "$PSScriptRoot\public" -Recurse -Filter *.ps1 | ForEach-Object { . $_.FullName }
 

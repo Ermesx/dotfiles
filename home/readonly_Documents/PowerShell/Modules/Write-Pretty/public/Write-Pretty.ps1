@@ -1,4 +1,4 @@
-﻿function Write-Pretty {
+function Write-Pretty {
 <#
 .SYNOPSIS
 Displays text with Markdown support and colors in the PowerShell console.

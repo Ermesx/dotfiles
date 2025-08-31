@@ -1,4 +1,4 @@
-﻿# git repository greeter
+# git repository greeter
 $Global:lastRepository = $null
 
 function Test-DirectoryForNewRepository {

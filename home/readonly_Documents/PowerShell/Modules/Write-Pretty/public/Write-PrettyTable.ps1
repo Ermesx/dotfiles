@@ -1,4 +1,4 @@
-﻿function Write-PrettyTable {
+function Write-PrettyTable {
 <#
 .SYNOPSIS
     Prints a formatted table to the console from an array of objects.

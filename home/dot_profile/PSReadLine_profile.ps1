@@ -1,4 +1,4 @@
-﻿# PSReadline configuration
+# PSReadline configuration
 Set-PSReadLineOption -EditMode Windows
 
 # Predictcion history
