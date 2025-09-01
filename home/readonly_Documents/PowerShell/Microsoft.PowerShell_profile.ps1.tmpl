@@ -4,11 +4,8 @@
 {{ end }}
 
 # Import installed modules
-{{ $modules := fromYaml (include (joinPath .chezmoi.sourceDir "dot_config/winget-dsc/modules.dsc.winget")) }}
-{{- range $modules.properties.resources }}
-{{- if eq .resource "PowerShellModule/PSModuleResource" -}}
-Import-Module -Name {{ .settings.Module_Name | squote }}
-{{ end -}}
+{{- range .packages.windows.modules }}
+Import-Module -Name {{ . | squote }}
 {{ end }}
 # Import Custom Modules
 Import-Module -Name 'Write-Pretty' -Force

@@ -1,4 +1,48 @@
 packages:
+  windows:
+    wingets:
+      # shell
+      - Microsoft.PowerShell
+      - JanDeDobbeleer.OhMyPosh
+      - Microsoft.WindowsTerminal
+
+      # fzf
+      - junegunn.fzf
+      - sharkdp.fd
+      - BurntSushi.ripgrep.MSVC
+      - eza-community.eza
+      - sharkdp.bat
+      - GnuWin32.File
+
+      # git
+      - Git.Git
+      - JesseDuffield.lazygit
+      - amrdeveloper.gitql
+      - o2sh.onefetch
+      - Git.GCM
+
+      # docker
+      - Docker.DockerDesktop
+
+      # chezmoi
+      - twpayne.chezmoi
+
+      # editors
+      - Microsoft.VisualStudioCode
+      - JetBrains.Rider
+
+      # browsers
+      - Google.Chrome
+
+    modules:
+      - Microsoft.WinGet.Client
+      - Terminal-Icons
+      - PSfzf
+      - posh-git
+      - DockerCompletion
+      - powershell-yaml
+      - Pester
+  
   linux:
     brews:
       # shell

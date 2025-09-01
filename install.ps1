@@ -1,6 +1,5 @@
 [CmdletBinding()]
 param (
-    [string]$BRANCH = 'develop',
     [string]$GITHUB_USERNAME = 'Ermesx'
 )
 
@@ -15,25 +14,14 @@ function Download-File {
     Invoke-RestMethod -Uri $Url -OutFile $Destination
 }
 
-# Resrouces
-$GITHUB_URL = "https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/$BRANCH/home/dot_config/winget-dsc"
-$wingets = @('packages.dsc.winget', 'modules.dsc.winget', 'windows.dsc.winget')
-$dest = Join-Path $HOME ".config\winget-dsc"
+$wingets = @('twpayne.chezmoi', 'microsoft.dsc')
 
 if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
-    # Create destination directory if it doesn't exist
-    if (-Not (Test-Path -Path $dest)) {
-        New-Item -ItemType Directory -Path $dest | Out-Null
-    }
-
-    # Download winget-dsc configuration files
-    $wingets | Foreach-Object { Download-File -Url "$GITHUB_URL/$_" -Destination (Join-Path $dest $_) }
-
-    # Install packages
-    Write-Host "► Installing packages" -ForegroundColor Cyan
-    winget configure --enable
+    
+    # Install packages    
     $wingets | Foreach-Object {
-        winget configure -f (Join-Path $dest $_) --accept-configuration-agreements --disable-interactivity --suppress-initial-details
+        Write-Host "► Installing $_" -ForegroundColor Cyan
+        winget install $_ --accept-source-agreements --accept-source-agreements --disable-interactivity | Out-Null
     }
 
     # Refresh PATH to include user PATH additions without needing to restart the shell
@@ -43,9 +31,9 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     $env:PATH = "$userPath;$machinePath"
 
     # Trust PSGallery repository
-    if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
-        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-    }
+#    if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
+#        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+#    }
     
     # Install chezmoi and apply dotfiles
     chezmoi init --apply $GITHUB_USERNAME

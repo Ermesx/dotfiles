@@ -1,0 +1,4 @@
+# Install packagess and configure system
+
+Write-Host "► Running DSC configuration" -ForegroundColor Cyan
+dsc config set -i {{ includeTemplate "config.dsc.yaml.tmpl" | squote }}

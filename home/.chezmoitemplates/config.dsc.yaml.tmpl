@@ -1,0 +1,56 @@
+$schema: https://aka.ms/dsc/schemas/v3/bundled/config/document.json
+metadata:
+  winget:
+    processor:
+      identifier: dscv3
+resources:
+{{- range .packages.windows.wingets }}
+  - name: winget_{{ .  }}
+    type: Microsoft.WinGet/Package
+    metadata:
+      description: "Install  {{ . }}"
+    properties:
+      id: {{ .  }}
+      source: winget
+{{ end -}}
+
+{{- range .packages.windows.modules }}
+  - name: module_{{ . }}
+    type: AnyPackageDsc/Package
+    metadata:
+      description: "Install {{ . }} module"
+    properties:
+      Name: {{ . }}
+      Provider: AnyPackage.PSResourceGet\PSResourceGet
+      Source: PSGallery
+{{ end }}
+  - name: win_EnableDeveloperMode
+    type: Microsoft.Windows.Settings/WindowsSettings
+    metadata:
+      description: "Enable Developer Mode"
+    properties:
+      DeveloperMode: true
+
+  - name: win_Taskbar
+    type: Microsoft.Windows.Developer/Taskbar
+    metadata:
+      description: "Modify taskbar settings"
+    properties:
+      SearchBoxMode: ShowIconAndLabel
+      TaskViewButton: Show
+      WidgetsButton: Hide
+      RestartExplorer: True
+
+  - name: win_WindowsExplorer
+    type: Microsoft.Windows.Developer/WindowsExplorer
+    metadata:
+      description: "Modify Windows Explorer settings"
+    properties:
+      FileExtensions: Show
+      HiddenFiles: Show
+      RestartExplorer: True
+
+  - name: win_ShowSecondsInClock
+    type: Microsoft.Windows.Developer/ShowSecondsInClock
+    metadata:
+      description: "Show seconds in clock"
