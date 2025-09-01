@@ -1,3 +1,9 @@
+# Refresh PATH to include user PATH additions without needing to restart the shell
+Write-Host "► Refreshing PATH" -ForegroundColor Cyan
+$userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+$machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+$env:PATH = "$userPath;$machinePath"
+
 # Install fonts
 Add-Type -AssemblyName PresentationCore
 $fontsSource = ([Windows.Media.Fonts]::SystemFontFamilies.Source)

@@ -10,4 +10,5 @@ Install-Module Microsoft.Windows.Settings -AllowPrerelease
 Install-Module Microsoft.Windows.Developer -AllowPrerelease -AllowClobber
 
 Write-Host "► Running DSC configuration" -ForegroundColor Cyan
-dsc config set -o yaml -i {{ includeTemplate "config.dsc.yaml.tmpl" . | squote }}
+$resultPath = Join-Path -Path $HOME -ChildPath '.local\dsc\result.yaml'
+dsc config set -o yaml -i {{ includeTemplate "config.dsc.yaml.tmpl" . | squote }} | Set-Content -Path $resultPath -Force
