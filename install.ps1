@@ -20,7 +20,7 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     
     #Self upgrade winget
     Write-Host "► Upgrading winget" -ForegroundColor Cyan
-    winget upgrade winget | Out-Null
+    winget upgrade winget --accept-source-agreements --accept-source-agreements --disable-interactivity | Out-Null
     
     # Install packages    
     $wingets | Foreach-Object {
