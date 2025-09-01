@@ -18,6 +18,10 @@ $wingets = @('twpayne.chezmoi', 'microsoft.dsc', 'microsoft.powershell')
 
 if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     
+    #Self upgrade winget
+    Write-Host "► Upgrading winget" -ForegroundColor Cyan
+    winget upgrade winget
+    
     # Install packages    
     $wingets | Foreach-Object {
         Write-Host "► Installing $_" -ForegroundColor Cyan
