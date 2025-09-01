@@ -27,6 +27,11 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
         Write-Host "► Installing $_" -ForegroundColor Cyan
         winget install $_ --accept-source-agreements --accept-source-agreements --disable-interactivity | Out-Null
     }
+
+    # Refresh PATH to include user PATH additions without needing to restart the shell
+    $userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+    $machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+    $env:PATH = "$userPath;$machinePath"
     
     # Install chezmoi and apply dotfiles
     chezmoi init --apply $GITHUB_USERNAME
