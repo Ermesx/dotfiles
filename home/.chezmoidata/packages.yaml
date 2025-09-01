@@ -5,6 +5,7 @@ packages:
       - Microsoft.PowerShell
       - JanDeDobbeleer.OhMyPosh
       - Microsoft.WindowsTerminal
+      - ajeetdsouza.zoxide
 
       # fzf
       - junegunn.fzf

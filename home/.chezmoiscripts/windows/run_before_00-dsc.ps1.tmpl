@@ -1,4 +1,9 @@
 # Install packagess and configure system
 
+Write-Host "► Installing Requred DSC Resources" -ForegroundColor Cyan
+Install-Module PowerShellModule
+Install-Module Microsoft.Windows.Settings -AllowPrerelease
+Install-Module Microsoft.Windows.Developer -AllowPrerelease -AllowClobber
+
 Write-Host "► Running DSC configuration" -ForegroundColor Cyan
-dsc config set -i {{ includeTemplate "config.dsc.yaml.tmpl" | squote }}
+dsc config set -o yaml -i {{ includeTemplate "config.dsc.yaml.tmpl" . | squote }}

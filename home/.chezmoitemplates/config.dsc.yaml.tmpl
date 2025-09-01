@@ -16,13 +16,12 @@ resources:
 
 {{- range .packages.windows.modules }}
   - name: module_{{ . }}
-    type: AnyPackageDsc/Package
+    type: PowerShellModule/PSModuleResource
     metadata:
       description: "Install {{ . }} module"
     properties:
-      Name: {{ . }}
-      Provider: AnyPackage.PSResourceGet\PSResourceGet
-      Source: PSGallery
+      Module_Name: {{ . }}
+      Ensure: Present
 {{ end }}
   - name: win_EnableDeveloperMode
     type: Microsoft.Windows.Settings/WindowsSettings
@@ -30,16 +29,6 @@ resources:
       description: "Enable Developer Mode"
     properties:
       DeveloperMode: true
-
-  - name: win_Taskbar
-    type: Microsoft.Windows.Developer/Taskbar
-    metadata:
-      description: "Modify taskbar settings"
-    properties:
-      SearchBoxMode: ShowIconAndLabel
-      TaskViewButton: Show
-      WidgetsButton: Hide
-      RestartExplorer: True
 
   - name: win_WindowsExplorer
     type: Microsoft.Windows.Developer/WindowsExplorer
@@ -54,3 +43,13 @@ resources:
     type: Microsoft.Windows.Developer/ShowSecondsInClock
     metadata:
       description: "Show seconds in clock"
+      
+{{/*  - name: win_Taskbar*/}}
+{{/*    type: Microsoft.Windows.Developer/Taskbar*/}}
+{{/*    metadata:*/}}
+{{/*      description: "Modify taskbar settings"*/}}
+{{/*    properties:*/}}
+{{/*      SearchBoxMode: ShowIconAndLabel*/}}
+{{/*      TaskViewButton: Show*/}}
+{{/*      WidgetsButton: Hide*/}}
+{{/*      RestartExplorer: True*/}}

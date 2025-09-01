@@ -14,7 +14,7 @@ function Download-File {
     Invoke-RestMethod -Uri $Url -OutFile $Destination
 }
 
-$wingets = @('twpayne.chezmoi', 'microsoft.dsc')
+$wingets = @('twpayne.chezmoi', 'microsoft.dsc', 'microsoft.powershell')
 
 if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     
@@ -29,11 +29,6 @@ if (Get-Command -Name winget -ErrorAction SilentlyContinue) {
     $userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
     $machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
     $env:PATH = "$userPath;$machinePath"
-
-    # Trust PSGallery repository
-#    if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
-#        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-#    }
     
     # Install chezmoi and apply dotfiles
     chezmoi init --apply $GITHUB_USERNAME

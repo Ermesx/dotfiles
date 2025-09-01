@@ -3,9 +3,12 @@ param (
 )
 $ErrorActionPreference = "Stop"
 
-# Set environment variable to indicate we are in a Vagrant environment
+# Set environment variable to indicate we are in a Vagrant environment and update PATH
 [System.Environment]::SetEnvironmentVariable("VAGRANT", "1", "User")
-$env:VAGRANT = "1"
+$userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+$machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+$env:PATH = "$userPath;$machinePath"
+
 
 Write-Host "Install dotfiles:" -ForegroundColor Cyan
 $script = "https://raw.githubusercontent.com/Ermesx/dotfiles/refs/heads/$BRANCH/install.ps1"
