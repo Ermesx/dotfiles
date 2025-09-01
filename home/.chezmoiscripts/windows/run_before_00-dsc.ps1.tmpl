@@ -10,5 +10,7 @@ Install-Module Microsoft.Windows.Settings -AllowPrerelease
 Install-Module Microsoft.Windows.Developer -AllowPrerelease -AllowClobber
 
 Write-Host "► Running DSC configuration" -ForegroundColor Cyan
-$resultPath = Join-Path -Path $HOME -ChildPath '.local\dsc\result.yaml'
+$timestamp = Get-Date -Format 'dd-MMM-yyyy_HH-mm'
+$fileName = "config.dsc.result_$timestamp.yaml"
+$resultPath = Join-Path -Path $env:TEMP -ChildPath $fileName
 dsc config set -o yaml -i {{ includeTemplate "config.dsc.yaml.tmpl" . | squote }} | Set-Content -Path $resultPath -Force
