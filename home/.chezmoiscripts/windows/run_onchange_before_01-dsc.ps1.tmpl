@@ -1,0 +1,5 @@
+Write-Host "► Running DSC configuration" -ForegroundColor Cyan
+$timestamp = Get-Date -Format 'dd-MMM-yyyy_HH-mm'
+$fileName = "config.dsc.result_$timestamp.yaml"
+$resultPath = Join-Path -Path $env:TEMP -ChildPath $fileName
+dsc config set -o yaml -i {{ includeTemplate "config.dsc.yaml.tmpl" . | squote }} | Set-Content -Path $resultPath -Force

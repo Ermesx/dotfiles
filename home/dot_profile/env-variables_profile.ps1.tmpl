@@ -8,3 +8,11 @@ if ($env:{{ .var }} -notlike "*{{ .value }}*") {
 }
 {{ end -}}
 {{ end -}}
+
+# Initialize the ripgrep config env variable
+$env:RIPGREP_CONFIG_PATH = Join-Path $HOME ".config\.rgrc"
+
+# Initialize the fzf config env variables
+$env:FZF_DEFAULT_OPTS_FILE = Join-Path $HOME ".config\fzf\.fzfrc"
+$env:FZF_DEFAULT_COMMAND = Get-Content -Path (Join-Path $HOME ".config\fzf\.fzfdc")
+$env:_PSFZF_FZF_DEFAULT_OPTS = Get-Content -Path (Join-Path $HOME ".config\fzf\.psfzfrc") 
