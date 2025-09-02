@@ -5,6 +5,16 @@ This repository contains dotfiles and automation scripts to deliver a repeatable
 Linux using chezmoi (templated dotfiles) and WinGet DSC (declarative app/module state on Windows). All configuration is
 template-driven so the same source adapts per OS and host.
 
+Installation
+---------------------------------------------------------------
+```powershell
+# Windows 
+iex (irm 'https://getdotfiles.short.gy/install.ps1' | Out-String)
+```
+```zsh
+# Linux / macOS
+sh -c "$(curl -fsLS https://getdotfiles.short.gy/install.sh)"
+```
 
 General Architecture
 ---------------------------------------------------------------

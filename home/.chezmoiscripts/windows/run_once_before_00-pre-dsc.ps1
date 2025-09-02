@@ -1,6 +1,6 @@
-# Install packagess and configure system
+# Trust PSGallery and install required DSC resources
 if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
-    Write-Host "► Setting PSGallery Trusted" -ForegroundColor Cyan
+    Write-Host "► Trust PSGallery" -ForegroundColor Cyan
     Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 }
 
