@@ -8,7 +8,7 @@ function Download-NerdFont {
 
     $finalVersion = ''
     if ($Version -eq 'latest') {
-        $respone = Invoke-WebRequest -Uri "$fontsUri/$Version" -MaximumRedirection 0 -ErrorAction SilentlyContinue
+        $respone = Invoke-WebRequest -Uri "$fontsUri/$Version" -ErrorAction SilentlyContinue
         $finalVersion = Split-Path -Path $WebResponse.Headers['Location'] -Leaf
     }
     else {
