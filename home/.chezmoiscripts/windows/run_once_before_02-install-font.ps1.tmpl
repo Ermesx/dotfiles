@@ -1,16 +1,50 @@
-# Refresh PATH to include user PATH additions without needing to restart the shell
-$userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
-$machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
-$env:PATH = "$userPath;$machinePath"
+function Download-NerdFont {
+    param (
+        [string]$FontName,
+        [string]$Version = 'latest'
+    )
 
-# Install fonts
+    $fontsUri = 'https://github.com/ryanoasis/nerd-fonts/releases'
+
+    $finalVersion = ''
+    if ($Version -eq 'latest') {
+        $respone = Invoke-WebRequest -Uri "$fontsUri/$Version" -MaximumRedirection 0 -ErrorAction SilentlyContinue
+        $finalVersion = Split-Path -Path $WebResponse.Headers['Location'] -Leaf
+    }
+    else {
+        $finalVersion = "tag/v$Version"
+    }
+
+    $uri = "$fontsUri/download/$finalVersion/$FontName.zip"
+    $tempFile = Join-Path $env:TEMP "$FontName.zip"
+    try {
+        Invoke-WebRequest -Uri $uri -OutFile $tempFile
+        Expand-Archive $tempFile
+    }
+    catch {
+        Write-Host "Fonts $FontName not exists with version $finalVersion" -ForegroundColor Red
+    }
+
+    return Join-Path $env:TEMP $FontName
+}
+
 Add-Type -AssemblyName PresentationCore
 $fontsSource = ([Windows.Media.Fonts]::SystemFontFamilies.Source)
 
 if ($fontsSource -notcontains {{ .font.exactName | squote }}) {
     Write-Host "► Installing fonts" -ForegroundColor Cyan
-    oh-my-posh font install {{ .font.name | squote }}
+    
+    $fontRegPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+    $fontsWinPath = "$env:WINDIR\Fonts"
+    $fontPath = Download-NerdFont -FontName {{ .font.name | squote }}
+    
+    Get-ChildItem -Path $fontPath -Include '*.ttf', '*.otf', '*.fon', '*.fnt' -Recurse | ForEach-Object {
+        if (-not (Test-Path "$fontsWinPath\$($_.Name)")) {
+            Copy-Item $_ $fontsWinPath -Force
+            New-ItemProperty -Path $fontRegPath -Name $_.Name -Value $_.Name -PropertyType String | Out-Null
+        }
+    }
 }
 
-# Enable auto upgrade for oh-my-posh
-oh-my-posh enable upgrade
+
+
