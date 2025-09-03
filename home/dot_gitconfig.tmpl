@@ -3,6 +3,7 @@
     email = {{ .email | quote }}
 [core]
     autocrlf = True
+    pager = delta
 [color "status"]
     changed = yellow
     untracked = cyan
@@ -14,8 +15,17 @@
 [credential]
     helper =
     helper = {{ .chezmoi.config.destDir -}}/AppData/Local/Programs/Git\\ Credential\\ Manager/git-credential-manager.exe
+[interactive]
+    diffFilter = delta --color-only
+[merge]
+    conflictStyle = zdiff3
 {{/* Only for tests proposes */}}
 {{- if env "VAGRANT" }}
 [safe]
     directory = %(prefix)///vboxsvr/Users_vagrant_.local_share_chezmoi/
 {{ end -}}
+
+[delta]
+	navigate = false
+	side-by-side = true
+	true-color = always

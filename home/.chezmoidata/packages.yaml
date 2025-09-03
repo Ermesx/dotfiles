@@ -17,10 +17,12 @@ packages:
 
       # git
       - Git.Git
+      - Git.GCM
+      - o2sh.onefetch
+      - dandavison.delta
+      - jftuga.less
       - JesseDuffield.lazygit
       - amrdeveloper.gitql
-      - o2sh.onefetch
-      - Git.GCM
 
       # docker
       - Docker.DockerDesktop
