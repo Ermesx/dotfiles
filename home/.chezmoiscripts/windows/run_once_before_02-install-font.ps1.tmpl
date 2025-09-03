@@ -3,23 +3,20 @@ function Download-NerdFont {
         [string]$FontName,
         [string]$Version = 'latest'
     )
-
-    $fontsUri = 'https://github.com/ryanoasis/nerd-fonts/releases'
-
-    $finalVersion = ''
+    $repo = 'ryanoasis/nerd-fonts'
+    
+    $tag = $Version
     if ($Version -eq 'latest') {
-        $respone = Invoke-WebRequest -Uri "$fontsUri/$Version" -ErrorAction SilentlyContinue
-        $finalVersion = Split-Path -Path $WebResponse.Headers['Location'] -Leaf
+        $fontsUri = "https://api.github.com/repos/$repo/releases"
+        $tag = (Invoke-WebRequest $fontsUri | ConvertFrom-Json)[0].tag_name
     }
-    else {
-        $finalVersion = "tag/v$Version"
-    }
-
-    $uri = "$fontsUri/download/$finalVersion/$FontName.zip"
+    
+    $uri = "https://github.com/$repo/releases/download/$tag/$FontName.zip"
     $tempFile = Join-Path $env:TEMP "$FontName.zip"
+    $tempDir = Join-Path $env:TEMP $FontName
     try {
-        Invoke-WebRequest -Uri $uri -OutFile $tempFile
-        Expand-Archive $tempFile
+        Invoke-WebRequest $uri -OutFile $tempFile
+        Expand-Archive $tempFile -Destination $tempDir -Force
     }
     catch {
         Write-Host "Fonts $FontName not exists with version $finalVersion" -ForegroundColor Red
