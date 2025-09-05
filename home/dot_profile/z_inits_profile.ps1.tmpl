@@ -1,9 +1,9 @@
 # starship
 function Invoke-Starship-TransientFunction {
     $time = starship module time
-    $os =   starship module os
+    $shell = starship module shell
     $char = starship module character
-    return "$time$os$char"
+    return "$shell$time $char"
 }
 
 Invoke-Expression (starship init powershell | Out-String)
