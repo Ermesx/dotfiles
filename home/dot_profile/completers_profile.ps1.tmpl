@@ -13,6 +13,9 @@ Invoke-Expression (dsc completer powershell | Out-String)
 # delta 
 Invoke-Expression (delta --generate-completion powershell | Out-String)
 
+#starship
+Invoke-Expression (starship completions power-shell | Out-String)
+
 # chezmoi
 {{ completion "powershell" }}
 

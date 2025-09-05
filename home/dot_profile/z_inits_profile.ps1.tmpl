@@ -1,0 +1,13 @@
+# starship
+function Invoke-Starship-TransientFunction {
+    $time = starship module time
+    $os =   starship module os
+    $char = starship module character
+    return "$time$os$char"
+}
+
+Invoke-Expression (starship init powershell | Out-String)
+Enable-TransientPrompt
+
+# zoxide
+Invoke-Expression (zoxide init powershell | Out-String)
