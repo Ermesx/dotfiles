@@ -19,7 +19,7 @@ function Download-NerdFont {
         Expand-Archive $tempFile -Destination $tempDir -Force
     }
     catch {
-        Write-Host "Fonts $FontName not exists with version $finalVersion" -ForegroundColor Red
+        Write-Host "Font $FontName does not exist with version $finalVersion" -ForegroundColor Red
     }
 
     return Join-Path $env:TEMP $FontName
