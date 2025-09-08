@@ -1,0 +1,147 @@
+format = """
+$os\
+$username\
+$hostname\
+$localip\
+$shlvl\
+$singularity\
+$kubernetes\
+$directory\
+$fill\
+$vcsh\
+$fossil_branch\
+$fossil_metrics\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$hg_branch\
+$pijul_channel\
+$docker_context\
+$package\
+$c\
+$cmake\
+$cobol\
+$daml\
+$dart\
+$deno\
+$dotnet\
+$elixir\
+$elm\
+$erlang\
+$fennel\
+$gleam\
+$golang\
+$guix_shell\
+$haskell\
+$haxe\
+$helm\
+$java\
+$julia\
+$kotlin\
+$gradle\
+$lua\
+$nim\
+$nodejs\
+$ocaml\
+$opa\
+$perl\
+$php\
+$pulumi\
+$purescript\
+$python\
+$quarto\
+$raku\
+$rlang\
+$red\
+$ruby\
+$rust\
+$scala\
+$solidity\
+$swift\
+$terraform\
+$typst\
+$vlang\
+$vagrant\
+$zig\
+$buf\
+$nix_shell\
+$conda\
+$meson\
+$spack\
+$memory_usage\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$nats\
+$direnv\
+$env_var\
+$mise\
+$crystal\
+$custom\
+$sudo\
+$cmd_duration\
+$shell\
+$time\
+$line_break\
+$jobs\
+$battery\
+$status\
+$container\
+$netns\
+$character"""
+
+continuation_prompt = '[>>](bright-black) '
+
+[character]
+success_symbol = '[❯](bold green)'
+error_symbol = '[](bold red)'
+
+[username]
+style_root = 'red bold underline'
+style_user = 'yellow bold'
+show_always = true
+{{- if eq .chezmoi.os "windows" }}
+aliases = { 'Administrator' = {{ env "USERNAME" | squote }} }
+{{- end }}
+
+[directory]
+style = 'bold #7aa2f7'
+truncate_to_repo = false
+truncation_symbol = '...\'
+repo_root_style = 'bold yellow'
+
+[git_branch]
+format = '[$symbol$branch(:$remote_branch)]($style) '
+symbol = ' '
+style = 'bold #ff9e64'
+
+[git_metrics]
+disabled = false
+format = '[\[[+$added]($added_style)/[-$deleted]($deleted_style)\]](bright-black) '
+
+[git_status]
+ahead = '⇡${count}'
+diverged = '⇕⇡${ahead_count}⇣${behind_count}'
+behind = '⇣${count}'
+
+[dotnet]
+symbol = '󰪮 '
+version_format = 'v${major}.${minor}'
+style = 'bold yellow'
+
+[time]
+disabled = false
+format = '[$time]($style)'
+style = 'bold bright-black'
+
+[fill]
+symbol = ' '
+
+[shell]
+format = '[$indicator]($style)'
+disabled = false
+powershell_indicator = ' '
+style = 'bold bright-black'

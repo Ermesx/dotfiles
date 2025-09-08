@@ -3,7 +3,7 @@ packages:
     wingets:
       # shell
       - Microsoft.PowerShell
-      - JanDeDobbeleer.OhMyPosh
+      - Starship.Starship
       - Microsoft.WindowsTerminal
       - ajeetdsouza.zoxide
 
