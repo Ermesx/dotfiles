@@ -1,0 +1,29 @@
+Add-Type -AssemblyName PresentationCore
+$fontsSource = ([Windows.Media.Fonts]::SystemFontFamilies.Source)
+
+if ($fontsSource -notcontains {{ .font.exactName | squote }}) {
+    Write-Host "► Installing fonts" -ForegroundColor Cyan
+
+    {{- $fontFile := printf "%s.zip" .font.name }}
+
+    $uri = {{ gitHubLatestReleaseAssetURL "ryanoasis/nerd-fonts" $fontFile | squote }}
+    if (-not $uri) {
+        throw "Could not find the download URL for the font {{ .font.name }}."
+    }
+
+    $fontRegPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+    $fontsWinPath = "$env:WINDIR\Fonts"
+    $fontFile = Join-Path $env:TEMP {{ $fontFile | squote }}
+    $fontPath = Join-Path $env:TEMP {{ .font.name | squote }}    
+
+    Invoke-WebRequest $uri -OutFile $fontFile
+    Expand-Archive $fontFile -Destination $tempDir -Force
+    
+    Get-ChildItem -Path $fontPath -Include '*.ttf', '*.otf', '*.fon', '*.fnt' -Recurse | ForEach-Object {
+        if (-not (Test-Path "$fontsWinPath\$($_.Name)")) {
+            Copy-Item $_ $fontsWinPath -Force
+            New-ItemProperty -Path $fontRegPath -Name $_.Name -Value $_.Name -PropertyType String | Out-Null
+        }
+    }
+}
+

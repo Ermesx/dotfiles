@@ -1,2 +1,3 @@
---style=numbers,changes,header  
+--style=numbers,changes,header 
+--paging=never 
 --color=always
