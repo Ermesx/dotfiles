@@ -17,7 +17,7 @@ if ($fontsSource -notcontains {{ .font.exactName | squote }}) {
     $fontPath = Join-Path $env:TEMP {{ .font.name | squote }}    
 
     Invoke-WebRequest $uri -OutFile $fontFile
-    Expand-Archive $fontFile -Destination $tempDir -Force
+    Expand-Archive $fontFile -Destination $fontPath -Force
     
     Get-ChildItem -Path $fontPath -Include '*.ttf', '*.otf', '*.fon', '*.fnt' -Recurse | ForEach-Object {
         if (-not (Test-Path "$fontsWinPath\$($_.Name)")) {
