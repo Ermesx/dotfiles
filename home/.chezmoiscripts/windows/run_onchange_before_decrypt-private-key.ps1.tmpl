@@ -1,0 +1,5 @@
+# Decrypt the private key if it doesn't already exist for chezmoi
+if (-not (Test-Path "$HOME/.config/chezmoi/key.txt")) {
+    New-Item -ItemType Directory -Force -Path "$HOME/.config/chezmoi" | Out-Null
+    chezmoi age decrypt --output "$HOME/.config/chezmoi/key.txt" --passphrase "{{ .chezmoi.sourceDir }}/key.txt.age"
+}

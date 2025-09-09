@@ -1,3 +1,4 @@
+key.txt.age
 conf/
 
 {{- if eq .chezmoi.os "windows" }}
@@ -7,3 +8,4 @@ readonly_AppData/
 readonly_Documents/
 **/*.ps1
 {{- end -}}
+
