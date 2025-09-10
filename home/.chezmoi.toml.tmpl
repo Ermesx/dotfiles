@@ -1,23 +1,15 @@
-{{- $email := "vagrant@local" }}
-{{- $name := "Vagrant User"  }}
-
-{{- if not (env "VAGRANT") }}
-    {{- $email := default (promptString "email") "john@doe.com" }}
-    {{- $name := default (promptString "name") "John Doe"  }}
-{{- end }}
-
 progress = true
 encryption = "age"
 
 [age]
-identity = "~/.config/chezmoi/key.txt"
-recipient = "age1xvez3je4mhx7xswxu6gpalmrxq88uktcncthtqs8m7zcjgnjd4qsq05uw8"
+    identity = "~/.config/chezmoi/key.txt"
+    recipient = "age1xvez3je4mhx7xswxu6gpalmrxq88uktcncthtqs8m7zcjgnjd4qsq05uw8"
 
+# User & email are encrypted for privacy
 [data]
-    name = {{ $name | quote }}
-    email = {{ $email | quote }}
+{{ join .chezmoi.sourceDir ".encrypted-data.toml.age" | include | decrypt | indent 4 }}
 
-{{- if eq .chezmoi.os "windows" }}
+{{ if eq .chezmoi.os "windows" -}}
 [cd]
     command = "pwsh"
 {{- end }}

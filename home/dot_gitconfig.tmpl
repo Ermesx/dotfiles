@@ -1,8 +1,14 @@
 [user]
-    name = {{ .name | quote }}
-    email = {{ .email | quote }}
+    name = {{ .name }}
+    email = {{ .email }}
+    signingkey = {{ join .chezmoi.sourceDir "dot_ssh/encrypted_id_ed25519.pub.age" | include | decrypt | trim }}
+[gpg]
+    format = ssh
+{{- if eq .chezmoi.os "windows" }}
+[gpg "ssh"]
+    program = C:\\Windows\\System32\\OpenSSH\\ssh-keygen.exe
+{{- end }}
 [core]
-    autocrlf = True
     pager = delta
 [color "status"]
     changed = yellow
@@ -12,20 +18,22 @@
     commit-amend = commit --amend --no-edit
 [push]
     default = matching
-[credential]
-    helper =
-    helper = {{ .chezmoi.config.destDir -}}/AppData/Local/Programs/Git\\ Credential\\ Manager/git-credential-manager.exe
+	autoSetupRemote = true
+[commit]
+    gpgsign = true
+[tag]
+    gpgSign = true
 [interactive]
     diffFilter = delta --color-only
 [merge]
     conflictStyle = zdiff3
 {{/* Only for tests proposes */}}
-{{- if env "VAGRANT" }}
+{{- if env "VAGRANT" -}}
 [safe]
     directory = %(prefix)///vboxsvr/Users_vagrant_.local_share_chezmoi/
 {{ end -}}
 
 [delta]
-	navigate = false
-	side-by-side = true
-	true-color = always
+    navigate = false
+    side-by-side = true
+    true-color = always
