@@ -16,6 +16,8 @@
 [alias]
     st = status
     commit-amend = commit --amend --no-edit
+[rebase]
+    autosquash = true
 [push]
     default = matching
 	autoSetupRemote = true
@@ -26,9 +28,13 @@
 [interactive]
     diffFilter = delta --color-only
 [merge]
-    conflictStyle = zdiff3
-{{/* Only for tests proposes */}}
-{{- if env "VAGRANT" -}}
+    tool = vscode
+[mergetool "vscode"]
+    cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
+    trustExitCode = false
+[mergetool]
+    prompt = false
+{{- if env "VAGRANT" -}}{{/* Only for tests proposes */}}
 [safe]
     directory = %(prefix)///vboxsvr/Users_vagrant_.local_share_chezmoi/
 {{ end -}}
