@@ -1,5 +1,6 @@
 packages:
   windows:
+    wsl: Ubuntu-24.04
     wingets:
       # shell
       - Microsoft.PowerShell

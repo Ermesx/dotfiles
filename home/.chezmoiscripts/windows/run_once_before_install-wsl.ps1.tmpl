@@ -1,0 +1,10 @@
+$distro = {{ .packages.windows.wsl | squote }}
+Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
+
+# Update WSL first time
+wsl.exe --update | Out-Null
+
+# Install WSL distro if not already installed
+if (-not ((wsl -l -q) -contains $distro)) {
+    wsl --install -d $distro | Out-Null
+}
