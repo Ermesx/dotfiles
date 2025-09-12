@@ -21,7 +21,7 @@ Set-PSReadLineKeyHandler -Key Ctrl+Spacebar -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function ForwardWord 
 
 # Capitalize, uppercase, and lowercase words
-Set-PSReadLineKeyHandler -Key Alt+c -Function CapitalizeWord
+Set-PSReadLineKeyHandler -Key Ctrl+Alt+c -Function CapitalizeWord
 Set-PSReadLineKeyHandler -Key Alt+u -Function UpcaseWord
 Set-PSReadLineKeyHandler -Key Alt+l -Function DowncaseWord
 
@@ -130,7 +130,7 @@ Set-PSReadLineKeyHandler -Key '"',"'" `
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert($quote)
 }
 
-Set-PSReadLineKeyHandler -Key '(','{','[' `
+Set-PSReadLineKeyHandler -Key '(', '{', '[' `
                          -BriefDescription InsertPairedBraces `
                          -LongDescription "Insert matching braces" `
                          -ScriptBlock {
@@ -219,7 +219,7 @@ Set-PSReadLineKeyHandler -Key Backspace `
     }
 }
 
-# Each time you press Alt+', this key handler will change the token
+# Each time you press Alt+' , this key handler will change the token
 # under or before the cursor.  It will cycle through single quotes, double quotes, or
 # no quotes each time it is invoked.
 Set-PSReadLineKeyHandler -Key "Alt+'" `

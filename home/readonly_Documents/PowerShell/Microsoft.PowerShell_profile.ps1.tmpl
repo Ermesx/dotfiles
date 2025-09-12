@@ -1,11 +1,11 @@
 # Pofiles hashes
-{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.*")) }}
+{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.ps1*")) }}
 # {{ include . | sha256sum -}}
 {{ end }}
 
 # Import installed modules
 {{- range .packages.windows.modules }}
-Import-Module -Name {{ . | squote }}
+Import-Module -Name {{ . | squote -}}
 {{ end }}
 # Import Custom Modules
 Import-Module -Name 'Write-Pretty' -Force
@@ -13,6 +13,6 @@ Import-Module -Name 'Write-Pretty' -Force
 # Import all profile files
 {{- $base := print .chezmoi.sourceDir "/dot_profile/" }}
 {{- $target := print .chezmoi.config.destDir "/.profile/" }}
-{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.*")) }}
+{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.ps1*")) }}
 . {{ replace $base $target . | replace ".tmpl" "" | squote -}}
 {{ end }}

@@ -1,13 +1,5 @@
-# Add Environment Variables
-{{- range .env.windows }}
-{{- if eq .action "set" }}
-$env:{{ .var }} = {{ .value | squote }}
-{{ else if eq .action "extend" }} 
-if ($env:{{ .var }} -notlike "*{{ .value }}*") {
-    $env:{{ .var }} = "$env:{{ .var }};{{ .value }}"
-}
-{{ end -}}
-{{ end -}}
+# Add GnuWin32 to the PATH for Windows
+$env:PATH = "$env:PATH;$env:ProgramFiles(x86)\GnuWin32\bin"
 
 # Initialize the ripgrep config env variable
 $env:RIPGREP_CONFIG_PATH = Join-Path $HOME ".config\.rgrc"
@@ -15,4 +7,4 @@ $env:RIPGREP_CONFIG_PATH = Join-Path $HOME ".config\.rgrc"
 # Initialize the fzf config env variables
 $env:FZF_DEFAULT_OPTS_FILE = Join-Path $HOME ".config\fzf\.fzfrc"
 $env:FZF_DEFAULT_COMMAND = Get-Content -Path (Join-Path $HOME ".config\fzf\.fzfdc")
-$env:_PSFZF_FZF_DEFAULT_OPTS = Get-Content -Path (Join-Path $HOME ".config\fzf\.psfzfrc") 
+$env:_PSFZF_FZF_DEFAULT_OPTS = Get-Content -Path (Join-Path $HOME ".config\fzf\.psfzfrc")
