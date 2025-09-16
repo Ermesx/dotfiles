@@ -1,13 +1,3 @@
-function Get-FlatContent {
-    param (
-        [string]$Path
-    )
-    $Path = Join-Path $HOME $Path
-    if (Test-Path -Path $Path) {
-        return ((Get-Content -Path $Path -Raw) -replace "[\r\n]+", " ").Trim()
-    }
-}
-
 # Add GnuWin32 to the PATH for Windows
 $env:PATH = "$env:PATH;C:\Program Files (x86)\GnuWin32\bin"
 
