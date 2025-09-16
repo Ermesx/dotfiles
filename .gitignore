@@ -20,6 +20,8 @@
 .idea/**/shelf
 .idea/**/vagrant.xml
 .idea/**/copilotDiffState.xml
+.idea/**/copilot.data.migration.agent.xml
+.idea/**/copilot.data.migration.edit.xml
 
 # Generated files
 .idea/**/contentModel.xml
