@@ -39,6 +39,7 @@ packages:
       
       # other
       - Microsoft.PowerToys
+      - sxyazi.yazi
 
     modules:
       - Microsoft.WinGet.Client
