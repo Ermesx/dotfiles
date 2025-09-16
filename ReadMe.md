@@ -26,36 +26,36 @@ General Architecture
 
 | Name                                            | Category | Install Type | Purpose                              |
 |-------------------------------------------------|----------|--------------|--------------------------------------|
-| PowerShell 7 (Microsoft.PowerShell)             | Shell    | App          | Modern PowerShell shell              |
-| Starship (Starship.Starship)                    | Shell    | App          | Cross-shell prompt                   |
-| Windows Terminal (Microsoft.WindowsTerminal)    | Shell    | App          | Terminal emulator                    |
-| zoxide (ajeetdsouza.zoxide)                     | Shell    | App          | Smart directory navigation           |
-| fzf (junegunn.fzf)                              | Shell    | App          | Fuzzy finder                         |
-| fd (sharkdp.fd)                                 | Shell    | App          | Fast file search                     |
-| ripgrep (BurntSushi.ripgrep.MSVC)               | Shell    | App          | Fast text search                     |
-| eza (eza-community.eza)                         | Shell    | App          | Modern ls replacement                |
-| bat (sharkdp.bat)                               | Shell    | App          | Syntax-highlighting cat              |
-| file (GnuWin32.File)                            | Shell    | App          | File type identification             |
-| Git (Git.Git)                                   | Git      | App          | Git version control                  |
-| delta (dandavison.delta)                        | Git      | App          | Syntax-highlighted diffs             |
-| less (jftuga.less)                              | Shell    | App          | Pager utility                        |
-| lazygit (JesseDuffield.lazygit)                 | Git      | App          | TUI for Git                          |
-| gitql (amrdeveloper.gitql)                      | Git      | App          | Query Git repos with SQL-like syntax |
-| onefetch (o2sh.onefetch)                        | Git      | App          | Repo summary in terminal             |
-| Docker Desktop (Docker.DockerDesktop)           | Docker   | App          | Docker engine & UI                   |
-| chezmoi (twpayne.chezmoi)                       | Setup    | App          | Templated dotfiles manager           |
-| Visual Studio Code (Microsoft.VisualStudioCode) | Editor   | App          | Code editor                          |
-| JetBrains Rider (JetBrains.Rider)               | Editor   | App          | .NET IDE                             |
-| Google Chrome (Google.Chrome)                   | Browser  | App          | Web browser                          |
-| PowerToys (Microsoft.PowerToys)                 | Other    | App          | Power utilities for Windows          |
-| yazi (sxyazi.yazi)                              | Shell    | App          | TUI file manager                     |
-| Microsoft.WinGet.Client                         | Shell    | Module       | Winget cmdlets for DSC               |
-| Terminal-Icons                                  | Shell    | Module       | File and folder icons in terminal    |
-| PSfzf                                           | Shell    | Module       | PowerShell integration for fzf       |
-| posh-git                                        | Git      | Module       | Git prompt enhancements              |
-| DockerCompletion                                | Docker   | Module       | Docker command completion            |
-| powershell-yaml                                 | Shell    | Module       | YAML parsing for PowerShell          |
-| Pester                                          | Testing  | Module       | PowerShell testing framework         |
+| PowerShell 7 (Microsoft.PowerShell)             | shell    | App          | Modern PowerShell shell              |
+| Microsoft.WinGet.Client                         | shell    | Module       | Winget cmdlets for DSC               |
+| Starship (Starship.Starship)                    | shell    | App          | Cross-shell prompt                   |
+| Windows Terminal (Microsoft.WindowsTerminal)    | shell    | App          | Terminal emulator                    |
+| Terminal-Icons                                  | shell    | Module       | File and folder icons in terminal    |
+| zoxide (ajeetdsouza.zoxide)                     | shell    | App          | Smart directory navigation           |
+| fzf (junegunn.fzf)                              | fzf      | App          | Fuzzy finder                         |
+| fd (sharkdp.fd)                                 | fzf      | App          | Fast file search                     |
+| ripgrep (BurntSushi.ripgrep.MSVC)               | fzf      | App          | Fast text search                     |
+| eza (eza-community.eza)                         | fzf      | App          | Modern ls replacement                |
+| bat (sharkdp.bat)                               | fzf      | App          | Syntax-highlighting cat              |
+| file (GnuWin32.File)                            | fzf      | App          | File type identification             |
+| PSfzf                                           | fzf      | Module       | PowerShell integration for fzf       |
+| onefetch (o2sh.onefetch)                        | git      | App          | Repo summary in terminal             |
+| delta (dandavison.delta)                        | git      | App          | Syntax-highlighted diffs             |
+| less (jftuga.less)                              | git      | App          | Pager utility                        |
+| lazygit (JesseDuffield.lazygit)                 | git      | App          | TUI for Git                          |
+| onefetch (o2sh.onefetch)                        | git      | App          | Repo summary in terminal             |
+| gitql (amrdeveloper.gitql)                      | git      | App          | Query Git repos with SQL-like syntax |
+| posh-git                                        | git      | Module       | Git prompt enhancements              |
+| Docker Desktop (Docker.DockerDesktop)           | docker   | App          | Docker engine & UI                   |
+| DockerCompletion                                | docker   | Module       | Docker command completion            |
+| chezmoi (twpayne.chezmoi)                       | chezmoi  | App          | Templated dotfiles manager           |
+| Visual Studio Code (Microsoft.VisualStudioCode) | editors  | App          | Code editor                          |
+| JetBrains Rider (JetBrains.Rider)               | editors  | App          | .NET IDE                             |
+| Google Chrome (Google.Chrome)                   | browsers | App          | Web browser                          |
+| PowerToys (Microsoft.PowerToys)                 | other    | App          | Power utilities for Windows          |
+| yazi (sxyazi.yazi)                              | other    | App          | TUI file manager                     |
+| powershell-yaml                                 | other    | Module       | YAML parsing for PowerShell          |
+| Pester                                          | other    | Module       | PowerShell testing framework         |
 
 ---
 
