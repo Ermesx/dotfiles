@@ -1,0 +1,23 @@
+--style="full:rounded"
+--reverse
+
+--border-label=" Search " 
+--input-label=" Input " 
+--header-label=" File Type "
+
+--info="inline-right"
+--pointer="=>"
+--prompt="❯ "
+
+--preview="bat --style=numbers,changes {}"
+--bind="focus:transform-preview-label:echo ' [{}] '"
+--bind="focus:+transform-footer:file --brief {}"
+
+--color="border:#aaaaaa,label:#cccccc,query:#d9d9d9"
+--color="preview-border:#9999cc,preview-label:#ccccff"
+--color="list-border:#669966,list-label:#99cc99"
+--color="input-border:#996666,input-label:#ffcccc"
+--color="header-border:#6699cc,header-label:#99ccff"
+--color=hl:#5f87af,hl+:#5fd7ff,info:#b6af5b,marker:#87ff00
+--color=prompt:#d60000,spinner:#af5fff,pointer:#ffff00,header:#87afaf
+--ansi
