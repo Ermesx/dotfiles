@@ -23,6 +23,15 @@ resources:
       Module_Name: {{ . }}
       Ensure: Present
 {{ end }}
+
+{{- range .packages.dotnet_tools }}
+  - name: dotnet_tool_{{ . }}
+    type: Microsoft.DotNet.Dsc/DotNetToolPackage
+    metadata:
+      description: "Install {{ . }} for dotnet"
+    properties:
+      PackageId: {{ .  }}
+{{ end }}
   - name: win_EnableDeveloperMode
     type: Microsoft.Windows.Settings/WindowsSettings
     metadata:
@@ -43,7 +52,7 @@ resources:
     type: Microsoft.Windows.Developer/ShowSecondsInClock
     metadata:
       description: "Show seconds in clock"
-      
+
 {{/*  - name: win_Taskbar*/}}
 {{/*    type: Microsoft.Windows.Developer/Taskbar*/}}
 {{/*    metadata:*/}}

@@ -1,4 +1,17 @@
 packages:
+  dotnet_tools:
+    - dotnet-ef
+    - dotnet-reportgenerator-globaltool
+    - dotnet-outdated-tool
+    - dotnet-user-secrets
+    - dotnet-dev-certs
+    - gitversion.tool
+    - dotnet-coverage
+    - dotnet-trace
+    - dotnet-counters
+    - dotnet-dump
+    - dotnet-stack
+  
   windows:
     wsl: Ubuntu-24.04
     wingets:
@@ -23,6 +36,9 @@ packages:
       - jftuga.less
       - JesseDuffield.lazygit
       - amrdeveloper.gitql
+      
+      # dotnet
+      - Microsoft.DotNet.SDK.9
 
       # docker
       - Docker.DockerDesktop
