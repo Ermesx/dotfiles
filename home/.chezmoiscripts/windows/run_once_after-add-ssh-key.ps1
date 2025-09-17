@@ -2,4 +2,4 @@
 Write-Host "► Add ssh key" -ForegroundColor Cyan
 Get-Service ssh-agent | Set-Service -StartupType Automatic
 Start-Service ssh-agent
-ssh-add $env:USERPROFILE\.ssh\id_ed25519  
+ssh-add (Join-Path $HOME ".ssh" "id_ed25519")
