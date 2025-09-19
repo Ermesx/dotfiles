@@ -18,7 +18,7 @@ Set-PSReadLineKeyHandler -Key Ctrl+p -Function CaptureScreen
 Set-PSReadLineKeyHandler -Key Ctrl+Spacebar -Function MenuComplete
 
 # Change from NextWord to ForwardWord (on the end of word)
-Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function ForwardWord 
+Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function ForwardWord
 
 # Capitalize, uppercase, and lowercase words
 Set-PSReadLineKeyHandler -Key Ctrl+Alt+c -Function CapitalizeWord
@@ -50,8 +50,7 @@ Set-PSReadLineKeyHandler -Key '"',"'" `
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
 
     # If text is selected, just quote it without any smarts
-    if ($selectionStart -ne -1)
-    {
+    if ($selectionStart -ne -1) {
         [Microsoft.PowerShell.PSConsoleReadLine]::Replace($selectionStart, $selectionLength, $quote + $line.SubString($selectionStart, $selectionLength) + $quote)
         [Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($selectionStart + $selectionLength + 2)
         return
@@ -62,19 +61,21 @@ Set-PSReadLineKeyHandler -Key '"',"'" `
     $parseErrors = $null
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$ast, [ref]$tokens, [ref]$parseErrors, [ref]$null)
 
-    function FindToken
-    {
+    function FindToken {
         param($tokens, $cursor)
 
-        foreach ($token in $tokens)
-        {
-            if ($cursor -lt $token.Extent.StartOffset) { continue }
+        foreach ($token in $tokens) {
+            if ($cursor -lt $token.Extent.StartOffset) {
+                continue
+            }
             if ($cursor -lt $token.Extent.EndOffset) {
                 $result = $token
                 $token = $token -as [System.Management.Automation.Language.StringExpandableToken]
                 if ($token) {
                     $nested = FindToken $token.NestedTokens $cursor
-                    if ($nested) { $result = $nested }
+                    if ($nested) {
+                        $result = $nested
+                    }
                 }
 
                 return $result
@@ -102,7 +103,7 @@ Set-PSReadLineKeyHandler -Key '"',"'" `
     }
 
     if ($null -eq $token -or $token.Kind -eq [System.Management.Automation.Language.TokenKind]::RParen -or $token.Kind -eq [System.Management.Automation.Language.TokenKind]::RCurly -or $token.Kind -eq [System.Management.Automation.Language.TokenKind]::RBracket) {
-        if ($line[0..$cursor].Where{$_ -eq $quote}.Count % 2 -eq 1) {
+        if ($line[0..$cursor].Where{ $_ -eq $quote }.Count % 2 -eq 1) {
             # Odd number of quotes before the cursor, insert a single quote
             [Microsoft.PowerShell.PSConsoleReadLine]::Insert($quote)
         }
@@ -117,7 +118,7 @@ Set-PSReadLineKeyHandler -Key '"',"'" `
     # If cursor is at the start of a token, enclose it in quotes.
     if ($token.Extent.StartOffset -eq $cursor) {
         if ($token.Kind -eq [System.Management.Automation.Language.TokenKind]::Generic -or $token.Kind -eq [System.Management.Automation.Language.TokenKind]::Identifier -or
-                $token.Kind -eq [System.Management.Automation.Language.TokenKind]::Variable -or $token.TokenFlags.hasFlag([System.Management.Automation.Language.TokenFlags]::Keyword)) {
+            $token.Kind -eq [System.Management.Automation.Language.TokenKind]::Variable -or $token.TokenFlags.hasFlag([System.Management.Automation.Language.TokenFlags]::Keyword)) {
             $end = $token.Extent.EndOffset
             $len = $end - $cursor
             [Microsoft.PowerShell.PSConsoleReadLine]::Replace($cursor, $len, $quote + $line.SubString($cursor, $len) + $quote)
@@ -136,11 +137,16 @@ Set-PSReadLineKeyHandler -Key '(', '{', '[' `
                          -ScriptBlock {
     param($key, $arg)
 
-    $closeChar = switch ($key.KeyChar)
-    {
-        <#case#> '(' { [char]')'; break }
-        <#case#> '{' { [char]'}'; break }
-        <#case#> '[' { [char]']'; break }
+    $closeChar = switch ($key.KeyChar) {
+        <#case#> '(' {
+            [char]')'; break
+        }
+        <#case#> '{' {
+            [char]'}'; break
+        }
+        <#case#> '[' {
+            [char]']'; break
+        }
     }
 
     $selectionStart = $null
@@ -151,12 +157,12 @@ Set-PSReadLineKeyHandler -Key '(', '{', '[' `
     $cursor = $null
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
 
-    if ($selectionStart -ne -1)
-    {
+    if ($selectionStart -ne -1) {
         # Text is selected, wrap it in brackets
         [Microsoft.PowerShell.PSConsoleReadLine]::Replace($selectionStart, $selectionLength, $key.KeyChar + $line.SubString($selectionStart, $selectionLength) + $closeChar)
         [Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($selectionStart + $selectionLength + 2)
-    } else {
+    }
+    else {
         # No text is selected, insert a pair
         [Microsoft.PowerShell.PSConsoleReadLine]::Insert("$($key.KeyChar)$closeChar")
         [Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($cursor + 1)
@@ -173,12 +179,10 @@ Set-PSReadLineKeyHandler -Key ')',']','}' `
     $cursor = $null
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
 
-    if ($line[$cursor] -eq $key.KeyChar)
-    {
+    if ($line[$cursor] -eq $key.KeyChar) {
         [Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($cursor + 1)
     }
-    else
-    {
+    else {
         [Microsoft.PowerShell.PSConsoleReadLine]::Insert("$($key.KeyChar)")
     }
 }
@@ -193,27 +197,32 @@ Set-PSReadLineKeyHandler -Key Backspace `
     $cursor = $null
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
 
-    if ($cursor -gt 0)
-    {
+    if ($cursor -gt 0) {
         $toMatch = $null
-        if ($cursor -lt $line.Length)
-        {
-            switch ($line[$cursor])
-            {
-                <#case#> '"' { $toMatch = '"'; break }
-                <#case#> "'" { $toMatch = "'"; break }
-                <#case#> ')' { $toMatch = '('; break }
-                <#case#> ']' { $toMatch = '['; break }
-                <#case#> '}' { $toMatch = '{'; break }
+        if ($cursor -lt $line.Length) {
+            switch ($line[$cursor]) {
+                <#case#> '"' {
+                    $toMatch = '"'; break
+                }
+                <#case#> "'" {
+                    $toMatch = "'"; break
+                }
+                <#case#> ')' {
+                    $toMatch = '('; break
+                }
+                <#case#> ']' {
+                    $toMatch = '['; break
+                }
+                <#case#> '}' {
+                    $toMatch = '{'; break
+                }
             }
         }
 
-        if ($toMatch -ne $null -and $line[$cursor-1] -eq $toMatch)
-        {
+        if ($toMatch -ne $null -and $line[$cursor - 1] -eq $toMatch) {
             [Microsoft.PowerShell.PSConsoleReadLine]::Delete($cursor - 1, 2)
         }
-        else
-        {
+        else {
             [Microsoft.PowerShell.PSConsoleReadLine]::BackwardDeleteChar($key, $arg)
         }
     }
@@ -240,7 +249,7 @@ Set-PSReadLineKeyHandler -Key "Alt+'" `
         $extent = $token.Extent
         if ($extent.StartOffset -le $cursor -and $extent.EndOffset -ge $cursor) {
             $tokenToChange = $token
-    
+
             # If the cursor is at the end of the current token, check if the next token starts at the cursor position.
             if ($extent.EndOffset -eq $cursor -and ($i + 1) -lt $tokens.Count) {
                 $nextToken = $tokens[$i + 1]
@@ -252,29 +261,25 @@ Set-PSReadLineKeyHandler -Key "Alt+'" `
         }
     }
 
-    if ($tokenToChange -ne $null)
-    {
+    if ($tokenToChange -ne $null) {
         $extent = $tokenToChange.Extent
         $tokenText = $extent.Text
-        if ($tokenText[0] -eq '"' -and $tokenText[-1] -eq '"')
-        {
+        if ($tokenText[0] -eq '"' -and $tokenText[-1] -eq '"') {
             # Switch to no quotes
             $replacement = $tokenText.Substring(1, $tokenText.Length - 2)
         }
-        elseif ($tokenText[0] -eq "'" -and $tokenText[-1] -eq "'")
-        {
+        elseif ($tokenText[0] -eq "'" -and $tokenText[-1] -eq "'") {
             # Switch to double quotes
             $replacement = '"' + $tokenText.Substring(1, $tokenText.Length - 2) + '"'
         }
-        else
-        {
+        else {
             # Add single quotes
             $replacement = "'" + $tokenText + "'"
         }
 
         [Microsoft.PowerShell.PSConsoleReadLine]::Replace(
-                $extent.StartOffset,
-                $tokenText.Length,
-                $replacement)
+            $extent.StartOffset,
+            $tokenText.Length,
+            $replacement)
     }
 }

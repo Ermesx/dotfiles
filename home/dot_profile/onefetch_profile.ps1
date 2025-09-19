@@ -2,7 +2,7 @@
 $Global:lastRepository = $null
 
 function Test-DirectoryForNewRepository {
-    $currentRepository = git rev-parse --show-toplevel 2>$null
+    $currentRepository = git rev-parse --show-toplevel 2> $null
     if ($currentRepository -and ($currentRepository -ne $Global:lastRepository)) {
         Write-Host
         onefetch --nerd-fonts

@@ -14,11 +14,11 @@ if ($fontsSource -notcontains {{ .font.exactName | squote }}) {
     $fontRegPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
     $fontsWinPath = "$env:WINDIR\Fonts"
     $fontFile = Join-Path $env:TEMP {{ $fontFile | squote }}
-    $fontPath = Join-Path $env:TEMP {{ .font.name | squote }}    
+    $fontPath = Join-Path $env:TEMP {{ .font.name | squote }}
 
     Invoke-WebRequest $uri -OutFile $fontFile
     Expand-Archive $fontFile -Destination $fontPath -Force
-    
+
     Get-ChildItem -Path $fontPath -Include '*.ttf', '*.otf', '*.fon', '*.fnt' -Recurse | ForEach-Object {
         if (-not (Test-Path "$fontsWinPath\$($_.Name)")) {
             Copy-Item $_ $fontsWinPath -Force

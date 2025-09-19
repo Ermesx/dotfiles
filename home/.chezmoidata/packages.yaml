@@ -11,7 +11,7 @@ packages:
     - dotnet-counters
     - dotnet-dump
     - dotnet-stack
-  
+
   windows:
     wsl: Ubuntu-24.04
     wingets:
@@ -20,6 +20,7 @@ packages:
       - Starship.Starship
       - Microsoft.WindowsTerminal
       - ajeetdsouza.zoxide
+      - sxyazi.yazi
 
       # fzf
       - junegunn.fzf
@@ -36,7 +37,7 @@ packages:
       - jftuga.less
       - JesseDuffield.lazygit
       - amrdeveloper.gitql
-      
+
       # dotnet
       - Microsoft.DotNet.SDK.9
 
@@ -52,10 +53,10 @@ packages:
 
       # browsers
       - Google.Chrome
-      
+
       # other
       - Microsoft.PowerToys
-      - sxyazi.yazi
+      - jqlang.jq
 
     modules:
       - Microsoft.WinGet.Client
@@ -65,32 +66,32 @@ packages:
       - DockerCompletion
       - powershell-yaml
       - Pester
-  
+
   linux:
     brews:
       # shell
       - zsh
       - oh-my-zsh
       - zoxide
-      
-      # fzf  
+
+      # fzf
       - fzf
       - fd
       - ripgrep
       - eza
       - fzf-tab
-      
-      # git  
+
+      # git
       - git
       - lazygit
       - gitql
       - onefetch
-      
-      # docker    
+
+      # docker
       - docker
-    
+
     casks:
-    
+
     modules:
       - zsh-autosuggestions
       - zsh-syntax-highlighting

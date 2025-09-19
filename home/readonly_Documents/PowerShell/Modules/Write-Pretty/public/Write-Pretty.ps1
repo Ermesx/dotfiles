@@ -1,5 +1,5 @@
 function Write-Pretty {
-<#
+    <#
 .SYNOPSIS
 Displays text with Markdown support and colors in the PowerShell console.
 
@@ -48,8 +48,8 @@ Write-Pretty -Text "**Hello** _world_" -ForegroundColor "255,0,0"
         function Convert-MarkdownToAnsi {
             param([string]$Text)
             $Text -replace '\*\*(.+?)\*\*', "`e[1m`$1`e[22m" `
-                 -replace '__(.+?)__', "`e[4m`$1`e[24m" `
-                 -replace '_([^_]+?)_', "`e[3m`$1`e[23m"
+                     -replace '__(.+?)__', "`e[4m`$1`e[24m" `
+                     -replace '_([^_]+?)_', "`e[3m`$1`e[23m"
         }
 
         function Convert-ToAnsiCode {
@@ -62,7 +62,8 @@ Write-Pretty -Text "**Hello** _world_" -ForegroundColor "255,0,0"
                 $rgb = $ColorString -split ','
                 if ($Type -eq 'fg') {
                     return "`e[38;2;$($rgb -join ';')m"
-                } else {
+                }
+                else {
                     return "`e[48;2;$($rgb -join ';')m"
                 }
             }
@@ -72,8 +73,8 @@ Write-Pretty -Text "**Hello** _world_" -ForegroundColor "255,0,0"
         function Clean-Markdown {
             param([string]$Text)
             $Text -replace '\*\*(.+?)\*\*', '$1' `
-                 -replace '__(.+?)__', '$1' `
-                 -replace '_([^_]+?)_', '$1'
+                     -replace '__(.+?)__', '$1' `
+                     -replace '_([^_]+?)_', '$1'
         }
 
         function Write-SafeHost {
@@ -84,9 +85,15 @@ Write-Pretty -Text "**Hello** _world_" -ForegroundColor "255,0,0"
                 [string]$BGColor
             )
             $paramsForWriteHost = @{ Object = $Content }
-            if ($UseNoNewLine) { $paramsForWriteHost['NoNewLine'] = $true }
-            if ($FGColor) { $paramsForWriteHost['ForegroundColor'] = $FGColor }
-            if ($BGColor) { $paramsForWriteHost['BackgroundColor'] = $BGColor }
+            if ($UseNoNewLine) {
+                $paramsForWriteHost['NoNewLine'] = $true
+            }
+            if ($FGColor) {
+                $paramsForWriteHost['ForegroundColor'] = $FGColor
+            }
+            if ($BGColor) {
+                $paramsForWriteHost['BackgroundColor'] = $BGColor
+            }
             Write-Host @paramsForWriteHost
         }
     }
@@ -99,7 +106,8 @@ Write-Pretty -Text "**Hello** _world_" -ForegroundColor "255,0,0"
             $reset = "`e[0m"
             $finalText = "$ansiFG$ansiBG$ansiText$reset"
             Write-SafeHost -Content $finalText -UseNoNewLine:$NoNewLine
-        } else {
+        }
+        else {
             $plainText = Clean-Markdown -Text $Text
             Write-SafeHost -Content $plainText -UseNoNewLine:$NoNewLine `
                 -FGColor $FallbackForegroundColor -BGColor $FallbackBackgroundColor

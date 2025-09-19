@@ -4,7 +4,7 @@ $Global:Colors = @{
     'Green' = @{ ForegroundColor = '0,255,0'; FallbackForegroundColor = 'Green' }
     'Red' = @{ ForegroundColor = '255,0,0'; FallbackForegroundColor = 'Red' }
     'Yellow' = @{ ForegroundColor = '255,255,0'; FallbackForegroundColor = 'Yellow' }
-    'Cyan' = @{ ForegroundColor = '0,255,255';  FallbackForegroundColor = 'Cyan' }
+    'Cyan' = @{ ForegroundColor = '0,255,255'; FallbackForegroundColor = 'Cyan' }
 }
 
 # Define function color aliases for Write-Pretty

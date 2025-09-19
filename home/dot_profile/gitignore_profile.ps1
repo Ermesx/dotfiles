@@ -2,29 +2,29 @@
     <#
     .SYNOPSIS
     Generates a .gitignore file from technology presets using the Toptal gitignore API.
-    
+
     .DESCRIPTION
     Downloads and writes a combined .gitignore for the provided list of technologies/frameworks.
     Supports receiving items from the pipeline, writing to a custom output path, and appending to an existing file.
-    
+
     .INPUTS
     System.String[]
     You can pipe one or more technology names (e.g., 'windows', 'node') to this function.
-    
+
     .OUTPUTS
     None
     Writes a .gitignore file to disk; no objects are emitted.
-    
+
     .PARAMETER List
     One or more technology identifiers (e.g., 'windows', 'visualstudio', 'node', 'python').
     Accepts values from the pipeline and from remaining arguments.
-    
+
     .PARAMETER OutputPath
     The path to the output .gitignore file. Defaults to '.gitignore' in the current directory.
-    
+
     .PARAMETER Append
     When specified, appends the downloaded content to the target file instead of overwriting it.
-    
+
     .EXAMPLE
     gi windows visualstudio -o .gitignore
     Downloads a .gitignore that includes Windows and Visual Studio presets and writes it to ./.gitignore.
@@ -63,7 +63,7 @@
             $content = Invoke-RestMethod -Uri $uri -Method Get -StatusCodeVariable status -ErrorAction Stop
         }
         catch {
-            throw "Download failed: $( $_.Exception.Message )`nURL: $uri"
+            throw "Download failed: $($_.Exception.Message)`nURL: $uri"
         }
         if ($status -ne 200) {
             throw "Unexpected HTTP status: $status`nURL: $uri"

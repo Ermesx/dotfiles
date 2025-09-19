@@ -5,7 +5,7 @@ Describe 'Write-Pretty' {
     BeforeAll {
         Import-Module Write-Pretty -Force
     }
-    
+
     InModuleScope Write-Pretty {
 
         Context 'Basic Markdown parsing' {
@@ -17,8 +17,8 @@ Describe 'Write-Pretty' {
 
                 Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
                     $Object -match "`e\[1mBold`e\[22m" -and
-                            $Object -match "`e\[3mItalic`e\[23m" -and
-                            $Object -match "`e\[4mUnderline`e\[24m"
+                        $Object -match "`e\[3mItalic`e\[23m" -and
+                        $Object -match "`e\[4mUnderline`e\[24m"
                 }
             }
 
@@ -30,7 +30,7 @@ Describe 'Write-Pretty' {
 
                 Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
                     $Object -eq 'Bold Italic Underline' -and
-                            $ForegroundColor -eq 'Yellow'
+                        $ForegroundColor -eq 'Yellow'
                 }
             }
         }
@@ -44,7 +44,7 @@ Describe 'Write-Pretty' {
 
                 Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
                     $Object -match "`e\[38;2;255;128;64m" -and
-                            $Object -match "`e\[48;2;0;64;128m"
+                        $Object -match "`e\[48;2;0;64;128m"
                 }
             }
         }
@@ -58,7 +58,7 @@ Describe 'Write-Pretty' {
 
                 Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
                     $ForegroundColor -eq 'Green' -and
-                            $BackgroundColor -eq 'Black'
+                        $BackgroundColor -eq 'Black'
                 }
             }
         }

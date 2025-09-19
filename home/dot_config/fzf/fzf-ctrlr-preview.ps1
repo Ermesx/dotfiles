@@ -2,11 +2,11 @@
 param([string] $Line)
 
 $cmd = (($Line -replace "`r?`n", '').TrimStart() -split '\s+')[0]
-if ([string]::IsNullOrWhiteSpace($cmd)) {
+if ( [string]::IsNullOrWhiteSpace($cmd)) {
     return
 }
 
-if ($cmd.StartsWith('$')) {
+if ( $cmd.StartsWith('$')) {
     Invoke-Expression $cmd 2>&1 | Out-String
     return
 }
