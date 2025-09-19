@@ -75,5 +75,44 @@ Describe 'Write-Pretty' {
                 }
             }
         }
+
+        # New tests for Write-PrettyTable
+        Context 'Pipeline input for Write-PrettyTable' {
+            It 'accepts objects from the pipeline and prints a table' {
+                Mock Write-Host { }
+
+                $data = @(
+                    [pscustomobject]@{ Name = 'Alice'; Age = 30 },
+                    [pscustomobject]@{ Name = 'Bob'; Age = 25 }
+                )
+
+                { $data | Write-PrettyTable } | Should -Not -Throw
+
+                # Verify that at least one separator line was written, indicating table rendering happened
+                Assert-MockCalled Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+            }
+
+            It 'accepts an array passed as a single argument (no pipeline)' {
+                Mock Write-Host { }
+                $data = @(
+                    [pscustomobject]@{ Name = 'Carol'; Age = 40 },
+                    [pscustomobject]@{ Name = 'Dave'; Age = 22 }
+                )
+
+                { Write-PrettyTable -Data $data } | Should -Not -Throw
+                Assert-MockCalled Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+            }
+
+            It 'accepts hashtable input from the pipeline' {
+                Mock Write-Host { }
+                $data = @(
+                    @{ Name = 'Eve'; Age = 28 },
+                    @{ Name = 'Frank'; Age = 33 }
+                )
+
+                { $data | Write-PrettyTable } | Should -Not -Throw
+                Assert-MockCalled Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+            }
+        }
     }
 }
