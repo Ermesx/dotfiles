@@ -37,12 +37,14 @@ packages:
       - jftuga.less
       - JesseDuffield.lazygit
       - amrdeveloper.gitql
+      - GitHub.cli
 
       # dotnet
       - Microsoft.DotNet.SDK.9
 
-      # docker
+      # containers
       - Docker.DockerDesktop
+      - Hashicorp.Vagrant
 
       # chezmoi
       - twpayne.chezmoi
