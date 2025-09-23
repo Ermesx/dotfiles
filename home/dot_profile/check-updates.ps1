@@ -52,13 +52,13 @@ function Check-Updates {
         $modules = $Global:ModuleUpdatesCache
     }
 
-    Write-Green  "__APPS__"
     if ($apps) {
+        Write-Green  "__APPS__"
         $apps | Write-PrettyTable
     }
 
-    Write-Green -Text "__MODULES__"
     if ($modules) {
+        Write-Green -Text "__MODULES__"
         $modules | Write-PrettyTable
     }
 }
