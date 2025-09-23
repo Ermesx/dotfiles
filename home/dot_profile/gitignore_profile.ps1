@@ -1,4 +1,4 @@
-﻿function gi {
+﻿function gitignore {
     <#
     .SYNOPSIS
     Generates a .gitignore file from technology presets using the Toptal gitignore API.

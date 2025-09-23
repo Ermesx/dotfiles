@@ -1,3 +1,5 @@
+Set-Alias gi gitignore -Force
+
 # starship
 function Invoke-Starship-TransientFunction {
     & starship module character
