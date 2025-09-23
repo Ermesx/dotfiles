@@ -1,4 +1,3 @@
 {{- if ne .chezmoi.os "windows" }}
-fzf/dot_psfzfrc
 config.dsc.yaml.tmpl
 {{- end }}
