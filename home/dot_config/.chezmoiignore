@@ -1,3 +1,6 @@
 {{- if ne .chezmoi.os "windows" }}
 config.dsc.yaml.tmpl
 {{- end }}
+{{- if eq .chezmoi.os "windows" }}
+yazi/
+{{- end }}
