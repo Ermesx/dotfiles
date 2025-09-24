@@ -1,5 +1,6 @@
 --ansi
 --style="default"
+--height=40%
 --border-label=" Pick Directory "
 --border="rounded"
 
