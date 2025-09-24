@@ -2,6 +2,9 @@
 Set-Alias gi gitignore -Force
 Set-Alias file 'C:\Program Files\Git\usr\bin\file.exe'
 
+# Additional Icons
+Set-TerminalIconsIcon -FileExtension ".slnx" -Glyph "nf-dev-visualstudio"
+
 # starship
 function Invoke-Starship-TransientFunction {
     & starship module character

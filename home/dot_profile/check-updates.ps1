@@ -23,6 +23,7 @@ function Get-ModuleUpdates {
                 if ($latest -and $latest.Version -gt $_.Version) {
                     [pscustomobject]@{
                         Name = $_.Name
+                        Id = $_.Id
                         Old = $_.Version
                         New = $latest.Version
                     }
