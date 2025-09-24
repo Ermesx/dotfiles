@@ -31,7 +31,6 @@ packages:
       - BurntSushi.ripgrep.MSVC
       - eza-community.eza
       - sharkdp.bat
-      - GnuWin32.File
 
       # git
       - Git.Git

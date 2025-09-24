@@ -10,7 +10,7 @@
 --info="right"
 --prompt="Search ❯ "
 
---preview="eza -T -a -L 3 --colour=always --icons=always --git-ignore {}"
+--preview="eza -T -a -L 3 --colour=always --icons=always --git-ignore \"$(echo {} | cut -d' ' -f2-)\""
 --preview-border="rounded"
 
 --color="border:#aaaaaa,label:#cccccc,query:#d9d9d9"

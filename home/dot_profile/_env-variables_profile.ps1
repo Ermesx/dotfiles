@@ -9,8 +9,8 @@ function Get-FlatContent {
     }
 }
 
-# Add GnuWin32 to the PATH for Windows
-$env:PATH = "$env:PATH;C:\Program Files (x86)\GnuWin32\bin"
+# Initialize the yazi config env variables
+$env:YAZI_FILE_ONE = 'C:\Program Files\Git\usr\bin\file.exe'
 
 # Initialize the ripgrep config env variable
 $env:RIPGREP_CONFIG_PATH = Join-Path $HOME ".config\.rgrc"
@@ -27,3 +27,6 @@ $env:FZF_ALT_C_COMMAND = (Get-FlatContent ".config\fzf\fzf-default-command").Rep
 
 # Set bash to run scripts from fzf (examples and knowns konfigs is writen in bash)
 $env:SHELL = "C:\Program Files\Git\bin\bash.exe"
+
+# fzf in zoxide
+$env:_ZO_FZF_OPTS = Get-FlatContent ".config\fzf\fzf-zi-opts"

@@ -1,4 +1,6 @@
+# Aliases
 Set-Alias gi gitignore -Force
+Set-Alias file 'C:\Program Files\Git\usr\bin\file.exe'
 
 # starship
 function Invoke-Starship-TransientFunction {
