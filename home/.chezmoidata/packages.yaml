@@ -12,6 +12,9 @@ packages:
     - dotnet-dump
     - dotnet-stack
 
+  yazi_plugins:
+    - yazi-rs/plugins:full-border
+
   windows:
     wsl: Ubuntu-24.04
     wingets:
