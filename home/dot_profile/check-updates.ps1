@@ -5,6 +5,7 @@ function Get-AppUpdates {
             ForEach-Object {
                 [pscustomobject]@{
                     Name = $_.Name
+                    Id = $_.Id
                     Old = $_.InstalledVersion
                     New = $_.AvailableVersions[0]
                 }
@@ -23,7 +24,6 @@ function Get-ModuleUpdates {
                 if ($latest -and $latest.Version -gt $_.Version) {
                     [pscustomobject]@{
                         Name = $_.Name
-                        Id = $_.Id
                         Old = $_.Version
                         New = $latest.Version
                     }
