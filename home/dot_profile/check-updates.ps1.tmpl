@@ -1,0 +1,125 @@
+$AppUpdatesCacheFile = Join-Path $env:TEMP 'AppUpdatesCache.json'
+$ModuleUpdatesCacheFile = Join-Path $env:TEMP 'ModuleUpdatesCache.json'
+$UpdatesCacheLastRunFile = Join-Path $env:TEMP 'UpdatesCacheLastRun.txt'
+
+function Get-AppUpdates {
+    try {
+        Get-WinGetPackage -Source winget -ErrorAction SilentlyContinue |
+            Where-Object { $_.IsUpdateAvailable } |
+            ForEach-Object {
+                [pscustomobject]@{
+                    Name = $_.Name
+                    Id = $_.Id
+                    Old = $_.InstalledVersion
+                    New = $_.AvailableVersions[0]
+                }
+            }
+    }
+    catch {
+        @()
+    }
+}
+
+function Get-ModuleUpdates {
+    try {
+        Get-InstalledModule -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                $latest = Find-Module -Name $_.Name -ErrorAction SilentlyContinue
+                if ($latest -and $latest.Version -gt $_.Version) {
+                    [pscustomobject]@{
+                        Name = $_.Name
+                        Old = $_.Version
+                        New = $latest.Version
+                    }
+                }
+            }
+    }
+    catch {
+        @()
+    }
+}
+
+function Save-UpdatesCache {
+    param(
+        $apps,
+        $modules
+    )
+    $apps | ConvertTo-Json -Depth 5 | Set-Content -Path $AppUpdatesCacheFile -Encoding UTF8
+    $modules | ConvertTo-Json -Depth 5 | Set-Content -Path $ModuleUpdatesCacheFile -Encoding UTF8
+    Get-Date | Set-Content -Path $UpdatesCacheLastRunFile -Encoding UTF8
+}
+
+function Load-UpdatesCache {
+    $apps = if (Test-Path $AppUpdatesCacheFile) {
+        Get-Content $AppUpdatesCacheFile -Raw | ConvertFrom-Json
+    }
+    else {
+        @()
+    }
+    $modules = if (Test-Path $ModuleUpdatesCacheFile) {
+        Get-Content $ModuleUpdatesCacheFile -Raw | ConvertFrom-Json
+    }
+    else {
+        @()
+    }
+    $lastRun = if (Test-Path $UpdatesCacheLastRunFile) {
+        Get-Content $UpdatesCacheLastRunFile -Raw | [datetime]::Parse($_)
+    }
+    else {
+        Get-Date '2000-01-01'
+    }
+    return @{ apps = $apps; modules = $modules; lastRun = $lastRun }
+}
+
+function Check-Updates {
+    param(
+        [switch]$Now
+    )
+
+    if ($Now) {
+        $knownAppps = @({{ .packages.windows.wingets | squote | join ', ' }})
+        $knowndModules = @({{ .packages.windows.modules | squote | join ', ' }})
+
+        $apps = Get-AppUpdates | Where-Object { $knownAppps -contains $_.Id }
+        $modules = Get-ModuleUpdates  | Where-Object { $knowndModules -contains $_.Name }
+
+        Save-UpdatesCache -apps $apps -modules $modules
+        $lastRun = Get-Date
+    }
+    else {
+        $cache = Load-UpdatesCache
+        $apps = $cache.apps
+        $modules = $cache.modules
+        $lastRun = $cache.lastRun
+    }
+
+    if ($apps) {
+        Write-Green  "__APPS__"
+        $apps | Write-PrettyTable
+    }
+
+    if ($modules) {
+        Write-Green -Text "__MODULES__"
+        $modules | Write-PrettyTable
+    }
+}
+
+# Timer-driven background refresh per session
+$sourceId = 'CheckUpdates-Timer'
+if (-not (Get-EventSubscriber -SourceIdentifier $sourceId -ErrorAction SilentlyContinue)) {
+    $Global:CheckUpdatesTimer = New-Object System.Timers.Timer
+    $Global:CheckUpdatesTimer.Interval = [TimeSpan]::FromHours(4).TotalMilliseconds
+    $Global:CheckUpdatesTimer.AutoReset = $true
+
+    Register-ObjectEvent -InputObject $Global:CheckUpdatesTimer -EventName Elapsed -SourceIdentifier $sourceId -Action {
+        try {
+            $apps = Get-AppUpdates
+            $modules = Get-ModuleUpdates
+            Save-UpdatesCache -apps $apps -modules $modules
+        }
+        catch {
+        }
+    } | Out-Null
+
+    $Global:CheckUpdatesTimer.Start()
+}
