@@ -113,8 +113,11 @@ if (-not (Get-EventSubscriber -SourceIdentifier $sourceId -ErrorAction SilentlyC
 
     Register-ObjectEvent -InputObject $Global:CheckUpdatesTimer -EventName Elapsed -SourceIdentifier $sourceId -Action {
         try {
-            $apps = Get-AppUpdates
-            $modules = Get-ModuleUpdates
+            $knownAppps = @({{ .packages.windows.wingets | quoteList | join ", " }})
+            $knowndModules = @({{ .packages.windows.modules | quoteList | join ", " }})
+
+            $apps = Get-AppUpdates | Where-Object { $knownAppps -contains $_.Id }
+            $modules = Get-ModuleUpdates | Where-Object { $knowndModules -contains $_.Name }
             Save-UpdatesCache -apps $apps -modules $modules
         }
         catch {
