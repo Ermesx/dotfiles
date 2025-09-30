@@ -104,6 +104,53 @@ function Check-Updates {
     }
 }
 
+function Update-Apps{
+    $apps = if (Test-Path $AppUpdatesCacheFile) {
+        Get-Content $AppUpdatesCacheFile -Raw | ConvertFrom-Json
+    } else { @() }
+    if ($apps) {
+        $params = @(
+            '--accept-source-agreements'
+            '--accept-source-agreements'
+            '--disable-interactivity'
+        )
+        Write-Cyan "► Updating Apps..."
+        foreach ($app in $apps) {
+            try {
+                Write-Host " - Upgrading app: $($app.Name) ($($app.Id)) [" -NoNewline
+                Write-Yellow "$($app.Old)" -NoNewline
+                Write-Host " => " -NoNewline
+                Write-Green "$($app.New)" -NoNewline
+                Write-Host "]"
+                winget upgrade --id $($app.Id) @params | Out-Null
+            } catch {
+                Write-Red "Failed to update app: $($app.Name) ($($app.Id))"
+            }
+        }
+    }
+}
+
+function Update-Modules {
+    $modules = if (Test-Path $ModuleUpdatesCacheFile) {
+        Get-Content $ModuleUpdatesCacheFile -Raw | ConvertFrom-Json
+    } else { @() }
+    if ($modules) {
+        Write-Cyan "► Updating Modules..."
+        foreach ($module in $modules) {
+            try {
+                Write-Host " - Upgrading module: $($module.Name)" -NoNewline
+                Write-Yellow "$($module.Old)" -NoNewline
+                Write-Host " => " -NoNewline
+                Write-Green "$($module.New)" -NoNewline
+                Write-Host "]"
+                Update-Module -Name $($module.Name) -Force
+            } catch {
+                Write-Red "Failed to update module: $($module.Name)"
+            }
+        }
+    }
+}
+
 # Timer-driven background refresh per session
 $sourceId = 'CheckUpdates-Timer'
 if (-not (Get-EventSubscriber -SourceIdentifier $sourceId -ErrorAction SilentlyContinue)) {
