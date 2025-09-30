@@ -22,6 +22,7 @@ packages:
       - Microsoft.PowerShell
       - Starship.Starship
       - Microsoft.WindowsTerminal
+      - jqlang.jq
       - ajeetdsouza.zoxide
       - sxyazi.yazi
 
@@ -60,7 +61,7 @@ packages:
 
       # other
       - Microsoft.PowerToys
-      - jqlang.jq
+      - APIDocumentation.Scalar
 
     modules:
       - Microsoft.WinGet.Client
