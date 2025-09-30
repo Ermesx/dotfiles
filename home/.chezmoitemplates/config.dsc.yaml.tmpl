@@ -8,7 +8,7 @@ resources:
   - name: winget_{{ .  }}
     type: Microsoft.WinGet/Package
     metadata:
-      description: "Install  {{ . }}"
+      description: "Install {{ . }}"
     properties:
       id: {{ .  }}
       source: winget

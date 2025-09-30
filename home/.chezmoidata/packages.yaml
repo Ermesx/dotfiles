@@ -25,6 +25,7 @@ packages:
       - jqlang.jq
       - ajeetdsouza.zoxide
       - sxyazi.yazi
+      - sigoden.AIChat
 
       # fzf
       - junegunn.fzf
