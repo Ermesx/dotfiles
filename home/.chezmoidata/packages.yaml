@@ -11,6 +11,7 @@ packages:
     - dotnet-counters
     - dotnet-dump
     - dotnet-stack
+    - refitter
 
   yazi_plugins:
     - yazi-rs/plugins:full-border
