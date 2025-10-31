@@ -6,11 +6,14 @@ signingkey = {{ join .chezmoi.sourceDir "dot_ssh/encrypted_id_ed25519.pub.age" |
 format = ssh
 {{- if eq .chezmoi.os "windows" }}
 [gpg "ssh"]
-program = C:\\Windows\\System32\\OpenSSH\\ssh-keygen.exe
+program = C:/Windows/System32/OpenSSH/ssh-keygen.exe
 {{- end }}
 
 [core]
 pager = delta
+{{- if eq .chezmoi.os "windows" }}
+sshCommand = C:/Windows/System32/OpenSSH/ssh.exe
+{{- end }}
 
 [color "status"]
 changed = yellow
