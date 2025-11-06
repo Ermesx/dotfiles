@@ -47,6 +47,9 @@ packages:
       # dotnet
       - Microsoft.DotNet.SDK.9
 
+      # Node JS
+      - OpenJS.NodeJS
+
       # containers
       - Docker.DockerDesktop
       - Hashicorp.Vagrant
