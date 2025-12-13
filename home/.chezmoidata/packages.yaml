@@ -45,7 +45,7 @@ packages:
       - GitHub.cli
 
       # dotnet
-      - Microsoft.DotNet.SDK.9
+      - Microsoft.DotNet.SDK.10
 
       # Node JS
       - OpenJS.NodeJS
