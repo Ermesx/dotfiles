@@ -41,3 +41,4 @@ PowerShell, from the repo root.
 | `tests/`, the VM, `install.ps1` | [`docs/testing.md`](docs/testing.md) |
 | Not sure where a capability lives | [`docs/architecture.md`](docs/architecture.md) |
 | A design choice (tool, layout, mechanism) or anything that reverses one | [`docs/adr/`](docs/adr/) — the architecture decision record; don't edit an accepted ADR, add a new one that supersedes it |
+| A feature or change that has a spec | [`docs/specs/`](docs/specs/) — specifications: what to build and how it should behave; the ADR records why |
