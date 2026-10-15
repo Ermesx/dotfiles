@@ -40,3 +40,4 @@ PowerShell, from the repo root.
 | Scripts, PowerShell profile, line endings | [`docs/conventions.md`](docs/conventions.md) |
 | `tests/`, the VM, `install.ps1` | [`docs/testing.md`](docs/testing.md) |
 | Not sure where a capability lives | [`docs/architecture.md`](docs/architecture.md) |
+| A design choice (tool, layout, mechanism) or anything that reverses one | [`docs/adr/`](docs/adr/) — the architecture decision record; don't edit an accepted ADR, add a new one that supersedes it |
