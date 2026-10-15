@@ -1,9 +1,15 @@
-#Requires -Modules Pester, Write-Pretty
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '6.0.0' }, Write-Pretty
 
 Describe 'Write-Pretty' {
 
     BeforeAll {
         Import-Module Write-Pretty -Force
+        # Tests fake the PowerShell version by mutating the session-wide $PSVersionTable
+        $script:originalPSVersion = $PSVersionTable.PSVersion
+    }
+
+    AfterEach {
+        $PSVersionTable.PSVersion = $script:originalPSVersion
     }
 
     InModuleScope Write-Pretty {
@@ -15,7 +21,7 @@ Describe 'Write-Pretty' {
                 $PSVersionTable.PSVersion = [version]'7.0.0'
                 Write-Pretty '**Bold** _Italic_ __Underline__'
 
-                Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
                     $Object -match "`e\[1mBold`e\[22m" -and
                         $Object -match "`e\[3mItalic`e\[23m" -and
                         $Object -match "`e\[4mUnderline`e\[24m"
@@ -28,7 +34,7 @@ Describe 'Write-Pretty' {
                 $PSVersionTable.PSVersion = [version]'5.1.0'
                 Write-Pretty '**Bold** _Italic_ __Underline__' -FallbackForegroundColor 'Yellow'
 
-                Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
                     $Object -eq 'Bold Italic Underline' -and
                         $ForegroundColor -eq 'Yellow'
                 }
@@ -42,7 +48,7 @@ Describe 'Write-Pretty' {
                 $PSVersionTable.PSVersion = [version]'7.0.0'
                 Write-Pretty 'Color test' -ForegroundColor '255,128,64' -BackgroundColor '0,64,128'
 
-                Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
                     $Object -match "`e\[38;2;255;128;64m" -and
                         $Object -match "`e\[48;2;0;64;128m"
                 }
@@ -56,7 +62,7 @@ Describe 'Write-Pretty' {
                 $PSVersionTable.PSVersion = [version]'5.1.0'
                 Write-Pretty 'Simple text' -FallbackForegroundColor 'Green' -FallbackBackgroundColor 'Black'
 
-                Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
                     $ForegroundColor -eq 'Green' -and
                         $BackgroundColor -eq 'Black'
                 }
@@ -70,7 +76,7 @@ Describe 'Write-Pretty' {
                 $PSVersionTable.PSVersion = [version]'7.0.0'
                 Write-Pretty 'Line test' -NoNewline
 
-                Assert-MockCalled Write-Host -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
                     $NoNewline -eq $true
                 }
             }
@@ -89,7 +95,7 @@ Describe 'Write-Pretty' {
                 { $data | Write-PrettyTable } | Should -Not -Throw
 
                 # Verify that at least one separator line was written, indicating table rendering happened
-                Assert-MockCalled Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+                Should -Invoke Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
             }
 
             It 'accepts an array passed as a single argument (no pipeline)' {
@@ -100,7 +106,7 @@ Describe 'Write-Pretty' {
                 )
 
                 { Write-PrettyTable -Data $data } | Should -Not -Throw
-                Assert-MockCalled Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+                Should -Invoke Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
             }
 
             It 'accepts hashtable input from the pipeline' {
@@ -111,7 +117,7 @@ Describe 'Write-Pretty' {
                 )
 
                 { $data | Write-PrettyTable } | Should -Not -Throw
-                Assert-MockCalled Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+                Should -Invoke Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
             }
         }
     }
