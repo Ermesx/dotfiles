@@ -82,42 +82,67 @@ Describe 'Write-Pretty' {
             }
         }
 
-        # New tests for Write-PrettyTable
-        Context 'Pipeline input for Write-PrettyTable' {
-            It 'accepts objects from the pipeline and prints a table' {
+        # Write-PrettyTable calls `Write-Host $line` positionally; Write-Host binds -Object with
+        # ValueFromRemainingArguments, so $Object is a List[object], not a string. Compare "$Object".
+        Context 'Write-PrettyTable' {
+            It 'renders objects from the pipeline as a bordered table' {
                 Mock Write-Host { }
-
                 $data = @(
                     [pscustomobject]@{ Name = 'Alice'; Age = 30 },
                     [pscustomobject]@{ Name = 'Bob'; Age = 25 }
                 )
 
-                { $data | Write-PrettyTable } | Should -Not -Throw
+                $data | Write-PrettyTable
 
-                # Verify that at least one separator line was written, indicating table rendering happened
-                Should -Invoke Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+                Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -eq '+-------+-----+' }
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Alice | 30  |' }
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Bob   | 25  |' }
             }
 
-            It 'accepts an array passed as a single argument (no pipeline)' {
+            It 'renders an array passed as a single argument' {
                 Mock Write-Host { }
                 $data = @(
                     [pscustomobject]@{ Name = 'Carol'; Age = 40 },
                     [pscustomobject]@{ Name = 'Dave'; Age = 22 }
                 )
 
-                { Write-PrettyTable -Data $data } | Should -Not -Throw
-                Should -Invoke Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+                Write-PrettyTable -Data $data
+
+                Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -eq '+-------+-----+' }
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Carol | 40  |' }
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Dave  | 22  |' }
             }
 
-            It 'accepts hashtable input from the pipeline' {
+            It 'renders hashtables from the pipeline' {
                 Mock Write-Host { }
                 $data = @(
                     @{ Name = 'Eve'; Age = 28 },
                     @{ Name = 'Frank'; Age = 33 }
                 )
 
-                { $data | Write-PrettyTable } | Should -Not -Throw
-                Should -Invoke Write-Host -ParameterFilter { $Object -is [string] -and $Object -like '+*' }
+                $data | Write-PrettyTable
+
+                # Hashtable key order is not guaranteed, so accept either column order
+                Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -match '^\+(-------\+-----|-----\+-------)\+$' }
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -match '^\| (Eve   \| 28  |28  \| Eve   )\|$' }
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -match '^\| (Frank \| 33  |33  \| Frank )\|$' }
+            }
+
+            It 'writes nothing for empty input' {
+                Mock Write-Host { }
+
+                @() | Write-PrettyTable
+
+                Should -Invoke Write-Host -Times 0 -Exactly
+            }
+
+            It 'skips null rows' {
+                Mock Write-Host { }
+
+                Write-PrettyTable -Data @($null, [pscustomobject]@{ Name = 'Gina'; Age = 51 }, $null)
+
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Gina | 51  |' }
+                Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -eq '+------+-----+' }
             }
         }
     }
