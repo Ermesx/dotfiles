@@ -7,3 +7,15 @@
   source dir, and `chezmoi init` skips cloning when that dir is already a git repo.
 - Tests under `tests/windows/` that check a completed install (they read `~/.config/config.dsc.yaml`) run only in
   the VM.
+
+## Unit tests against the working copy
+
+Module tests (currently `tests/windows/Write-Pretty/`) run on the host without applying chezmoi: prepend the
+source module directory to `PSModulePath` in a child shell. Only Pester 6 is supported; the Write-Pretty test file
+enforces it with `#Requires`:
+
+```powershell
+pwsh -NoProfile -Command 'Import-Module Pester -MinimumVersion 6.0.0; $env:PSModulePath = "$PWD\home\readonly_Documents\PowerShell\Modules;$env:PSModulePath"; Invoke-Pester tests/windows/Write-Pretty -Output Detailed'
+```
+
+Without the `PSModulePath` prefix, `Import-Module Write-Pretty` loads the *installed* copy from `~/Documents`.
