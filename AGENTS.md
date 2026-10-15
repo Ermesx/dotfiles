@@ -14,8 +14,8 @@ below. Add a rule here only if it applies to every task.
   and change services. Use the VM; otherwise ask first.
 - Never commit plaintext secrets. Never decrypt `*.age` files into the repo or edit `*.age` / `encrypted_*` files as
   text.
-- Check [`docs/known-issues.md`](docs/known-issues.md) before touching related code; remove an entry in the same
-  change that fixes it.
+- Known bugs are tracked as GitHub issues (`gh issue list`). Check them before touching related code; reference the
+  issue (`Fixes #N`) in the change that fixes it.
 - Git: branch off `develop`; Conventional Commits with a scope (`feat(packages): …`); commit only when asked.
 
 ## Commands
