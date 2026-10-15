@@ -9,7 +9,8 @@ need with `chezmoi --source . managed` while planning and keep it in your plan, 
   tooling and is never applied to `$HOME`.
 - On Windows, software state is declarative: `home/.chezmoidata/packages.yaml` is rendered into a DSC v3 document
   that drives `Microsoft.WinGet/Package`, `PowerShellModule/PSModuleResource`, and
-  `Microsoft.DotNet.Dsc/DotNetToolPackage` resources.
+  `Microsoft.DotNet.Dsc/DotNetToolPackage` resources. Rationale and exceptions:
+  [ADR-0001](adr/0001-windows-packages-via-dsc-v3.md).
 - Bootstrap is `install.ps1` (published at `https://getdotfiles.short.gy/install.ps1`): it ensures winget, installs
   chezmoi, Microsoft DSC, and PowerShell 7, then runs `chezmoi init --apply Ermesx`.
 
