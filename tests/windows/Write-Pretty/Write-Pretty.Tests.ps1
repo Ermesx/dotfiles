@@ -97,6 +97,8 @@ Describe 'Write-Pretty' {
                 Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -eq '+-------+-----+' }
                 Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Alice | 30  |' }
                 Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Bob   | 25  |' }
+                # Data rows only; -NoNewline calls are the header pieces
+                Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter { -not $NoNewline -and "$Object" -like '|*' }
             }
 
             It 'renders an array passed as a single argument' {
@@ -111,6 +113,7 @@ Describe 'Write-Pretty' {
                 Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -eq '+-------+-----+' }
                 Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Carol | 40  |' }
                 Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Dave  | 22  |' }
+                Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter { -not $NoNewline -and "$Object" -like '|*' }
             }
 
             It 'renders hashtables from the pipeline' {
@@ -126,6 +129,7 @@ Describe 'Write-Pretty' {
                 Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -match '^\+(-------\+-----|-----\+-------)\+$' }
                 Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -match '^\| (Eve   \| 28  |28  \| Eve   )\|$' }
                 Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -match '^\| (Frank \| 33  |33  \| Frank )\|$' }
+                Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter { -not $NoNewline -and "$Object" -like '|*' }
             }
 
             It 'writes nothing for empty input' {
@@ -142,6 +146,7 @@ Describe 'Write-Pretty' {
                 Write-PrettyTable -Data @($null, [pscustomobject]@{ Name = 'Gina'; Age = 51 }, $null)
 
                 Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { "$Object" -eq '| Gina | 51  |' }
+                Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter { -not $NoNewline -and "$Object" -like '|*' }
                 Should -Invoke Write-Host -Times 3 -Exactly -ParameterFilter { "$Object" -eq '+------+-----+' }
             }
         }
