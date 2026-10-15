@@ -138,7 +138,7 @@ function Update-Modules {
         Write-Cyan "► Updating Modules..."
         foreach ($module in $modules) {
             try {
-                Write-Host " - Upgrading module: $($module.Name)" -NoNewline
+                Write-Host " - Upgrading module: $($module.Name) [" -NoNewline
                 Write-Yellow "$($module.Old)" -NoNewline
                 Write-Host " => " -NoNewline
                 Write-Green "$($module.New)" -NoNewline
