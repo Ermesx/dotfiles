@@ -76,7 +76,7 @@ Negative / costs:
 
 - **Learning cost and silent conventions.** Behavior is driven by file-name attributes (`dot_`, `readonly_`,
   `run_onchange_before_`). A wrong separator silently changes semantics; three scripts already use a dash instead of
-  an underscore and lost their phase (`docs/known-issues.md`).
+  an underscore and lost their phase (#13).
 - **Scripts are not previewable.** `chezmoi diff` excludes scripts (`[diff] exclude = ["scripts"]`), and a
   `run_onchange_` script with side effects (DSC, `HKLM`, services) runs on the next apply. Testing needs the VM.
 - **Update is partial by design.** `chezmoi update` does not upgrade software versions. Manual drift on the machine
