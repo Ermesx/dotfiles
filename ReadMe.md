@@ -13,10 +13,39 @@ Installation
 iex (irm 'https://getdotfiles.short.gy/install.ps1' | Out-String)
 ```
 
-```zsh
-# Linux / macOS
-sh -c "$(curl -fsLS https://getdotfiles.short.gy/install.sh)"
-```
+Linux / macOS: there is no installer script yet (tracked in [#12](https://github.com/Ermesx/dotfiles/issues/12)).
+Install [chezmoi](https://www.chezmoi.io/install/) manually and run `chezmoi init --apply Ermesx`; only part of the
+configuration applies there.
+
+Daily use
+---------------------------------------------------------------
+
+Everything is managed by chezmoi with this repo as the source (`home/`). Change the source, not the files in `$HOME`.
+Rationale: [ADR-0002](docs/adr/0002-chezmoi-as-dotfiles-manager.md); source layout and attributes:
+[docs/chezmoi.md](docs/chezmoi.md).
+
+| Goal | Command |
+|---|---|
+| Get changes from the repo | `chezmoi update` (git pull + apply) |
+| Preview before applying | `chezmoi status`, `chezmoi diff` |
+| Change a config | `chezmoi edit <target>` (opens VS Code), then `chezmoi apply` |
+| Pick up a file edited in `$HOME` | `chezmoi re-add` (all tracked) or `chezmoi add <target>` (new file) |
+| Add a secret | `chezmoi add --encrypt <target>` |
+| Resolve drift or a conflict | `chezmoi merge <target>` |
+| Commit and publish | `chezmoi cd`, then `git commit` / `git push` on a branch off `develop` |
+| Upgrade apps and modules | `Check-Updates`, `Update-Apps`, `Update-Modules` (PowerShell profile) |
+
+Things that bite:
+
+- `chezmoi diff` excludes scripts (`[diff] exclude = ["scripts"]`), but `chezmoi apply` and `update` still run them.
+  `run_onchange_` scripts (the DSC run among them) rerun only when their rendered input changed, for example after a
+  `packages.yaml` edit, and they install software.
+- `chezmoi re-add` does not update `.tmpl` sources: it skips templates. Change those in the source with
+  `chezmoi edit`.
+- `chezmoi update` aligns the declared state only. It does not upgrade installed apps or modules; use the update
+  commands above (limited to the packages in `packages.yaml`).
+- `git.autoCommit` / `git.autoPush` are deliberately off: changes go through a branch off `develop` and Conventional
+  Commits, which auto-commit on the current branch would bypass.
 
 General Architecture
 ---------------------------------------------------------------
@@ -24,6 +53,8 @@ General Architecture
 ![arch.png](docs/arch.png)
 
 ## 📦 Installed Applications & Modules
+
+Generated from [`home/.chezmoidata/packages.yaml`](home/.chezmoidata/packages.yaml); edit that file, not the table.
 
 <!-- BEGIN:packages -->
 | Name                                                       | Category   | Install Type | Purpose                              |
@@ -82,4 +113,4 @@ General Architecture
 
 ---
 
-See key bindings and shortcuts here: [docs/bindings.md](docs/bindings.md)
+See key bindings and shortcuts here: [docs/terminal-bindings.md](docs/terminal-bindings.md)
