@@ -127,5 +127,11 @@ metadata, no change to the DSC template.
   (`$CLAUDE_PROJECT_DIR` would be empty under PowerShell, which uses `$env:`). Fixing the existing Rider hook is out of scope (same file as the `settings.local.json`
   cleanup); it is reported in the plan's hand-off. Whether the hook's cwd is the worktree or the main checkout is not
   verified; A6 checks it. The script itself does not depend on it (D9).
+  **Correction (observed later):** the cwd assumption was wrong. The hook inherits the session's current directory,
+  so after Claude changes directory (e.g. into `home/.chezmoiscripts/windows`) the relative path fails with
+  "can't open file …\windows\.claude\hooks\docs-sync-trigger.py". The hook now uses exec form,
+  `"command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/docs-sync-trigger.py"]`: Claude Code
+  substitutes the placeholder itself, so no shell expands anything and spaces in the path need no quoting. Verified
+  with `claude -p` 2.1.292: the hook ran from a subdirectory with a space in its path.
 - **Hook change needs a session restart** (settings are read at start), so A6 cannot be tested in the session that
   implements it.
