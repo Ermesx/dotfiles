@@ -111,7 +111,7 @@ git commit -m "docs(packages): define category glossary and group every package 
 - Create: `.claude/settings.json`
 
 No automated tests: one small script does not justify a new test tool in the repo. It is verified by the manual
-smoke check in Step 3 and the live trigger in Task 4, Step 5. Add Pester tests only if the hook starts failing in
+smoke check in Step 3 and the live trigger in Task 4, Step 4. Add Pester tests only if the hook starts failing in
 practice.
 
 **Interfaces:**
@@ -151,7 +151,7 @@ foreach ($c in $cases) { "--- $c"; $c | python3 .claude/hooks/docs-sync-trigger.
 
 Expected: no parse error; the first three print one JSON line containing `docs-sync`; the other six print
 nothing; every `exit=0`. The live trigger (A6) cannot be tested in this session (settings are read at session
-start); it is Task 4, Step 5.
+start); it is Task 4, Step 4.
 
 - [ ] **Step 4: Commit**
 
@@ -241,12 +241,7 @@ git commit -m "feat(claude): docs-sync agent and generated-region markers" -m "R
 **Interfaces:**
 - Consumes: everything above. Produces: the corrected documents (A3) and evidence for A4–A6.
 
-- [ ] **Step 1: Check the AIChat precondition**
-
-Run: `Select-String -Path home/.chezmoidata/packages.yaml -Pattern 'AIChat'; gh issue view 21 --json state --jq .state`
-Expected: if AIChat is still listed, **stop and ask the user** whether to land #21 first (spec "Risks"). Do not add an ignore rule.
-
-- [ ] **Step 2: First run (A3)**
+- [ ] **Step 1: First run (A3)**
 
 Run the `docs-sync` agent in this session (Agent tool, `subagent_type: "docs-sync"`; if the new agent is not yet
 registered, restart the session or run a general-purpose agent whose prompt is the body of
@@ -262,20 +257,20 @@ marker line numbers from `Select-String`). README row count = ids in `wingets` +
 `yazi_plugins` + 1 (`wsl`); `GnuWin32.File` and `.NET SDK 9` absent; the bindings table contains `Alt+c`, `Ctrl+r`,
 `Ctrl+t`, `Ctrl+s`, `Ctrl+Alt+c`, `UpArrow`, `DownArrow` with the sources from the profile files.
 
-- [ ] **Step 3: Idempotence (A4)**
+- [ ] **Step 2: Idempotence (A4)**
 
-Stage the Step 2 output (`git add ReadMe.md docs/terminal-bindings.md`), run the agent again, then `git diff`
+Stage the Step 1 output (`git add ReadMe.md docs/terminal-bindings.md`), run the agent again, then `git diff`
 (unstaged changes only).
-Expected: empty. If not empty, tighten the prompt rule (D4) and repeat from Step 2.
+Expected: empty. If not empty, tighten the prompt rule (D4) and repeat from Step 1.
 
-- [ ] **Step 4: Mutation checks (A5, Review Focus 3–4)** — all on the working tree, reverted with `git restore`
+- [ ] **Step 3: Mutation checks (A5, Review Focus 3–4)** — all on the working tree, reverted with `git restore`
 
 (a) Delete the id `Microsoft.PowerToys` from `packages.yaml`, run the agent → its row is gone. (b) Add `- Foo.Bar` under a new `# unknown` group → final message lists it; no row added.
 (c) Delete `<!-- END:packages -->` → agent reports the marker problem and `git diff ReadMe.md` is empty.
 Revert each with `git restore home/.chezmoidata/packages.yaml ReadMe.md` before the next; confirm clean afterwards
-(except the staged Step 2 output).
+(except the staged Step 1 output).
 
-- [ ] **Step 5: Live hook trigger (A6)** — needs a new session
+- [ ] **Step 4: Live hook trigger (A6)** — needs a new session
 
 Start a fresh Claude Code session in the repo, make a trivial comment edit in `packages.yaml` and observe the
 reminder; edit `docs/conventions.md` and observe none. Record which shell ran the hook (does `$CLAUDE_PROJECT_DIR`
@@ -283,7 +278,7 @@ expand?) and whether it pointed at the worktree. If the command fails, fix the c
 `.claude/settings.json` (e.g. fall back to a `.claude/hooks/...` path relative to the cwd) and update spec "Risks".
 Revert the trial edits.
 
-- [ ] **Step 6: Final checks and commit**
+- [ ] **Step 5: Final checks and commit**
 
 ```powershell
 chezmoi --source . managed | Measure-Object
