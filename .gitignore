@@ -78,9 +78,13 @@ zsdoc/data
 .vagrant/
 
 # Log files (if you are creating logs in debug mode, uncomment this)
-# *.log
+*.log
 
 ### Vagrant Patch ###
 *.box
 
 # End of https://www.toptal.com/developers/gitignore/api/rider,powershell,zsh,vagrant
+
+### Claude Code ###
+# Git worktrees created by Claude Code sessions
+.claude/worktrees/
