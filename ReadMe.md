@@ -13,6 +13,11 @@ Installation
 iex (irm 'https://getdotfiles.short.gy/install.ps1' | Out-String)
 ```
 
+```zsh
+# Linux / macOS
+sh -c "$(curl -fsLS https://getdotfiles.short.gy/install.sh)"
+```
+
 General Architecture
 ---------------------------------------------------------------
 
