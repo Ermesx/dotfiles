@@ -41,8 +41,10 @@ alignment style: pad cells to the widest cell in the column).
 - **Rows:** one per id in `packages.windows.wingets`, `packages.windows.modules`, `packages.dotnet_tools`,
   `packages.yazi_plugins`, plus one row for `packages.windows.wsl` (the distro name). `packages.linux` is out of scope.
 - **Install Type:** `App` (wingets), `Module`, `Tool` (dotnet_tools), `Yazi plugin`, `WSL distro`.
-- **Category:** the glossary name of the nearest group comment above the id (or above the `wsl` key). An id whose
-  group is not in the glossary, or that has no group comment, is **left out of the table and listed under
+- **Category:** the glossary name of the nearest group comment above the id **within the same YAML list** (or the
+  comment directly above the `wsl` key). A comment belonging to an earlier list never counts: an id that precedes
+  the first comment of its own list has no group. An id whose group is not in the glossary, or that has no group
+  comment, is **left out of the table and listed under
   "Reported"** — do not guess a category.
 - **Order:** glossary order of the category (shell, fzf, git, dotnet, node, containers, chezmoi, editors, browsers,
   other), then source order (wingets, modules, dotnet_tools, yazi_plugins, wsl), then order in the YAML.
@@ -80,7 +82,9 @@ table with header exactly `| Shortcut | Action | Source |`.
   `~/Documents/PowerShell/Modules/PSFzf/*/` found with Glob). Each is a two-step chord `Ctrl+g, Ctrl+<key>`
   (`b` branches, `f` files, `h` hashes, `p` pull requests, `s` stashes, `t` tags at PSFzf 2.7.9); list them in a
   `## 🌿 Git (PSFzf)` section with Source `added`. A binding you cannot verify is left out and listed under "Reported".
-- **Order:** within a section by shortcut as listed in the sources: profile file order, then PSFzf, then seed defaults.
+- **Order:** never reorder existing rows. A new row goes at the **end** of the section it belongs to (the
+  `## 🌿 Git (PSFzf)` section lists chords in the order of `SetGitKeyBindings`). Only when a region is empty is it
+  built from scratch, in this order: profile files by name, then PSFzf, then seed defaults.
 
 ## 5. Idempotence
 
