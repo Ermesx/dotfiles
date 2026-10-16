@@ -86,5 +86,11 @@ zsdoc/data
 # End of https://www.toptal.com/developers/gitignore/api/rider,powershell,zsh,vagrant
 
 ### Claude Code ###
+# Personal project settings (docs: settings → "Project local")
+.claude/settings.local.json
+# Personal project instructions (docs: memory → "Local instructions")
+CLAUDE.local.md
+# Subagent memory with scope "local" (docs: sub-agents → persistent memory)
+.claude/agent-memory-local/
 # Git worktrees created by Claude Code sessions
 .claude/worktrees/
