@@ -26,7 +26,7 @@ correction of both documents.
 - `.claude/settings.local.json` is not modified (its Rider hook is already broken, see Hand-off).
 - The hook uses no network and no `chezmoi`; the agent never edits `home/`.
 - Glossary, exact: `shell`, `fzf`, `git`, `dotnet`, `node`, `containers`, `chezmoi`, `editors`, `browsers`, `other`.
-- Hook command, exact: `python3 .claude/hooks/docs-sync-trigger.py` (project-relative: no variable expansion, shell-independent).
+- Hook command, exact: `"command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/docs-sync-trigger.py"]` (exec form: Claude Code expands the placeholder, shell-independent, cwd-independent; a plain relative path breaks once the session changes directory).
 - Markers, exact: `<!-- BEGIN:packages -->` / `<!-- END:packages -->` (ReadMe.md);
   `<!-- BEGIN:bindings -->` / `<!-- END:bindings -->` (docs/terminal-bindings.md).
 
