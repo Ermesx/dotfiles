@@ -108,9 +108,6 @@ metadata, no change to the DSC template.
 
 ## Risks and open points
 
-- **AIChat (#21).** `sigoden.AIChat` is still in `packages.yaml`, so by R4 the first run adds a row for it, which
-  the issue says should not happen. Recommended: land #21 first. If #17 lands first, the AIChat row appears and #21
-  removes it through this same mechanism. No ignore-list is added (YAGNI).
 - **The hook is advisory (D7).** The session can ignore it. Accepted: the failure mode is a stale doc until the next
   edit of a source file, which is the status quo minus the cases the hook catches. The git `pre-commit` follow-up is
   the structural fix.
