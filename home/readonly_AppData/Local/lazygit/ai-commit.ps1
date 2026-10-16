@@ -35,6 +35,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Empty-string native arguments (--tools '') are dropped under the legacy mode (default before pwsh 7.3).
+$PSNativeCommandArgumentPassing = 'Standard'
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 
 # Generated or low-signal files: the model gains nothing from their diff, and they dominate its size.
@@ -50,6 +52,8 @@ if (-not $staged) {
 
 $stat = (git diff --cached --stat=120 -- .) -join "`n"
 $diff = (git diff --cached -- . $exclude) -join "`n"
+# Only generated files staged: filtering would leave the model nothing to describe.
+if (-not $diff.Trim()) { $diff = (git diff --cached) -join "`n" }
 if ($diff.Length -gt $MaxDiffChars) {
     $diff = $diff.Substring(0, $MaxDiffChars) + "`n[diff truncated at $MaxDiffChars characters]"
 }
@@ -100,9 +104,9 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
 Push-Location $env:TEMP
 try {
     $raw = $prompt | claude -p 'Follow the instructions on stdin.' --model $Model --tools '' `
-        --no-session-persistence --disable-slash-commands --strict-mcp-config --setting-sources '' --output-format text
+        --no-session-persistence --disable-slash-commands --strict-mcp-config --setting-sources '' --output-format text 2>&1
     if ($LASTEXITCODE -ne 0) {
-        [Console]::Error.WriteLine("claude exited with code $LASTEXITCODE.")
+        [Console]::Error.WriteLine("claude exited with code ${LASTEXITCODE}:`n$($raw -join "`n")")
         exit 1
     }
 }
@@ -110,10 +114,10 @@ finally {
     Pop-Location
 }
 
-$pattern = if ($Type -eq 'ai-defined') { '[a-z]+' } else { [regex]::Escape($Type) }
+$pattern = if ($Type -eq 'ai-defined') { 'build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test' } else { [regex]::Escape($Type) }
 $candidates = $raw -split '\r?\n' |
     ForEach-Object { ($_ -replace '^\s*(?:[-*]|\d+[.)])\s*', '').Trim().Trim('`') } |
-    Where-Object { $_ -match "^$pattern(\([^)]+\))?!?: \S" } |
+    Where-Object { $_.Length -le 72 -and $_ -match "^($pattern)\([^)]+\)!?: \S" } |
     Select-Object -Unique -First $Count
 
 if (-not $candidates) {
