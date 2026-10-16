@@ -196,7 +196,7 @@ not narrative:
    *Purpose* cells verbatim, write new ones as `Display name (winget id)` / short purpose in the existing style. [R4, D3, D4]
 4. Bindings algorithm: columns and `Source` values with the D6 rules; inputs listed in R5; the **seed defaults**
    list (D5: `Ctrl+]` GotoBrace, `Ctrl+h` BackwardDeleteChar, `Alt+.` YankLastArg, `Alt+a` SelectCommandArgument,
-   `Ctrl+l` ClearScreen, `Ctrl+z` Undo, `Ctrl+y` Redo, `F7` History); verify each default and each PSFzf chord
+   `Ctrl+l` ClearScreen, `Ctrl+z` Undo, `Ctrl+y` Redo); verify each default and each PSFzf chord
    (including every `-GitKeyBindings` chord) against the PSReadLine/PSFzf documentation with `WebFetch`; report what
    cannot be verified; action text is one plain sentence, existing action cells are kept verbatim. [R5–R7]
 5. Idempotence rule: no source change ⇒ no diff. [R7, D4]

@@ -69,8 +69,9 @@ table with header exactly `| Shortcut | Action | Source |`.
   function and the profile binds something else; `added` — the chord has no default.
 - **Seed defaults** (shown even though the profile does not set them): `Ctrl+]` GotoBrace, `Ctrl+h`
   BackwardDeleteChar, `Alt+.` YankLastArg, `Alt+a` SelectCommandArgument, `Ctrl+l` ClearScreen, `Ctrl+z` Undo,
-  `Ctrl+y` Redo, `F7` History. Do not add others and do not remove these unless verification (below) shows one is
-  not a default in Windows mode — then drop it and report it.
+  `Ctrl+y` Redo. Do not add others and do not remove these unless verification (below) shows one is
+  not a default in Windows mode — then drop it and report it. Seed rows (Source `default`) go into the
+  `## ✏️ Navigation & Editing` section, except `Ctrl+l`, which goes into `## 🖥️ Screen Management`.
 - **Action text:** one plain-language sentence of what the key does for the user. `-BriefDescription` and
   `-Function` names are input, not the text. If the shortcut already has a row, keep its Action cell verbatim
   unless the action itself changed (different function or purpose).
