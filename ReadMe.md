@@ -25,6 +25,7 @@ General Architecture
 
 ## 📦 Installed Applications & Modules
 
+<!-- BEGIN:packages -->
 | Name                                                       | Category | Install Type | Purpose                              |
 |------------------------------------------------------------|----------|--------------|--------------------------------------|
 | PowerShell 7 (Microsoft.PowerShell)                        | shell    | App          | Modern PowerShell shell              |
@@ -69,6 +70,7 @@ General Architecture
 | yazi (sxyazi.yazi)                                         | other    | App          | TUI file manager                     |
 | powershell-yaml                                            | other    | Module       | YAML parsing for PowerShell          |
 | Pester                                                     | other    | Module       | PowerShell testing framework         |
+<!-- END:packages -->
 
 ---
 
