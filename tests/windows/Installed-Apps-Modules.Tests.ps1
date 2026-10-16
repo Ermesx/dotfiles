@@ -5,7 +5,7 @@ Describe "After installing dotfiles" {
         $configPath = Join-Path $HOME '.config\config.dsc.yaml'
         $resources = (Get-Content -Path $configPath | ConvertFrom-Yaml).resources
         $script:packages = $resources | Where-Object { $_.type -eq 'Microsoft.WinGet/Package' }
-        $script:modules = $resources | Where-Object { $_.type -eq 'AnyPackageDsc/Package' }
+        $script:modules = $resources | Where-Object { $_.type -eq ' PowerShellModule/PSModuleResource' }
     }
 
     BeforeAll {
