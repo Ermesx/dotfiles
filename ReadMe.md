@@ -96,6 +96,7 @@ Things that bite:
 | dotnet-stack (dotnet-stack)                                | dotnet     | Tool         | Managed stack trace tool             |
 | refitter                                                   | dotnet     | Tool         | Refit client generator from OpenAPI  |
 | Node.js (OpenJS.NodeJS)                                    | node       | App          | JavaScript runtime                   |
+| Python Install Manager (Python.PythonInstallManager)       | python     | App          | Python runtime manager               |
 | Docker Desktop (Docker.DockerDesktop)                      | containers | App          | Docker engine & UI                   |
 | Vagrant (Hashicorp.Vagrant)                                | containers | App          | VM environments for testing          |
 | DockerCompletion                                           | containers | Module       | Docker command completion            |

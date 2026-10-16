@@ -53,6 +53,9 @@ packages:
       # node
       - OpenJS.NodeJS
 
+      # python
+      - Python.PythonInstallManager
+
       # containers
       - Docker.DockerDesktop
       - Hashicorp.Vagrant

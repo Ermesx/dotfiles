@@ -27,6 +27,7 @@ package table.
 | `git` | Git, Git UIs and diff/pager tools, repo inspection, Git modules |
 | `dotnet` | .NET SDKs and .NET global tools |
 | `node` | Node.js runtime and tooling |
+| `python` | Python runtimes and the tooling that manages them |
 | `containers` | Docker, Vagrant and other container or VM tooling, and their modules |
 | `chezmoi` | The dotfiles manager itself |
 | `editors` | Code editors and IDEs |
