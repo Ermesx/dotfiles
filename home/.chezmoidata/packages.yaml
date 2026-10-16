@@ -1,5 +1,6 @@
 packages:
   dotnet_tools:
+    # dotnet
     - dotnet-ef
     - dotnet-reportgenerator-globaltool
     - dotnet-outdated-tool
@@ -14,9 +15,11 @@ packages:
     - refitter
 
   yazi_plugins:
+    # shell
     - yazi-rs/plugins:full-border
 
   windows:
+    # other
     wsl: Ubuntu-24.04
     wingets:
       # shell
@@ -47,7 +50,7 @@ packages:
       # dotnet
       - Microsoft.DotNet.SDK.10
 
-      # Node JS
+      # node
       - OpenJS.NodeJS
 
       # containers
@@ -69,11 +72,20 @@ packages:
       - APIDocumentation.Scalar
 
     modules:
+      # shell
       - Microsoft.WinGet.Client
       - Terminal-Icons
+
+      # fzf
       - PSfzf
+
+      # git
       - posh-git
+
+      # containers
       - DockerCompletion
+
+      # other
       - powershell-yaml
       - Pester
 
@@ -97,7 +109,7 @@ packages:
       - gitql
       - onefetch
 
-      # docker
+      # containers
       - docker
 
     casks:
