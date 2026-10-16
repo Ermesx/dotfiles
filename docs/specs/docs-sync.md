@@ -1,6 +1,6 @@
 # Spec: Agent and hook keep the README package table and key bindings list in sync with source
 
-Issue: [#17](https://github.com/Ermesx/dotfiles/issues/17) · Status: Draft · Date: 2026-10-16 ·
+Issue: [#17](https://github.com/Ermesx/dotfiles/issues/17) · Status: Implemented · Date: 2026-10-16 ·
 Plan: [`docs-sync.plan.md`](docs-sync.plan.md)
 
 ## Problem
