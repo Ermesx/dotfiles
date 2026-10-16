@@ -30,6 +30,7 @@ param(
     [ValidateRange(1, 20)]
     [int]$Count = 8,
     [string]$Model = 'haiku',
+    [ValidateRange(1, 2147483647)]
     [int]$MaxDiffChars = 20000,
     [switch]$DryRun
 )
