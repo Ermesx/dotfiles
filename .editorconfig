@@ -8,9 +8,11 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{ps1,bat,cmd}]
+[*.{ps1,psm1,psd1,bat,cmd}]
 end_of_line = crlf
 
+[*.ps1.tmpl]
+end_of_line = crlf
 
 [*.{json,yml,yaml}]
 indent_size = 2
