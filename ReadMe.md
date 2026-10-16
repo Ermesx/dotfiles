@@ -13,10 +13,6 @@ Installation
 iex (irm 'https://getdotfiles.short.gy/install.ps1' | Out-String)
 ```
 
-Linux / macOS: there is no installer script yet (tracked in [#12](https://github.com/Ermesx/dotfiles/issues/12)).
-Install [chezmoi](https://www.chezmoi.io/install/) manually and run `chezmoi init --apply Ermesx`; only part of the
-configuration applies there.
-
 General Architecture
 ---------------------------------------------------------------
 
