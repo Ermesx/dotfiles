@@ -122,9 +122,10 @@ metadata, no change to the DSC template.
 - **Hook shell syntax (observed 2026-10-16).** On this Windows host hook commands do not run under `cmd.exe`: the
   existing `settings.local.json` hook uses `%CLAUDE_PROJECT_DIR%`, which is not expanded and fails with "can't open
   file …\%CLAUDE_PROJECT_DIR%\.claude\hooks\post-tool-call.py". The new hook therefore uses
-  `"$CLAUDE_PROJECT_DIR"` (works in POSIX shells and PowerShell expands env via `$env:`, so A6 must confirm which
-  shell runs it). Fixing the existing Rider hook is out of scope (same file as the `settings.local.json`
-  cleanup); it is reported in the plan's hand-off. Whether `$CLAUDE_PROJECT_DIR` points at a worktree or the main
-  checkout is not verified; A6 checks it. The script itself does not depend on it (D9).
+  a project-relative path (`python3 .claude/hooks/docs-sync-trigger.py`): the same error shows hooks start in the
+  project root, and a relative path needs no variable expansion, so it does not depend on which shell runs it
+  (`$CLAUDE_PROJECT_DIR` would be empty under PowerShell, which uses `$env:`). Fixing the existing Rider hook is out of scope (same file as the `settings.local.json`
+  cleanup); it is reported in the plan's hand-off. Whether the hook's cwd is the worktree or the main checkout is not
+  verified; A6 checks it. The script itself does not depend on it (D9).
 - **Hook change needs a session restart** (settings are read at start), so A6 cannot be tested in the session that
   implements it.

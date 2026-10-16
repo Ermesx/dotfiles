@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/docs-sync-trigger.py\""
+            "command": "python3 .claude/hooks/docs-sync-trigger.py"
           }
         ]
       }
