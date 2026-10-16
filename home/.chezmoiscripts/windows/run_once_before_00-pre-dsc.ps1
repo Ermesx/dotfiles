@@ -4,7 +4,7 @@ if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
     Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 }
 
-Write-Host "► Installing Requred DSC Resources" -ForegroundColor Cyan
+Write-Host "► Installing Required DSC Resources" -ForegroundColor Cyan
 Install-Module PowerShellModule
 Install-Module Microsoft.DotNet.Dsc -AllowPrerelease
 Install-Module Microsoft.Windows.Settings -AllowPrerelease

@@ -4,13 +4,15 @@
 
 `.editorconfig` is the authority; `.gitattributes` matches it.
 
-- `*.ps1`, `*.bat`, `*.cmd`: **CRLF**.
-- Everything else, including `*.ps1.tmpl`, `*.psm1`, and `*.psd1`: **LF**.
+- `*.ps1`, `*.ps1.tmpl`, `*.psm1`, `*.psd1`, `*.bat`, `*.cmd`: **CRLF**.
+- Everything else (`*.md`, `*.yaml`, `*.json`, other `*.tmpl`): **LF**.
 - Indent and other formatting rules: follow `.editorconfig`.
 
 ## Scripts
 
-- Scripts must be idempotent: guard every install with an existence check (existing scripts show the pattern).
+- Scripts must be idempotent: guard every install by checking the target state (existing scripts show the pattern),
+  not the presence of the tool. Skip the guard only when the command converges by itself in a `run_onchange` script
+  (`dsc config set`).
 - User-facing progress lines use `Write-Host "► <Action>" -ForegroundColor Cyan`.
 
 ## Generated documentation
