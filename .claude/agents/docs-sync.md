@@ -25,8 +25,12 @@ You may edit only the text strictly between these lines, and nothing else in any
 - `ReadMe.md`: `<!-- BEGIN:packages -->` … `<!-- END:packages -->`
 - `docs/terminal-bindings.md`: `<!-- BEGIN:bindings -->` … `<!-- END:bindings -->`
 
-Each marker must appear exactly once per file, BEGIN before END. If a marker is missing, duplicated, or out of
-order, **stop: edit nothing in that file and report the problem.** Never append a table elsewhere. Never edit
+**First action, before reading anything else:** run `Grep` with pattern `<!-- (BEGIN|END):(packages|bindings) -->`
+(output mode `content`, with line numbers) on `ReadMe.md` and on `docs/terminal-bindings.md`, and state the result.
+Each file must contain exactly its own two markers (`packages` in `ReadMe.md`, `bindings` in
+`docs/terminal-bindings.md`): one BEGIN, then one END, no others. If a marker is missing, duplicated, or out of
+order, **stop: edit nothing in that file and report the problem under "Reported" (name the missing or extra
+marker).** A report of "no marker problems" is only valid if that Grep showed exactly the expected two lines. Never append a table elsewhere. Never edit
 `home/`, `packages.yaml`, the profile files, or any file other than these two. Use `Edit` on the region only.
 
 ## 3. Packages region
@@ -70,8 +74,12 @@ table with header exactly `| Shortcut | Action | Source |`.
   unless the action itself changed (different function or purpose).
 - **Verification (do not rely on memory):** fetch the PSReadLine key-handler documentation
   (https://learn.microsoft.com/powershell/module/psreadline/about/about_psreadline_functions) to confirm each
-  default and its function, and the PSFzf README (https://github.com/kelleyma49/PSFzf) to confirm each PSFzf chord
-  and every `-GitKeyBindings` chord. A binding you cannot verify is left out and listed under "Reported".
+  default and its function, and the PSFzf source to confirm each PSFzf chord. The README does not list the `-GitKeyBindings`
+  chords: take them from the `SetGitKeyBindings` function in `PSFzf.Git.ps1`
+  (https://raw.githubusercontent.com/kelleyma49/PSFzf/master/PSFzf.Git.ps1, or the installed copy under
+  `~/Documents/PowerShell/Modules/PSFzf/*/` found with Glob). Each is a two-step chord `Ctrl+g, Ctrl+<key>`
+  (`b` branches, `f` files, `h` hashes, `p` pull requests, `s` stashes, `t` tags at PSFzf 2.7.9); list them in a
+  `## 🌿 Git (PSFzf)` section with Source `added`. A binding you cannot verify is left out and listed under "Reported".
 - **Order:** within a section by shortcut as listed in the sources: profile file order, then PSFzf, then seed defaults.
 
 ## 5. Idempotence
