@@ -22,7 +22,7 @@ need with `chezmoi --source . managed` while planning and keep it in your plan, 
 | Applying that state on Windows | The DSC template in `home/.chezmoitemplates/` and the numbered scripts in `home/.chezmoiscripts/windows/` |
 | One-off machine setup (font, WSL, ssh-agent key, key decryption) | `home/.chezmoiscripts/<os>/`; font choice in `home/.chezmoidata/` |
 | PowerShell shell experience (modules, PSReadLine, fzf, completers, prompt, update checks) | The profile template under `home/readonly_Documents/PowerShell/` and the fragments it dot-sources |
-| Per-app configuration (terminal, git, starship, lazygit, bat, yazi, aichat, …) | `home/dot_*` for `$HOME`, `home/readonly_AppData/` for `%APPDATA%` / `%LOCALAPPDATA%` |
+| Per-app configuration (terminal, git, starship, lazygit, bat, yazi, …) | `home/dot_*` for `$HOME`, `home/readonly_AppData/` for `%APPDATA%` / `%LOCALAPPDATA%` |
 | Secrets and identity | `*.age` / `encrypted_*` files and `home/.chezmoi.toml.tmpl` |
 | OS-specific behavior | `.chezmoiignore` files and `.chezmoi.os` branches inside templates |
 | Testing a full install | `tests/` (Vagrant + Pester) |

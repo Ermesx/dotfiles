@@ -64,7 +64,6 @@ Things that bite:
 | jq (jqlang.jq)                                             | shell      | App          | JSON processor                       |
 | zoxide (ajeetdsouza.zoxide)                                | shell      | App          | Smart directory navigation           |
 | yazi (sxyazi.yazi)                                         | shell      | App          | TUI file manager                     |
-| AIChat (sigoden.AIChat)                                    | shell      | App          | LLM chat CLI                         |
 | Microsoft.WinGet.Client                                    | shell      | Module       | Winget cmdlets for DSC               |
 | Terminal-Icons                                             | shell      | Module       | File and folder icons in terminal    |
 | yazi-rs/plugins:full-border                                | shell      | Yazi plugin  | Full border for yazi panes           |
