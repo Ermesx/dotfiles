@@ -1,5 +1,6 @@
 # 🔑 Custom PSReadLine Keybindings Cheat Sheet
 
+<!-- BEGIN:bindings -->
 ## ✏️ Navigation & Editing
 
 | Shortcut      | Purpose                                                                |
@@ -29,5 +30,6 @@
 |----------|---------------------------------------------|
 | Ctrl+p   | Select multiple lines and copy to clipboard |
 | Ctrl+l   | Clear the screen and redraw current line    |
+<!-- END:bindings -->
 
 ---

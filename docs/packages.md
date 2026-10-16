@@ -4,7 +4,9 @@
   dotnet tools, yazi plugins, WSL distro, Linux packages. Templates, the DSC document, profile `Import-Module`
   lines, and tests all derive from it — never add a package anywhere else. Keep entries under the existing
   category comments.
-- The package table in `ReadMe.md` is a manual mirror of that file. Update it in the same change.
+- The package table in `ReadMe.md` (between the `BEGIN:packages` / `END:packages` markers) is generated from that
+  file by the `docs-sync` agent (`.claude/agents/docs-sync.md`): ids and categories come from the YAML, names and
+  purposes are kept from the existing rows. Do not edit it by hand; see `docs/conventions.md`.
 - Every id in `packages.yaml` sits under a group comment (`# shell`, `# git`, …) taken from the category glossary
   below. Add a new category here first, then use it.
 - Winget entries must be exact winget package IDs (`Publisher.Name`). Verify with `winget show --id <Id> --exact`.
