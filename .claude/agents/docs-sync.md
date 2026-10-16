@@ -63,7 +63,7 @@ table with header exactly `| Shortcut | Action | Source |`.
   every `Set-PSReadLineKeyHandler` (a handler with several keys, e.g. `'"',"'"` or `'(', '{', '['`, gets one row per
   key group, or one row listing all of its keys), the `Set-PsFzfOption` chord parameters
   (`-PSReadlineChordProvider`, `-PSReadlineChordReverseHistory`, `-PSReadlineChordSetLocation`), the chords enabled
-  by `-GitKeyBindings`, and the PSFzf bindings of `-TabExpansion`.
+  by `-GitKeyBindings`.
 - **Source:** `default` — the chord/function is a PSReadLine default for `-EditMode Windows` (a profile line that
   re-declares the same function on the same chord is still `default`); `changed` — the chord has a default
   function and the profile binds something else; `added` — the chord has no default.
