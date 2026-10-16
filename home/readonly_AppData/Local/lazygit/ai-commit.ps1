@@ -53,8 +53,8 @@ if (-not $staged) {
 
 $stat = (git diff --cached --stat=120 -- .) -join "`n"
 $diff = (git diff --cached -- . $exclude) -join "`n"
-# Only generated files staged: filtering would leave the model nothing to describe.
-if (-not $diff.Trim()) { $diff = (git diff --cached) -join "`n" }
+# Only generated files staged: say so instead of sending an empty section (or the diff we just filtered out).
+if (-not $diff.Trim()) { $diff = '(omitted: only lockfiles or generated files are staged; infer the change from the file list)' }
 if ($diff.Length -gt $MaxDiffChars) {
     $diff = $diff.Substring(0, $MaxDiffChars) + "`n[diff truncated at $MaxDiffChars characters]"
 }
