@@ -6,20 +6,16 @@ gui:
       - reverse
     inactiveBorderColor:
       - '#AAAAAA'
-
 git:
-  paging:
-    colorArg: always
-    # It doesn't work on windows => https://github.com/creack/pty/pull/155
-    pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+  diffRenderers:
+    - colorArg: always
+      # It doesn't work on windows => https://github.com/creack/pty/pull/155
+      command: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
   branchLogCmd: git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=format:"%C(blue)%ad %C(yellow)%d %C(auto)%h %C(reset)%<(50,trunc)%s %C(green)(%an)" {{branchName}} --
   ignoreWhitespaceInDiffView: true
-
 os:
   editPreset: 'vscode'
-
 disableStartupPopups: true
-
 customCommands:
   - key: <c-a>
     description: AI-powered conventional commit
