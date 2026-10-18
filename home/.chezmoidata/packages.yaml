@@ -45,12 +45,16 @@ packages:
       - JesseDuffield.lazygit
       - amrdeveloper.gitql
       - GitHub.cli
+      - Gitleaks.Gitleaks
 
       # dotnet
       - Microsoft.DotNet.SDK.10
 
       # node
       - OpenJS.NodeJS
+
+      # ai
+      - Anthropic.ClaudeCode
 
       # python
       - Python.PythonInstallManager

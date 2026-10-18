@@ -1,8 +1,21 @@
 {{- if eq .chezmoi.os "windows" }}
 **/*.sh
+.claude/*
+!.claude/CLAUDE.md
+!.claude/settings.json
+!.claude/keybindings.json
+!.claude/themes
+!.claude/rules
+!.claude/commands
+!.claude/agents
+!.claude/output-styles
+!.claude/workflows
+!.claude/skills
+.claude/skills/synced
 {{- else }}
 readonly_AppData/
 readonly_Documents/
 **/*.ps1
+.claude
 {{- end -}}
 

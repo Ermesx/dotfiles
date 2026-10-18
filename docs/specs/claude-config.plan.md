@@ -125,20 +125,17 @@ documentation only.
 **Files:**
 - Modify: `docs/chezmoi.md` (new section *Claude Code (`~/.claude`)* after *Encryption*)
 - Modify: `docs/architecture.md` (*Capabilities* row)
-- Modify: `ReadMe.md` (*Daily use* row)
 - Modify: `docs/specs/claude-config.md` (Status → Implemented)
 
 **Interfaces:**
 - Consumes: Tasks 1–3 (paths and names).
 
-- [ ] **Step 1: Write the `docs/chezmoi.md` section** with the content listed under spec R8, in the file's existing
-  bullet style. Include the "Considered and deferred" paragraph verbatim in substance.
+- [ ] **Step 1: Add the two bullets to the `docs/chezmoi.md` *Encryption* section** (spec R8, first sentence only;
+  the rest of R8 stays in the spec).
 - [ ] **Step 2: Add the `docs/architecture.md` row** (R9): capability *Claude Code configuration*, start from
   `home/dot_claude/` and the `.claude` entries in `home/.chezmoiignore`.
-- [ ] **Step 3: Add the `ReadMe.md` *Daily use* row** (R10), after the `chezmoi re-add` row:
-  goal *Pick up Claude Code settings changed by the app*, command `chezmoi status`, then `chezmoi re-add`, then commit.
-- [ ] **Step 4: Final verification.**
+- [ ] **Step 3: Final verification.**
   Run: `chezmoi --source . managed | Select-String '^\.claude'` → exactly the three lines from Task 2.
   Run: `Get-Content -Raw home/.chezmoitemplates/config.dsc.yaml.tmpl | chezmoi --source . execute-template | Select-String Anthropic.ClaudeCode` → one match.
   Re-run the Task 3, Step 4 scan over the whole branch diff: `git diff develop --stat` shows only the files in this plan.
-- [ ] **Step 5: Set the spec's Status to Implemented, commit** — `docs(chezmoi): document Claude Code config (Fixes #19)`.
+- [ ] **Step 4: Set the spec's Status to Implemented, commit** — `docs(chezmoi): document Claude Code config (Fixes #19)`.
