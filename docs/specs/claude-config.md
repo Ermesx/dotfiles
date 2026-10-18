@@ -97,8 +97,8 @@ in the plan's Task 3 against the real files.
     today, costs an extra mechanism and unreadable diffs. Revisit when the first non-public content appears.
 - **R9** `docs/architecture.md` *Capabilities* gets a row for Claude Code configuration pointing at
   `home/dot_claude/` and the `.claude` entries in `home/.chezmoiignore`.
-- **R10** `ReadMe.md` *Daily use* gets one row for the Claude flow: pick up an app edit with `chezmoi re-add`, then
-  commit; new standard file with `chezmoi add`.
+- **R10** (dropped in review) No ReadMe *Daily use* row: the existing `chezmoi re-add` / `chezmoi add` rows already cover
+  the Claude flow.
 
 ## Risks and counter-arguments
 

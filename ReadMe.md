@@ -36,7 +36,6 @@ Rationale: [ADR-0002](docs/adr/0002-chezmoi-as-dotfiles-manager.md); source layo
 | Preview before applying | `chezmoi status`, `chezmoi diff` |
 | Change a config | `chezmoi edit <target>` (opens VS Code), then `chezmoi apply` |
 | Pick up a file edited in `$HOME` | `chezmoi re-add` (all tracked) or `chezmoi add <target>` (new file) |
-| Pick up Claude Code settings changed by the app | `chezmoi status`, then `chezmoi re-add`, then commit; new standard file: `chezmoi add <target>` |
 | Add a secret | `chezmoi add --encrypt <target>` |
 | Resolve drift or a conflict | `chezmoi merge <target>` |
 | Commit and publish | `chezmoi cd`, then `git commit` / `git push` on a branch off `develop` |
