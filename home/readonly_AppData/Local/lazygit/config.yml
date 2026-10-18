@@ -69,7 +69,8 @@ customCommands:
         title: "AI Generated Commit Messages"
         key: CommitMsg
         # Logic lives in ai-commit.ps1 (deployed next to this file); run it from a terminal to debug.
-        command: pwsh -NoProfile -NoLogo -File "%LOCALAPPDATA%\lazygit\ai-commit.ps1" -Type {{.Form.Type}}
+        # lazygit does not expand %VAR% (cmd syntax), so let pwsh resolve the path via $env:.
+        command: pwsh -NoProfile -NoLogo -Command "& (Join-Path $env:LOCALAPPDATA 'lazygit/ai-commit.ps1') -Type {{.Form.Type}}"
     # -e opens the editor on the picked subject, so a body can be added before the commit is made.
     command: git commit -e -m {{.Form.CommitMsg | quote}}
     output: terminal
