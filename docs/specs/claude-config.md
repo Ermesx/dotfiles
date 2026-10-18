@@ -81,16 +81,17 @@ in the plan's Task 3 against the real files.
   Rendering the ignore file with `.chezmoi.os` = `linux` yields no `.claude` managed path.
 
 **Sensitive content** (documented, no code)
-- **R8** `docs/chezmoi.md` gets a **tool-agnostic** section *Config that the app rewrites* (the rules below, stated
-  generally; Claude-specific details stay in this spec). It states:
-  - the allowlist rule and D1–D4, and that a new standard file is added with `chezmoi add`;
-  - the daily loop (`status` → `diff` → `re-add`) and why `re-add` precedes `update`;
-  - secrets never go into `settings.json` `env`: use environment variables set from `.encrypted-data.toml.age` in
-    a profile template, or `apiKeyHelper`;
-  - anything identifying or work/client specific: `chezmoi add --encrypt` before the first commit (stored as
-    `encrypted_*.age`; `status`, `diff`, `re-add` keep working). File names are not encrypted, so use neutral
-    names; encrypt every file of a sensitive skill. Encrypted files cannot be merged by git: `chezmoi merge`;
-  - hook scripts read secrets from env, otherwise `encrypted_`; MCP servers (`~/.claude.json`) are not managed;
+- **R8** `docs/chezmoi.md` *Encryption* gets two tool-agnostic bullets: (1) sensitive data never goes into the repo
+  in plain text (secrets as environment variables from `.encrypted-data.toml.age`, everything private or identifying
+  via `chezmoi add --encrypt` before the first commit; neutral file names; `chezmoi merge`); (2) run
+  `gitleaks detect` before pushing new config and review personal content by hand. Everything else below lives only
+  in this spec, not in `docs/`:
+  - the allowlist rule, its pitfalls (a bare `.claude` beats `!`; `.claude/**` also excludes allowlisted paths) and
+    D1–D4; a new standard file is added with `chezmoi add`;
+  - the daily loop (`status` → `diff` → `re-add`) and why `re-add` precedes `update` (it is also in the ReadMe
+    "Daily use" table);
+  - secrets never go into `settings.json` `env`: use environment variables or `apiKeyHelper`; hook scripts read
+    secrets from env, otherwise `encrypted_`; MCP servers (`~/.claude.json`) are not managed;
   - **Considered and deferred:** plain `CLAUDE.md` plus encrypted `CLAUDE.private.md` imported with
     `@~/.claude/CLAUDE.private.md` (user-scope imports load without a trust dialog). Deferred: nothing to protect
     today, costs an extra mechanism and unreadable diffs. Revisit when the first non-public content appears.

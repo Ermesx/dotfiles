@@ -131,8 +131,8 @@ documentation only.
 **Interfaces:**
 - Consumes: Tasks 1–3 (paths and names).
 
-- [ ] **Step 1: Write the `docs/chezmoi.md` section** with the content listed under spec R8, in the file's existing
-  bullet style. Include the "Considered and deferred" paragraph verbatim in substance.
+- [ ] **Step 1: Add the two bullets to the `docs/chezmoi.md` *Encryption* section** (spec R8, first sentence only;
+  the rest of R8 stays in the spec).
 - [ ] **Step 2: Add the `docs/architecture.md` row** (R9): capability *Claude Code configuration*, start from
   `home/dot_claude/` and the `.claude` entries in `home/.chezmoiignore`.
 - [ ] **Step 3: Add the `ReadMe.md` *Daily use* row** (R10), after the `chezmoi re-add` row:

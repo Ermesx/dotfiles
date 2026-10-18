@@ -33,20 +33,3 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
   use `chezmoi merge`.
 - Run `gitleaks detect` before pushing new config. It finds credentials, not personal content: review those files
   yourself.
-
-## Config that the app rewrites
-
-Applies to any tool that edits its own config (Windows Terminal, lazygit, Claude Code, ...).
-
-- It is an ordinary target: plain files, no `readonly_` (the app must write them), no `.tmpl` unless a real per-OS
-  difference appears (`re-add` skips templates).
-- Edits made by the app go back to the source with `chezmoi status` → `diff` → `re-add` → commit. Do this before
-  `chezmoi update`: the "has changed since chezmoi last wrote it" prompt is interactive only, and `--force` or a
-  non-interactive run overwrites the edit.
-- A directory that mixes config with state (caches, sessions, credentials, mirrors of an online account) is managed
-  by **allowlist**: ignore `dir/*` in `.chezmoiignore`, then un-ignore what is config with `!dir/<path>`. A state
-  file missed by a denylist ends up in a public repo (irreversible history); a config file missed by an allowlist is
-  only absent. A new config file then shows in `chezmoi unmanaged` and is added with `chezmoi add`.
-- Allowlist pitfalls: a bare `dir` entry beats every `!` entry, so a whole-directory ignore for an unsupported OS
-  goes in its own OS branch; use `dir/*`, not `dir/**` (it also excludes the un-ignored paths).
-- The reasoning behind a specific tool belongs in its spec (for Claude Code: [`specs/claude-config.md`](specs/claude-config.md)).
