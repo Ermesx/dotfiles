@@ -27,26 +27,29 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
   file in `home/` with a passphrase. The recipient is in `home/.chezmoi.toml.tmpl`.
 - Add or change encrypted files only with `chezmoi add --encrypt <target>` or `chezmoi edit <target>`.
 
-## Claude Code (`~/.claude`)
+## Config that the app rewrites
 
-- `~/.claude` is an ordinary target under `home/dot_claude/`: plain files, no `readonly_` (Claude Code writes them),
-  no `.tmpl` unless a real per-OS difference appears (`re-add` skips templates). Windows only for now (#12).
-- **Allowlist, not denylist.** `home/.chezmoiignore` ignores `.claude/*` and un-ignores the standard config files
-  and directories with `!` entries. A state file missed by a denylist would be committed to a public repo
-  (irreversible history); a config file missed by an allowlist is only absent. A bare `.claude` entry beats every
-  `!` entry, so the whole-directory ignore lives only in the non-Windows branch. Use `.claude/*`, not `.claude/**`.
-- `skills/synced/` (mirror of the claude.ai account skills) and `~/.claude.json` (MCP, OAuth, caches) are not
-  managed. `hooks/` is not on the list yet: add `!.claude/hooks` with the first hook script.
-- A new standard file (for example `rules/x.md`) shows in `chezmoi unmanaged`; add it with `chezmoi add`.
-- Loop after the app rewrites a file: `chezmoi status` → `chezmoi diff` → `chezmoi re-add` → commit on a branch off
-  `develop` → push → `chezmoi update` elsewhere. Run `status` / `re-add` before `update`: the "has changed since
-  chezmoi last wrote it" prompt is interactive only, `--force` or a non-interactive run overwrites the edit.
-- Secrets never go into `settings.json` `env`: use environment variables set from `.encrypted-data.toml.age` in a
-  profile template, or `apiKeyHelper`. Hook scripts read secrets from env; otherwise `encrypted_`.
-- Anything identifying or work/client specific: `chezmoi add --encrypt` before the first commit (stored as
-  `encrypted_*.age`; `status`, `diff` and `re-add` keep working). File names are not encrypted, so use neutral
-  names; encrypt every file of a sensitive skill. Encrypted files cannot be merged by git: use `chezmoi merge`.
-- **Considered and deferred:** a plain `CLAUDE.md` plus an encrypted `CLAUDE.private.md` imported with
-  `@~/.claude/CLAUDE.private.md` (user-scope imports load without a trust dialog). Deferred: nothing to protect when
-  decided, and it costs an extra mechanism and unreadable diffs. Revisit when the first non-public content appears.
-- Spec: [`specs/claude-config.md`](specs/claude-config.md).
+Applies to any tool that edits its own config (Windows Terminal, lazygit, Claude Code, ...).
+
+- It is an ordinary target: plain files, no `readonly_` (the app must write them), no `.tmpl` unless a real per-OS
+  difference appears (`re-add` skips templates).
+- Edits made by the app go back to the source with `chezmoi status` → `diff` → `re-add` → commit. Do this before
+  `chezmoi update`: the "has changed since chezmoi last wrote it" prompt is interactive only, and `--force` or a
+  non-interactive run overwrites the edit.
+- A directory that mixes config with state (caches, sessions, credentials, mirrors of an online account) is managed
+  by **allowlist**: ignore `dir/*` in `.chezmoiignore`, then un-ignore what is config with `!dir/<path>`. A state
+  file missed by a denylist ends up in a public repo (irreversible history); a config file missed by an allowlist is
+  only absent. A new config file then shows in `chezmoi unmanaged` and is added with `chezmoi add`.
+- Allowlist pitfalls: a bare `dir` entry beats every `!` entry, so a whole-directory ignore for an unsupported OS
+  goes in its own OS branch; use `dir/*`, not `dir/**` (it also excludes the un-ignored paths).
+- Sensitive content never goes into the repo in plain text:
+  - Secrets: environment variables set from `.encrypted-data.toml.age` in a profile template, or the tool's
+    credential-helper setting. Never in the tool's config file.
+  - Identifying or private content (personal data, work or client specifics): `chezmoi add --encrypt` before the
+    first commit. `status`, `diff` and `re-add` keep working. File names are not encrypted, so use neutral names and
+    encrypt every file that belongs to the sensitive item. Git cannot merge encrypted files: use `chezmoi merge`.
+  - A file that mixes public and private content can be split into a plain file and an encrypted one, if the tool
+    supports includes/imports. Do it when the first such content appears, not before.
+- Before the first push of new config, run `gitleaks detect`. It finds credentials, not personal content: review
+  the files yourself.
+- The reasoning behind a specific tool belongs in its spec (for Claude Code: [`specs/claude-config.md`](specs/claude-config.md)).

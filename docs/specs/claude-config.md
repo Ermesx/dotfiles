@@ -81,7 +81,8 @@ in the plan's Task 3 against the real files.
   Rendering the ignore file with `.chezmoi.os` = `linux` yields no `.claude` managed path.
 
 **Sensitive content** (documented, no code)
-- **R8** `docs/chezmoi.md` gets a section *Claude Code (`~/.claude`)* stating:
+- **R8** `docs/chezmoi.md` gets a **tool-agnostic** section *Config that the app rewrites* (the rules below, stated
+  generally; Claude-specific details stay in this spec). It states:
   - the allowlist rule and D1–D4, and that a new standard file is added with `chezmoi add`;
   - the daily loop (`status` → `diff` → `re-add`) and why `re-add` precedes `update`;
   - secrets never go into `settings.json` `env`: use environment variables set from `.encrypted-data.toml.age` in
