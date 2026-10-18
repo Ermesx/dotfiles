@@ -16,6 +16,8 @@ below. Add a rule here only if it applies to every task.
   text.
 - Known bugs are tracked as GitHub issues (`gh issue list`). Check them before touching related code; reference the
   issue (`Fixes #N`) in the change that fixes it.
+- Updating installed software is winget's job (`Update-Apps`), not chezmoi's. chezmoi and DSC declare what is
+  installed and manage config files; do not add version pins or update mechanisms to them.
 - Git: branch off `develop`; Conventional Commits with a scope (`feat(packages): …`); commit only when asked.
 
 ## Commands
