@@ -28,6 +28,7 @@ package table.
 | `dotnet` | .NET SDKs and .NET global tools |
 | `node` | Node.js runtime and tooling |
 | `python` | Python runtimes and the tooling that manages them |
+| `ai` | AI coding assistants and their CLIs |
 | `containers` | Docker, Vagrant and other container or VM tooling, and their modules |
 | `chezmoi` | The dotfiles manager itself |
 | `editors` | Code editors and IDEs |

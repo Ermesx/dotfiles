@@ -80,6 +80,7 @@ Things that bite:
 | lazygit (JesseDuffield.lazygit)                            | git        | App          | TUI for Git                          |
 | gitql (amrdeveloper.gitql)                                 | git        | App          | Query Git repos with SQL-like syntax |
 | GitHub CLI (GitHub.cli)                                    | git        | App          | GitHub from the terminal             |
+| Gitleaks (Gitleaks.Gitleaks)                               | git        | App          | Secret scanner for Git repos         |
 | posh-git                                                   | git        | Module       | Git prompt enhancements              |
 | Microsoft .NET SDK 10 (Microsoft.DotNet.SDK.10)            | dotnet     | App          | .NET 10 SDK                          |
 | dotnet-ef (dotnet-ef)                                      | dotnet     | Tool         | EF Core migrations CLI               |
@@ -96,6 +97,7 @@ Things that bite:
 | refitter                                                   | dotnet     | Tool         | Refit client generator from OpenAPI  |
 | Node.js (OpenJS.NodeJS)                                    | node       | App          | JavaScript runtime                   |
 | Python Install Manager (Python.PythonInstallManager)       | python     | App          | Python runtime manager               |
+| Claude Code (Anthropic.ClaudeCode)                         | ai         | App          | AI coding assistant CLI              |
 | Docker Desktop (Docker.DockerDesktop)                      | containers | App          | Docker engine & UI                   |
 | Vagrant (Hashicorp.Vagrant)                                | containers | App          | VM environments for testing          |
 | DockerCompletion                                           | containers | Module       | Docker command completion            |
