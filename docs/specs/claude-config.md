@@ -1,6 +1,6 @@
 # Spec: Manage Claude Code configuration (`~/.claude`) with chezmoi
 
-Issue: [#19](https://github.com/Ermesx/dotfiles/issues/19) · Status: Draft · Date: 2026-10-18 ·
+Issue: [#19](https://github.com/Ermesx/dotfiles/issues/19) · Status: Implemented · Date: 2026-10-18 ·
 Plan: [`claude-config.plan.md`](claude-config.plan.md)
 
 ## Problem
