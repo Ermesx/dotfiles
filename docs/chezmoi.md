@@ -26,6 +26,13 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
 - Encryption is `age`. The identity is `~/.config/chezmoi/key.txt`, itself decrypted on first apply from an `.age`
   file in `home/` with a passphrase. The recipient is in `home/.chezmoi.toml.tmpl`.
 - Add or change encrypted files only with `chezmoi add --encrypt <target>` or `chezmoi edit <target>`.
+- Sensitive data never goes into the repo in plain text. Secrets (tokens, keys) stay out of tool config files: pass
+  them as environment variables set from `.encrypted-data.toml.age`. Everything else that is private or identifying
+  (personal data, work or client specifics) is encrypted with `chezmoi add --encrypt` before its first commit; file
+  names stay readable, so use neutral names and encrypt every file of the item. Git cannot merge encrypted files:
+  use `chezmoi merge`.
+- Run `gitleaks detect` before pushing new config. It finds credentials, not personal content: review those files
+  yourself.
 
 ## Config that the app rewrites
 
@@ -42,14 +49,4 @@ Applies to any tool that edits its own config (Windows Terminal, lazygit, Claude
   only absent. A new config file then shows in `chezmoi unmanaged` and is added with `chezmoi add`.
 - Allowlist pitfalls: a bare `dir` entry beats every `!` entry, so a whole-directory ignore for an unsupported OS
   goes in its own OS branch; use `dir/*`, not `dir/**` (it also excludes the un-ignored paths).
-- Sensitive content never goes into the repo in plain text:
-  - Secrets: environment variables set from `.encrypted-data.toml.age` in a profile template, or the tool's
-    credential-helper setting. Never in the tool's config file.
-  - Identifying or private content (personal data, work or client specifics): `chezmoi add --encrypt` before the
-    first commit. `status`, `diff` and `re-add` keep working. File names are not encrypted, so use neutral names and
-    encrypt every file that belongs to the sensitive item. Git cannot merge encrypted files: use `chezmoi merge`.
-  - A file that mixes public and private content can be split into a plain file and an encrypted one, if the tool
-    supports includes/imports. Do it when the first such content appears, not before.
-- Before the first push of new config, run `gitleaks detect`. It finds credentials, not personal content: review
-  the files yourself.
 - The reasoning behind a specific tool belongs in its spec (for Claude Code: [`specs/claude-config.md`](specs/claude-config.md)).
