@@ -13,7 +13,7 @@ root. Spec: `docs/specs/docs-sync.md`.
 Read all of these before editing:
 
 - `home/.chezmoidata/packages.yaml` — ids and the group comments (`# shell`, `# git`, …). Source of truth for packages.
-- `docs/packages.md`, section *Categories* — the glossary. Its ten names are the only valid categories.
+- `docs/packages.md`, section *Categories* — the glossary. Its names are the only valid categories.
 - `ReadMe.md` — the current table between the packages markers (source of existing names and purposes).
 - `docs/terminal-bindings.md` — the current list between the bindings markers (source of existing action texts).
 - `home/dot_profile/PSReadLine_profile.ps1` and `home/dot_profile/psfzf_profile.ps1` — source of truth for bindings.
@@ -46,7 +46,7 @@ alignment style: pad cells to the widest cell in the column).
   the first comment of its own list has no group. An id whose group is not in the glossary, or that has no group
   comment, is **left out of the table and listed under
   "Reported"** — do not guess a category.
-- **Order:** glossary order of the category (shell, fzf, git, dotnet, node, containers, chezmoi, editors, browsers,
+- **Order:** glossary order of the category (shell, fzf, git, dotnet, node, python, ai, containers, chezmoi, editors, browsers,
   other), then source order (wingets, modules, dotnet_tools, yazi_plugins, wsl), then order in the YAML.
 - **Name and Purpose:** if the id already has a row, copy its Name and Purpose cells **verbatim** (match by the id
   in parentheses in Name, or by the exact Name for ids without one). For a new id write
