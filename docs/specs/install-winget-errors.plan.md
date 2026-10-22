@@ -44,7 +44,7 @@
   - Remove both `| Out-Null`.
 
 - [ ] **Step 3: Host checks** (nothing is installed; none of these run winget)
-  - 5.1 parses: `powershell.exe -NoProfile -Command "[void][System.Management.Automation.Language.Parser]::ParseFile('install.ps1',[ref]$null,[ref]($e=$null)); 'errors=' + @($e).Count"` → `errors=0`.
+  - 5.1 parses: `powershell.exe -NoProfile -Command "$e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile('install.ps1',[ref]$null,[ref]$e); 'errors=' + @($e).Count"` → `errors=0`.
   - `git ls-files --eol install.ps1` → `w/crlf`.
   - `git diff --stat` lists only `install.ps1`.
   - Grep `install.ps1` for `exit`, `2>&1`, `Out-Null`, `function`: no matches.
