@@ -9,11 +9,13 @@ $params = @(
     '--disable-interactivity'
 )
 
-# winget codes treated as success: ok, already installed, newer installed, reboot pending
-$okCodes = @(0, 0x8A150061, 0x8A15010D, 0x8A15010E, 0x8A150109)
-
-# Readable reasons for the most likely winget failures
-$failReasons = @{
+# winget exit codes: $true = not a failure, text = reason shown when the install fails
+$wingetCodes = @{
+    0          = $true # ok
+    0x8A150061 = $true # already installed
+    0x8A15010D = $true # another version installed
+    0x8A15010E = $true # newer version installed
+    0x8A150109 = $true # reboot pending
     0x8A150014 = 'package not found in the winget sources'
     0x8A150019 = 'administrator rights are required, run the script from an elevated shell'
     0x8A150010 = 'no installer applicable to this system'
@@ -43,10 +45,10 @@ $wingets = @('twpayne.chezmoi', 'microsoft.dsc', 'microsoft.powershell')
 $wingets | Foreach-Object {
     Write-Host "► Installing $_" -ForegroundColor Cyan
     winget install $_ @params --no-progress | Out-Null
-    if ($LASTEXITCODE -notin $okCodes) {
-        $reason = $failReasons[$LASTEXITCODE]
-        if (-not $reason) { $reason = "unexpected winget error, run 'winget install $_' to see the details" }
-        throw ("Installing '{0}' failed: {1} (winget exit code 0x{2:X8})" -f $_, $reason, $LASTEXITCODE)
+    $result = $wingetCodes[$LASTEXITCODE]
+    if ($result -ne $true) {
+        if (-not $result) { $result = "unexpected winget error, run 'winget install $_' to see the details" }
+        throw ("Installing '{0}' failed: {1} (winget exit code 0x{2:X8})" -f $_, $result, $LASTEXITCODE)
     }
 }
 

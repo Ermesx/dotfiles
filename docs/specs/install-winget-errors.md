@@ -38,10 +38,11 @@ The quiet output stays: on success the user sees only the `► …` progress lin
 
 - **R0** Works on Windows PowerShell 5.1 and PowerShell 7. No PS 7-only syntax (`??`, ternary, `&&`/`||`,
   `-Parallel`).
-- **R1** No new functions. The handling is inline: a `$okCodes` array, a `$failReasons` hashtable and one `if` after
-  the `winget install` call.
+- **R1** No new functions. The handling is inline: one `$wingetCodes` hashtable (exit code → `$true` for a
+  non-failure, or the text of the failure reason) and one `if` after the `winget install` call. A code absent from
+  the table is a failure with the fallback reason (R4).
 - **R2** The install call keeps discarding winget's output (`| Out-Null`); the exit code decides.
-- **R3** Success codes, compared with `-notin`; any other code is a failure:
+- **R3** Codes with the value `$true` are not failures; every other code is:
 
   | Code | winget name | Why it is not a failure |
   |---|---|---|
@@ -52,8 +53,8 @@ The quiet output stays: on success the user sees only the `► …` progress lin
   | `0x8A150109` | `INSTALL_REBOOT_REQUIRED_TO_FINISH` | files are in place; a restart is pending, the bootstrap can continue |
 
 - **R4** A failed install `throw`s one message of the form
-  `Installing '<id>' failed: <reason> (winget exit code 0x<8 hex digits>)`; never `exit`. The `<reason>` comes from
-  `$failReasons`, keyed by exit code:
+  `Installing '<id>' failed: <reason> (winget exit code 0x<8 hex digits>)`; never `exit`. The `<reason>` is the text
+  stored in `$wingetCodes` for the exit code:
 
   | Code | winget name | Reason in the message |
   |---|---|---|

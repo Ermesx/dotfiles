@@ -4,7 +4,7 @@
 
 **Goal:** `install.ps1` stays quiet when winget installs succeed and stops with a readable message (what failed, why, exit code) when a required install fails.
 
-**Architecture:** Inline only: a `$okCodes` array, a `$failReasons` hashtable and one `if` after the `winget install` call. The self-upgrade is untouched. No functions, no new files, no automated tests. The skill's TDD structure is set aside by explicit user decision (simplicity of the install script is the top requirement); verification is the host parse/line-ending check, a stand-in `winget` logic check and the VM run.
+**Architecture:** Inline only: one `$wingetCodes` hashtable (code → `$true` or failure reason) and one `if` after the `winget install` call. The self-upgrade is untouched. No functions, no new files, no automated tests. The skill's TDD structure is set aside by explicit user decision (simplicity of the install script is the top requirement); verification is the host parse/line-ending check, a stand-in `winget` logic check and the VM run.
 
 **Tech Stack:** Windows PowerShell 5.1 (bootstrap host) and PowerShell 7.
 
@@ -36,9 +36,9 @@
 - Consumes: nothing.
 - Produces: nothing (no functions).
 
-- [ ] **Step 1: Add `$okCodes` and `$failReasons`** after the `$params` array, each with a one-line comment: `$okCodes = @(0, 0x8A150061, 0x8A15010D, 0x8A15010E, 0x8A150109)` and a hashtable `$failReasons` with the five code→reason pairs from spec R4 (reason texts verbatim).
+- [ ] **Step 1: Add `$wingetCodes`** after the `$params` array, with a one-line comment: one hashtable keyed by exit code; value `$true` for the five non-failure codes from spec R3 (each with a short trailing comment), value text for the five failure codes from spec R4 (reason texts verbatim).
 
-- [ ] **Step 2: Rewrite the install loop body** (keep the `Write-Host "► Installing $_"` line): `winget install $_ @params --no-progress | Out-Null`, then `if ($LASTEXITCODE -notin $okCodes) { … }` that looks up `$reason = $failReasons[$LASTEXITCODE]`, falls back to `unexpected winget error, run 'winget install $_' to see the details`, and `throw`s `("Installing '{0}' failed: {1} (winget exit code 0x{2:X8})" -f $_, $reason, $LASTEXITCODE)`. Do not touch the self-upgrade line.
+- [ ] **Step 2: Rewrite the install loop body** (keep the `Write-Host "► Installing $_"` line): `winget install $_ @params --no-progress | Out-Null`, then `$result = $wingetCodes[$LASTEXITCODE]` and `if ($result -ne $true) { … }` that, when `$result` is empty (code not in the table), sets it to `unexpected winget error, run 'winget install $_' to see the details`, and `throw`s `("Installing '{0}' failed: {1} (winget exit code 0x{2:X8})" -f $_, $result, $LASTEXITCODE)`. Do not touch the self-upgrade line.
 
 - [ ] **Step 3: Host checks** (nothing is installed; none of these run winget)
   - 5.1 parses: `powershell.exe -NoProfile -Command '$e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile("install.ps1",[ref]$null,[ref]$e); "errors=" + @($e).Count'` → `errors=0`.
@@ -64,5 +64,5 @@
 
 ## Self-review
 
-- Spec coverage: R0 → Task 1 Step 3; R1–R4, R6 → Task 1 Steps 1–2; R5 → Task 1 Step 2 (untouched line) and Step 3 (diff); R7 → `$failReasons` entry; Acceptance 1–2 → Task 1 Step 3, 3–4 → Task 2.
+- Spec coverage: R0 → Task 1 Step 3; R1–R4, R6 → Task 1 Steps 1–2; R5 → Task 1 Step 2 (untouched line) and Step 3 (diff); R7 → the `0x8A150019` entry in `$wingetCodes`; Acceptance 1–2 → Task 1 Step 3, 3–4 → Task 2.
 - Unverified until the VM: real winget exit codes on a failing install, and the `iex` behaviour of `throw` in an interactive console.
