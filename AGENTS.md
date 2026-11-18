@@ -8,6 +8,10 @@ below. Add a rule here only if it applies to every task.
 
 ## Always
 
+- **Never decrypt anything in GitHub Actions or any other CI.** This repo is public. No workflow may decrypt `*.age` /
+  `encrypted_*` files or templates that call `decrypt`, and no age identity, passphrase, or private key may be stored
+  in repository secrets, variables, or workflow files. CI must skip every part that needs decryption (e.g. via the
+  `CI` environment variable); decryption is tested only on the VM or a real machine. This rule has no exceptions.
 - Run chezmoi with `--source .` from the repo root. The local chezmoi config points at `~/.local/share/chezmoi`, a
   separate clone; without the flag you read the installed source, not this working copy.
 - Never run `chezmoi apply` or `install.ps1` on the host to test a change — they install software, write to `HKLM`,
