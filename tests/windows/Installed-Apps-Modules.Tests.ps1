@@ -1,29 +1,37 @@
-#Requires -Modules Pester
-Describe "After installing dotfiles" {
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '6.0.0' }
+
+Describe 'After installing dotfiles' {
 
     BeforeDiscovery {
-        $configPath = Join-Path $HOME '.config\config.dsc.yaml'
-        $resources = (Get-Content -Path $configPath | ConvertFrom-Yaml).resources
-        $script:packages = $resources | Where-Object { $_.type -eq 'Microsoft.WinGet/Package' }
-        $script:modules = $resources | Where-Object { $_.type -eq ' PowerShellModule/PSModuleResource' }
+        $src = Join-Path $PSScriptRoot '../..'
+        $sourceArgs = if (Test-Path (Join-Path $src '.chezmoiroot')) { @('--source', (Resolve-Path $src)) } else { @() }
+        $view = '{{ includeTemplate "packages.tmpl" . }}' | chezmoi @sourceArgs execute-template | ConvertFrom-Json
+        $apps = @($view.scoop | ForEach-Object { ($_ -split '/')[-1] })
+        $modules = @($view.modules)
+        $tools = @($view.dotnet_tools)
     }
 
     BeforeAll {
-        $script:allApps = Get-WinGetPackage
-        $script:allModules = Get-Module -ListAvailable
+        $installedApps = @(scoop list 2>$null | ForEach-Object { $_.Name })
+        $installedModules = @(Get-InstalledModule -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+        $installedTools = @(dotnet tool list -g 2>$null | Select-Object -Skip 2 | ForEach-Object { ($_ -split '\s+')[0] })
     }
 
-    Context "Apps" {
-        It "should have installed <_>" -Foreach $script:packages.properties.id {
-            $id = $_
-            $script:allApps | Where-Object { $_.Id -eq $id } | Should -Not -BeNullOrEmpty
+    Context 'Apps' {
+        It 'should have installed <_>' -ForEach $apps {
+            $installedApps | Should -Contain $_
         }
     }
 
-    Context "Modules" {
-        It "should have installed <_>" -Foreach $script:modules.properties.Name {
-            $name = $_
-            $script:allModules | Where-Object { $_.Name -eq $name } | Should -Not -BeNullOrEmpty
+    Context 'Modules' {
+        It 'should have installed <_>' -ForEach $modules {
+            $installedModules | Should -Contain $_
+        }
+    }
+
+    Context '.NET tools' {
+        It 'should have installed <_>' -ForEach $tools {
+            $installedTools | Should -Contain $_
         }
     }
 }
