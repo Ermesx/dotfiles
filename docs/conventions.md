@@ -12,7 +12,7 @@
 
 - Scripts must be idempotent: guard every install by checking the target state (existing scripts show the pattern),
   not the presence of the tool. Skip the guard only when the command converges by itself in a `run_onchange` script
-  (`dsc config set`).
+  (`scoop install` skips installed apps).
 - User-facing progress lines use `Write-Host "► <Action>" -ForegroundColor Cyan`.
 
 ## Generated documentation
@@ -25,5 +25,5 @@ agent; for edits made elsewhere (editor, another tool), run it yourself.
 
 ## PowerShell profile
 
-The profile imports every module from `packages.windows.modules`, then dot-sources every `~/.profile/*.ps1` by glob
+The profile imports every module from the package view's `modules`, then dot-sources every `~/.profile/*.ps1` by glob
 at apply time. A new fragment in `home/dot_profile/` needs no profile edit.

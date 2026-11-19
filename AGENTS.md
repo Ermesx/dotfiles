@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Personal dotfiles that set up Windows (fully) and Linux (partially) from one [chezmoi](https://www.chezmoi.io/)
-source, with Windows software installed declaratively through DSC v3.
+source, with Windows software installed declaratively in user scope through Scoop.
 
 This file is canonical (`CLAUDE.md` only imports it) and deliberately minimal: topic rules live in `docs/`, linked
 below. Add a rule here only if it applies to every task.
@@ -21,8 +21,8 @@ below. Add a rule here only if it applies to every task.
 - Work and known bugs are tracked as GitHub issues (`gh issue list`). Each issue is self-contained for one session;
   check its "blocked by" relationships before starting, check related issues before touching related code, and
   reference the issue (`Fixes #N`) in the change that fixes it.
-- Updating installed software is winget's job (`Update-Apps`), not chezmoi's. chezmoi and DSC declare what is
-  installed and manage config files; do not add version pins or update mechanisms to them.
+- Updating installed software is Scoop's job (`Update-Apps`, rewritten in #45), not chezmoi's. chezmoi declares
+  what is installed and manages config files; do not add version pins or update mechanisms to it.
 - Git: branch off `develop`; Conventional Commits with a scope (`feat(packages): …`); commit only when asked.
 
 ## Commands
@@ -35,7 +35,7 @@ PowerShell, from the repo root.
 | Scripts and how their names were parsed | `chezmoi --source . managed --include=scripts` |
 | Render a template | `Get-Content -Raw home/<path>.tmpl \| chezmoi --source . execute-template` |
 | Preview what apply would change (runs no scripts) | `chezmoi --source . diff` |
-| DSC drift, installs nothing | Render `home/.chezmoitemplates/config.dsc.yaml.tmpl` as above, pipe to `dsc config test -f -` |
+| Package view the scripts read | `'{{ includeTemplate "packages.tmpl" . }}' \| chezmoi --source . execute-template` |
 | Full install test (slow) | `cd tests; vagrant up dotfiles-windows`, then in the VM `C:\vagrant\run-tests.ps1 -BRANCH <branch>` |
 
 ## Read before you change
@@ -43,7 +43,7 @@ PowerShell, from the repo root.
 | Touching | Read |
 |---|---|
 | Anything under `home/` | [`docs/chezmoi.md`](docs/chezmoi.md) |
-| Installed software, `packages.yaml`, DSC | [`docs/packages.md`](docs/packages.md) |
+| Installed software, `packages.yaml` | [`docs/packages.md`](docs/packages.md) |
 | Scripts, PowerShell profile, line endings | [`docs/conventions.md`](docs/conventions.md) |
 | `tests/`, the VM, `install.ps1` | [`docs/testing.md`](docs/testing.md) |
 | Not sure where a capability lives | [`docs/architecture.md`](docs/architecture.md) |

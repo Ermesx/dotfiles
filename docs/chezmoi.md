@@ -9,8 +9,11 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
   comes back from `chezmoi --source . managed --include=scripts` without its prefixes.
 - Scripts run in lexical order within a phase, so numeric prefixes (`00-`, `01-`) are load-bearing: one script may
   install what the next one needs.
-- `run_onchange_` scripts rerun when their rendered content changes. A script that inlines rendered data (the DSC
-  apply script inlines the DSC document) reruns whenever that data changes.
+- `run_onchange_` scripts rerun when their rendered content changes. A script that inlines rendered data (the Scoop
+  install script inlines the rendered app list) reruns whenever that data changes.
+- A script that calls a tool installed earlier in the same apply must include the `refresh-env.ps1` partial
+  (`{{ template "refresh-env.ps1" . }}`): Scoop writes `PATH` and its variables to the user registry, which the
+  running chezmoi process does not see.
 
 ## Templates and scripts
 

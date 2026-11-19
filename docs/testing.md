@@ -5,8 +5,16 @@
   so push changes to `install.ps1` before testing them.
 - Dotfile content comes from your **local working copy**: the Vagrantfile syncs the repo root into the VM's chezmoi
   source dir, and `chezmoi init` skips cloning when that dir is already a git repo.
-- Tests under `tests/windows/` that check a completed install (they read `~/.config/config.dsc.yaml`) run only in
-  the VM.
+- Tests under `tests/windows/` that check a completed install (`Installed-Apps-Modules.Tests.ps1`) read the
+  expected list from the package view with `chezmoi execute-template`; no file is deployed to `$HOME`. They run
+  only in the VM.
+- Run the VM acceptance as a standard user (created by hand until #47), not as an administrator: that is what
+  proves apply needs no admin rights.
+- `tests/windows/Package-View.Tests.ps1` checks the view itself and also runs on the host:
+
+```powershell
+pwsh -NoProfile -Command 'Import-Module Pester -MinimumVersion 6.0.0; Invoke-Pester tests/windows/Package-View.Tests.ps1 -Output Detailed'
+```
 
 ## Unit tests against the working copy
 

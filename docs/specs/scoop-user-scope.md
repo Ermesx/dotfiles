@@ -133,8 +133,8 @@ scripts (#12). No uninstall, no state file, no version pins.
 1. Host: `Package-View.Tests.ps1` passes; every changed `.ps1.tmpl` renders with `chezmoi --source . execute-template`
    and parses with zero errors; `install.ps1` parses on 5.1; `chezmoi --source . managed` succeeds; new `.ps1*`
    files are CRLF.
-2. `git grep -n -i -E "winget|dsc|font\.name"` outside `docs/adr/0001-*`, `docs/adr/0002-*`, closed specs and
-   `check-updates.ps1.tmpl` (D2) returns nothing.
+2. `git grep -n -i -E "winget|dsc|font\.name"` outside `docs/adr/0001-*` to `0003-*`, closed specs, this spec,
+   `check-updates.ps1.tmpl` (D2) and the stock `DscResourcesToExport` comment in `Write-Pretty.psd1` returns nothing.
 3. VM, **standard user** created by hand: `install.ps1` → apply finishes with exit 0, no UAC prompt; WSL and SSH
    steps print their skip messages; `Installed-Apps-Modules.Tests.ps1` passes; Windows Terminal starts with the
    managed settings and Hasklug Nerd Font; `dotnet ef --version` works in a new shell. In an elevated shell each
