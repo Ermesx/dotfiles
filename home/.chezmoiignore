@@ -14,6 +14,7 @@
 .claude/skills/synced
 {{- else }}
 readonly_AppData/
+scoop/
 readonly_Documents/
 **/*.ps1
 .claude

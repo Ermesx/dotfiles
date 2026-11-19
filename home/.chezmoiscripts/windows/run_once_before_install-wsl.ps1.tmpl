@@ -1,10 +1,22 @@
-$distro = {{ .packages.windows.wsl | squote }}
-Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
+{{- $pkgs := includeTemplate "packages.tmpl" . | fromJson -}}
+$distros = @({{ range $pkgs.wsl }}
+    {{ . | squote }}{{ end }}
+)
 
-# Update WSL first time
-wsl.exe --update | Out-Null
+# wsl.exe prints UTF-16 unless WSL_UTF8 is set; without it -contains never matches.
+$env:WSL_UTF8 = '1'
 
-# Install WSL distro if not already installed
-if (-not ((wsl -l -q) -contains $distro)) {
-    wsl --install -d $distro | Out-Null
+wsl.exe --status *> $null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "► Skipping WSL distro: WSL is not enabled (needs an administrator)" -ForegroundColor Yellow
+    exit 0
+}
+
+$installed = @(wsl.exe -l -q)
+foreach ($distro in $distros) {
+    if ($installed -notcontains $distro) {
+        Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
+        # --no-launch keeps the first-run user prompt from blocking apply.
+        wsl.exe --install -d $distro --no-launch | Out-Null
+    }
 }
