@@ -5,7 +5,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "opus",
   "enableWorkflows": true,
   "enabledPlugins": {
     "csharp-lsp@claude-plugins-official": true,
