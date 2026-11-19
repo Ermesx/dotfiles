@@ -1,0 +1,23 @@
+{{- $pkgs := includeTemplate "packages.tmpl" . | fromJson -}}
+{{ template "refresh-env.ps1" . }}
+$tools = @({{ range $pkgs.dotnet_tools }}
+    {{ . | squote }}{{ end }}
+)
+$failedTools = @()
+
+Write-Host "► Installing .NET tools" -ForegroundColor Cyan
+$installed = dotnet tool list -g | Select-Object -Skip 2 | ForEach-Object { ($_ -split '\s+')[0] }
+foreach ($t in $tools) {
+    if ($installed -contains $t) { continue }
+    dotnet tool install -g $t
+    if ($LASTEXITCODE -ne 0) { $failedTools += $t }
+}
+
+if ($failedTools) {
+    Write-Host "► Failed" -ForegroundColor Red
+    foreach ($t in $failedTools) {
+        Write-Host "  ✗ $t  (see the error with: dotnet tool install -g $t)"
+    }
+    exit 1
+}
+exit 0
