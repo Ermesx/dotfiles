@@ -1,7 +1,6 @@
 # Pick up what Scoop wrote to the user registry (PATH, env_set variables) during this apply
 foreach ($entry in [Environment]::GetEnvironmentVariables('User').GetEnumerator()) {
-    Set-Item -Path "Env:$($entry.Key)" -Value $entry.Value
+    [Environment]::SetEnvironmentVariable($entry.Key, $entry.Value, 'Process')
 }
-$userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
-$env:PATH = "$userPath;$machinePath"
+$pathParts = 'User', 'Machine' | ForEach-Object { [Environment]::GetEnvironmentVariable('PATH', $_) } | Where-Object { $_ }
+$env:PATH = $pathParts -join ';'
