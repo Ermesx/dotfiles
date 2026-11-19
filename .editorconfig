@@ -14,6 +14,10 @@ end_of_line = crlf
 [*.ps1.tmpl]
 end_of_line = crlf
 
+# Windows PowerShell 5.1 reads BOM-less files as ANSI; IT may run these in 5.1
+[scripts/admin/*.ps1]
+charset = utf-8-bom
+
 [*.{json,yml,yaml}]
 indent_size = 2
 
