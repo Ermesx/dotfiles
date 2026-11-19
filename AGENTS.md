@@ -8,14 +8,19 @@ below. Add a rule here only if it applies to every task.
 
 ## Always
 
+- **Never decrypt anything in GitHub Actions or any other CI.** This repo is public. No workflow may decrypt `*.age` /
+  `encrypted_*` files or templates that call `decrypt`, and no age identity, passphrase, or private key may be stored
+  in repository secrets, variables, or workflow files. CI must skip every part that needs decryption (e.g. via the
+  `CI` environment variable); decryption is tested only on the VM or a real machine. This rule has no exceptions.
 - Run chezmoi with `--source .` from the repo root. The local chezmoi config points at `~/.local/share/chezmoi`, a
   separate clone; without the flag you read the installed source, not this working copy.
 - Never run `chezmoi apply` or `install.ps1` on the host to test a change — they install software, write to `HKLM`,
   and change services. Use the VM; otherwise ask first.
 - Never commit plaintext secrets. Never decrypt `*.age` files into the repo or edit `*.age` / `encrypted_*` files as
   text.
-- Known bugs are tracked as GitHub issues (`gh issue list`). Check them before touching related code; reference the
-  issue (`Fixes #N`) in the change that fixes it.
+- Work and known bugs are tracked as GitHub issues (`gh issue list`). Each issue is self-contained for one session;
+  check its "blocked by" relationships before starting, check related issues before touching related code, and
+  reference the issue (`Fixes #N`) in the change that fixes it.
 - Updating installed software is winget's job (`Update-Apps`), not chezmoi's. chezmoi and DSC declare what is
   installed and manage config files; do not add version pins or update mechanisms to them.
 - Git: branch off `develop`; Conventional Commits with a scope (`feat(packages): …`); commit only when asked.
