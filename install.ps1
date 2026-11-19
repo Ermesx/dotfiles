@@ -38,3 +38,6 @@ $apps | ForEach-Object {
 
 # Apply dotfiles
 chezmoi init --apply $GITHUB_USERNAME
+if ($LASTEXITCODE -ne 0) {
+    throw 'chezmoi apply failed, see the summary above'
+}

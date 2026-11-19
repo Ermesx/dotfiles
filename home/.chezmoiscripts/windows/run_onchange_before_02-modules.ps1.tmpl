@@ -20,14 +20,14 @@ foreach ($m in $modules) {
             Install-Module -Name $m -Scope CurrentUser -Force -ErrorAction Stop
         }
     } catch {
-        $failedModules += $m
+        $failedModules += [pscustomobject]@{ Name = $m; Reason = $_.Exception.Message }
     }
 }
 
 if ($failedModules) {
     Write-Host "► Failed" -ForegroundColor Red
-    foreach ($m in $failedModules) {
-        Write-Host "  ✗ $m  (see the error with: Install-Module $m -Scope CurrentUser)"
+    foreach ($f in $failedModules) {
+        Write-Host "  ✗ $($f.Name): $($f.Reason)  (retry with: Install-Module $($f.Name) -Scope CurrentUser)"
     }
     exit 1
 }

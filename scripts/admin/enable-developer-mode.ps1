@@ -8,7 +8,7 @@ if (-not (Test-Path $path)) {
     New-Item -Path $path -Force | Out-Null
 }
 
-$current = Get-ItemPropertyValue -Path $path -Name $name -ErrorAction SilentlyContinue
+$current = (Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue).$name
 if ($current -ne 1) {
     Set-ItemProperty -Path $path -Name $name -Value 1 -Type DWord
 }
