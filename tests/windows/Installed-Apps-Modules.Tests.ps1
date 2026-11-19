@@ -12,9 +12,9 @@ Describe 'After installing dotfiles' {
     }
 
     BeforeAll {
-        $installedApps = @(scoop list 2>$null | ForEach-Object { $_.Name })
+        $installedApps = @(try { scoop list | ForEach-Object Name } catch { })
         $installedModules = @(Get-InstalledModule -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
-        $installedTools = @(dotnet tool list -g 2>$null | Select-Object -Skip 2 | ForEach-Object { ($_ -split '\s+')[0] })
+        $installedTools = @(try { dotnet tool list -g | Select-Object -Skip 2 | ForEach-Object { ($_ -split '\s+')[0] } } catch { })
     }
 
     Context 'Apps' {
