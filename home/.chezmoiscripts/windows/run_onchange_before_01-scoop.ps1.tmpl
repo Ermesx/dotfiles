@@ -1,0 +1,44 @@
+{{- $pkgs := includeTemplate "packages.tmpl" . | fromJson -}}
+{{- $buckets := list -}}
+{{- range $pkgs.scoop -}}
+{{-   if contains "/" . -}}
+{{-     $buckets = append $buckets (index (splitList "/" .) 0) -}}
+{{-   end -}}
+{{- end -}}
+{{ template "refresh-env.ps1" . }}
+$buckets = @({{ range $buckets | uniq }}
+    {{ . | squote }}{{ end }}
+)
+$apps = @({{ range $pkgs.scoop }}
+    {{ . | squote }}{{ end }}
+)
+$failed = @()
+
+Write-Host "► Adding Scoop buckets" -ForegroundColor Cyan
+$known = (scoop bucket list).Name
+foreach ($bucket in $buckets) {
+    if ($known -notcontains $bucket) {
+        scoop bucket add $bucket
+        if ($LASTEXITCODE -ne 0) { $failed += "bucket $bucket" }
+    }
+}
+
+Write-Host "► Installing Scoop apps" -ForegroundColor Cyan
+foreach ($app in $apps) {
+    scoop install $app
+}
+
+$installed = scoop list
+foreach ($app in $apps) {
+    $name = ($app -split '/')[-1]
+    $entry = $installed | Where-Object Name -eq $name
+    if (-not $entry -or $entry.Info -match 'failed') { $failed += $app }
+}
+
+if ($failed) {
+    Write-Host "► Failed" -ForegroundColor Red
+    foreach ($app in $failed) {
+        Write-Host "  ✗ $app  (clear with: scoop uninstall $(($app -split '[/ ]')[-1]); then chezmoi apply)"
+    }
+    exit 1
+}

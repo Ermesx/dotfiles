@@ -1,8 +1,9 @@
+{{ template "refresh-env.ps1" . }}
 # Install yazi plugins
 $installedPlugins = ya pkg list
 
 Write-Host "► Installing yazi plugins" -ForegroundColor Cyan
-{{ range .packages.yazi_plugins }}
+{{ range (includeTemplate "packages.tmpl" . | fromJson).yazi_plugins }}
 if ($installedPlugins -notlike  {{ . | squote }} ) {
     ya pkg add {{ . | squote }} | Out-Null
 }
