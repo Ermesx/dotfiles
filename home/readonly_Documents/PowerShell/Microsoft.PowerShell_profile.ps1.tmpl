@@ -4,7 +4,7 @@
 {{ end }}
 
 # Import installed modules
-{{- range .packages.windows.modules }}
+{{- range (includeTemplate "packages.tmpl" . | fromJson).modules }}
 Import-Module -Name {{ . | squote -}}
 {{ end }}
 # Import Custom Modules
