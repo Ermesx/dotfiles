@@ -21,7 +21,7 @@ below. Add a rule here only if it applies to every task.
 - Work and known bugs are tracked as GitHub issues (`gh issue list`). Each issue is self-contained for one session;
   check its "blocked by" relationships before starting, check related issues before touching related code, and
   reference the issue (`Fixes #N`) in the change that fixes it.
-- Updating installed software is Scoop's job (`Update-Apps`, rewritten in #45), not chezmoi's. chezmoi declares
+- Updating installed software is Scoop's job (`Update-Apps`), not chezmoi's. chezmoi declares
   what is installed and manages config files; do not add version pins or update mechanisms to it.
 - Git: branch off `develop`; Conventional Commits with a scope (`feat(packages): …`); commit only when asked.
 
