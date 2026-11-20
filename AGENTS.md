@@ -35,7 +35,6 @@ PowerShell, from the repo root.
 | Scripts and how their names were parsed | `chezmoi --source . managed --include=scripts` |
 | Render a template | `Get-Content -Raw home/<path>.tmpl \| chezmoi --source . execute-template` |
 | Preview what apply would change (runs no scripts) | `chezmoi --source . diff` |
-| Package view the scripts read | `'{{ includeTemplate "packages.tmpl" . }}' \| chezmoi --source . execute-template` |
 | Full install test (slow) | `cd tests; vagrant up dotfiles-windows`, then in the VM `C:\vagrant\run-tests.ps1 -BRANCH <branch>` |
 
 ## Read before you change

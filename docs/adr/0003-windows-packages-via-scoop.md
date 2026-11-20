@@ -32,13 +32,13 @@ The architecture keeps ADR-0001's model and replaces only the engine underneath 
 | Updates are the package manager's job; no version pins in the repo | Package manager for apps: winget → Scoop |
 | Re-running setup is safe and installs only what is missing | DSC is removed entirely |
 
-### The list and its view
+### The list
 
 `packages.yaml` is grouped by platform, then by profile, then by install method (`scoop`, `modules`,
-`dotnet_tools`, …). Items common to every platform sit under `global`. Consumers never walk this tree: a shared
-template merges `global` with the current platform and exposes one list per method. The install step, the profile,
-the tests and the docs all read that view, so they depend on what is declared, not on how or by which engine it is
-installed. How profiles are selected is a separate decision.
+`dotnet_tools`, …). Items common to every platform sit under `global`. Each consumer reads the list directly: a
+template ranges over the profiles of the platform it needs and renders one command per item. The install step, the
+profile, the tests and the docs read the same data, so they depend on what is declared, not on how or by which
+engine it is installed. How profiles are selected is a separate decision.
 
 ### The privilege boundary
 
@@ -50,12 +50,19 @@ The central decision is a boundary between two layers that differ in nature:
   `install.ps1` sets the execution policy for the current user, installs Scoop, then git, chezmoi and PowerShell 7
   from Scoop, and hands over to `chezmoi init --apply`. No step of the chain asks for elevation.
 - **Privileged layer — admin scripts.** The few things that are machine-level by nature: Developer Mode, Windows
-  features such as WSL, system services such as `ssh-agent`. They are kept outside `chezmoi apply`, as explicit
-  scripts that the owner runs elevated on a private machine, or that an IT administrator runs on a managed one.
+  features such as WSL, system services such as `ssh-agent`. chezmoi deploys them as explicit scripts to
+  `~/.config/dotfiles/admin/` but never runs them; the owner runs them elevated on a private machine, or an IT
+  administrator runs them on a managed one.
+
+The boundary follows the nature of each step, not who runs it. An administrator on a managed machine elevates with
+their own account, so anything per user done in that session (a WSL distro, a key loaded into `ssh-agent`) would
+land in the administrator's profile. The admin scripts therefore change only the machine and end by printing the
+per-user step, which the user runs without admin rights.
 
 The unprivileged layer does not depend on the privileged one to succeed. A step that needs a machine-level
-prerequisite (a WSL distro, loading an SSH key) checks for it and skips with a clear message when it is absent;
-once an administrator enables it, the next apply completes it.
+prerequisite tries once during apply and, when the prerequisite is absent, skips with a message naming the admin
+script to run. After that, the admin script and the printed per-user step complete the work; no second apply is
+needed.
 
 ### Why Scoop
 

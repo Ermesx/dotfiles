@@ -36,16 +36,16 @@ marker).** A report of "no marker problems" is only valid if that Grep showed ex
 
 ## 3. Packages region
 
-One Markdown table, header exactly `| Name | Category | Install Type | Purpose |` (keep the existing column
+One Markdown table, header exactly `| Name | Profile | Install Type | Purpose |` (keep the existing column
 alignment style: pad cells to the widest cell in the column).
 
-- **Rows:** one per item in every method list under `packages.global.profiles.*` and
-  `packages.windows.profiles.*`. The `pick` key of a profile is not a method: skip it. `packages.linux` is out of
-  scope.
+- **Rows:** one per item in every method under `packages.global.profiles.*` and `packages.windows.profiles.*`. A
+  method holds a list, except `wsl`, which is a single distro name (one row). The `pick` key of a profile is not a
+  method: skip it. `packages.linux` is out of scope.
 - **Install Type:** by method: `scoop` is `App`, `modules` is `Module`, `dotnet_tools` is `Tool`, `yazi_plugins` is
   `Yazi plugin`, `wsl` is `WSL distro`.
-- **Category:** the name of the profile that holds the item (`base`, `shell`, `sdk`, `apps`, `ai`). A profile name
-  outside this list is **reported** and its items are left out; do not guess a category.
+- **Profile:** the name of the profile that holds the item (`base`, `shell`, `sdk`, `apps`, `ai`). A profile name
+  outside this list is **reported** and its items are left out; do not guess a profile.
 - **Order:** by profile (`base`, `shell`, `sdk`, `apps`, `ai`), then by method (`scoop`, `modules`, `dotnet_tools`,
   `yazi_plugins`, `wsl`), then by YAML order. `global` and `windows` items of one profile are interleaved by this
   rule, not grouped by platform.

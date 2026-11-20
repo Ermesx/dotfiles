@@ -10,9 +10,11 @@
 
 ## Scripts
 
-- Scripts must be idempotent: guard every install by checking the target state (existing scripts show the pattern),
-  not the presence of the tool. Skip the guard only when the command converges by itself in a `run_onchange` script
-  (`scoop install` skips installed apps).
+- Install scripts are a flat list rendered by the template: one command per item, no PowerShell loops, no result
+  checks. The commands converge by themselves (`scoop install`, `scoop bucket add`, `Install-Module`,
+  `dotnet tool install` skip or warn on what is installed); a failure shows in the output and in
+  `Installed-Apps-Modules.Tests.ps1`. Add a state check only where a command would fail or prompt otherwise (the
+  WSL distro, the SSH key).
 - User-facing progress lines use `Write-Host "► <Action>" -ForegroundColor Cyan`.
 
 ## Generated documentation
@@ -25,5 +27,5 @@ agent; for edits made elsewhere (editor, another tool), run it yourself.
 
 ## PowerShell profile
 
-The profile imports every module from the package view's `modules`, then dot-sources every `~/.profile/*.ps1` by glob
+The profile imports every module under `.packages.windows.profiles.*.modules`, then dot-sources every `~/.profile/*.ps1` by glob
 at apply time. A new fragment in `home/dot_profile/` needs no profile edit.

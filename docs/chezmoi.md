@@ -11,9 +11,11 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
   install what the next one needs.
 - `run_onchange_` scripts rerun when their rendered content changes. A script that inlines rendered data (the Scoop
   install script inlines the rendered app list) reruns whenever that data changes.
-- A script that calls a tool installed earlier in the same apply must include the `refresh-env.ps1` partial
-  (`{{ template "refresh-env.ps1" . }}`): Scoop writes `PATH` and its variables to the user registry, which the
-  running chezmoi process does not see.
+- Each script is a separate process started with chezmoi's environment, so environment changes never pass from
+  one script to the next. Apps that Scoop exposes through shims (`bin` in the manifest) work at once, because
+  `~/scoop/shims` is on `PATH` since `install.ps1`. A script that calls an app which adds its own `PATH` entry or
+  variables (`env_add_path`, `env_set`) reads them back from the user registry first; today only
+  `03-dotnet-tools` does this, for `dotnet-sdk`.
 
 ## Templates and scripts
 
