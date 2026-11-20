@@ -26,7 +26,7 @@ packages:
           - dotnet-stack
           - refitter
 
-  # methods: scoop ([bucket/]app; buckets taken from the prefix), modules (Install-Module -Scope CurrentUser), wsl (distro)
+  # methods: scoop ([bucket/]app; buckets taken from the prefix), modules (Install-Module -Scope CurrentUser), wsl (one distro, a scalar)
   windows:
     profiles:
       base:
@@ -74,7 +74,7 @@ packages:
           - docker-buildx
           - lazydocker
         modules: [DockerCompletion, powershell-yaml, Pester]
-        wsl: [Ubuntu-24.04]
+        wsl: Ubuntu-24.04
       apps:
         pick: true
         scoop:

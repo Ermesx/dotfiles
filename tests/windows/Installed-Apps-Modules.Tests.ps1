@@ -5,10 +5,12 @@ Describe 'After installing dotfiles' {
     BeforeDiscovery {
         $src = Join-Path $PSScriptRoot '../..'
         $sourceArgs = if (Test-Path (Join-Path $src '.chezmoiroot')) { @('--source', (Resolve-Path $src)) } else { @() }
-        $view = '{{ includeTemplate "packages.tmpl" . }}' | chezmoi @sourceArgs execute-template | ConvertFrom-Json
-        $apps = @($view.scoop | ForEach-Object { ($_ -split '/')[-1] })
-        $modules = @($view.modules)
-        $tools = @($view.dotnet_tools)
+        $packages = (chezmoi @sourceArgs data | ConvertFrom-Json).packages
+        $windows = $packages.windows.profiles.PSObject.Properties.Value
+        $global = $packages.global.profiles.PSObject.Properties.Value
+        $apps = @($windows.scoop | Where-Object { $_ } | ForEach-Object { ($_ -split '/')[-1] })
+        $modules = @($windows.modules | Where-Object { $_ })
+        $tools = @($global.dotnet_tools | Where-Object { $_ })
     }
 
     BeforeAll {

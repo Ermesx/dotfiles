@@ -1,4 +1,3 @@
-{{- $pkgs := includeTemplate "packages.tmpl" . | fromJson -}}
 $AppUpdatesCacheFile = Join-Path $env:TEMP 'AppUpdatesCache.json'
 $ModuleUpdatesCacheFile = Join-Path $env:TEMP 'ModuleUpdatesCache.json'
 $UpdatesCacheLastRunFile = Join-Path $env:TEMP 'UpdatesCacheLastRun.txt'
@@ -78,8 +77,14 @@ function Check-Updates {
     )
 
     if ($Now) {
-        $knownAppps = @({{ $pkgs.scoop | quoteList | join ", " }})
-        $knowndModules = @({{ $pkgs.modules | quoteList | join ", " }})
+        $knownAppps = @(
+{{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
+            {{ . | squote }}{{ end }}{{ end }}
+        )
+        $knowndModules = @(
+{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
+            {{ . | squote }}{{ end }}{{ end }}
+        )
 
         $apps = Get-AppUpdates | Where-Object { $knownAppps -contains $_.Id }
         $modules = Get-ModuleUpdates | Where-Object { $knowndModules -contains $_.Name }
@@ -161,8 +166,14 @@ if (-not (Get-EventSubscriber -SourceIdentifier $sourceId -ErrorAction SilentlyC
 
     Register-ObjectEvent -InputObject $Global:CheckUpdatesTimer -EventName Elapsed -SourceIdentifier $sourceId -Action {
         try {
-            $knownAppps = @({{ $pkgs.scoop | quoteList | join ", " }})
-            $knowndModules = @({{ $pkgs.modules | quoteList | join ", " }})
+            $knownAppps = @(
+{{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
+                {{ . | squote }}{{ end }}{{ end }}
+            )
+            $knowndModules = @(
+{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
+                {{ . | squote }}{{ end }}{{ end }}
+            )
 
             $apps = Get-AppUpdates | Where-Object { $knownAppps -contains $_.Id }
             $modules = Get-ModuleUpdates | Where-Object { $knowndModules -contains $_.Name }

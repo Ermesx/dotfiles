@@ -4,9 +4,9 @@
 {{ end }}
 
 # Import installed modules
-{{- range (includeTemplate "packages.tmpl" . | fromJson).modules }}
+{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
 Import-Module -Name {{ . | squote -}}
-{{ end }}
+{{ end }}{{ end }}
 # Import Custom Modules
 Import-Module -Name 'Write-Pretty' -Force
 
