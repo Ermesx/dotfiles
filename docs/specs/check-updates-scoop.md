@@ -66,9 +66,15 @@ are case-insensitive.
 - **R9 `Update-Apps`.** `► Updating Scoop and buckets` and `scoop update`; then the list from R3 computed fresh (not
   from the cache); then for each row a line ` - Updating <Name> [<Old> => <New>]` and `scoop update <Name>`. A
   non-zero `$LASTEXITCODE` **[added: Scoop aborts with `exit 1`, it does not throw]** prints
-  `Failed to update app: <Name>` in red and the loop continues. Finally the `apps` section of the cache is
-  replaced by the rows that failed; `lastRun` and the other sections are kept.
-- **R10 `Update-Modules`.** Same shape: list from R4 computed fresh; `Update-Module -Name <n> -Scope CurrentUser
+  `Failed to update app: <Name>` in red and the loop continues. **[added: Scoop skips an app with a running
+  process, prints "Running process detected, skip updating." and still exits 0 (`scoop-update.ps1`); `pwsh` and
+  `windows-terminal` host the session that runs `Update-Apps`.]** So after the loop the list from R3 is computed
+  again: every app on it that the loop did not already report prints
+  `Not updated: <Name> is still outdated (close its running instances and run Update-Apps from another shell)` in
+  red, and that list replaces the `apps` section of the cache; `lastRun` and the other sections are kept.
+- **R9a [added]** Output of the update commands (`scoop update <app>`, `dotnet tool update`, `Update-Module`) goes
+  to the host (`| Out-Host`), never into the success result, so it cannot turn a failure into a success.
+- **R10 `Update-Modules`.** Same shape as R9 without the second check: list from R4 computed fresh; `Update-Module -Name <n> -Scope CurrentUser
   -Force -ErrorAction Stop` **[added: explicit scope, a standard user cannot write AllUsers]**; a thrown error
   prints `Failed to update module: <Name>` and continues; the `modules` section is replaced by the failures.
 - **R11 `Update-DotnetTools`.** Same shape: list from R5 computed fresh; `dotnet tool update -g <id>`; non-zero

@@ -24,9 +24,10 @@ if (-not (Get-EventSubscriber -SourceIdentifier $sourceId -ErrorAction SilentlyC
 
     Register-ObjectEvent -InputObject $Global:PackageUpdatesTimer -EventName Elapsed -SourceIdentifier $sourceId -Action {
         try {
+            # Only finished jobs can be removed; a queued (NotStarted) or running one means "busy"
             Get-Job -Name PackageUpdates-Refresh -ErrorAction SilentlyContinue |
-                Where-Object State -ne Running |
-                Remove-Job
+                Where-Object State -in 'Completed', 'Failed', 'Stopped' |
+                Remove-Job -ErrorAction SilentlyContinue
             if (Get-Job -Name PackageUpdates-Refresh -ErrorAction SilentlyContinue) { return }
 
             Import-Module PackageUpdates -DisableNameChecking

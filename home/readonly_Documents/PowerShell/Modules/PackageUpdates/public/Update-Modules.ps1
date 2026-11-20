@@ -8,7 +8,7 @@ function Update-Modules {
     Invoke-PackageUpdateLoop -Rows $rows -Kind 'module' -Section Modules -Update {
         param($name)
         # A standard user cannot write the AllUsers scope
-        Update-Module -Name $name -Scope CurrentUser -Force -ErrorAction Stop
+        Update-Module -Name $name -Scope CurrentUser -Force -ErrorAction Stop | Out-Host
         $true
     }
 }

@@ -44,7 +44,24 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
                     $script:scoopCalls.Add($args -join ' ')
                     $global:LASTEXITCODE = if ($args -contains 'jq') { 1 } else { 0 }
                 }
-                Mock Get-ScoopAppUpdates { 'git', 'jq', 'bat' | ForEach-Object { & $row $_ } }
+                # First call: before the updates; second call: the state after them
+                $script:statusCalls = 0
+                Mock Get-ScoopAppUpdates {
+                    $script:statusCalls++
+                    $names = if ($script:statusCalls -eq 1) { 'git', 'jq', 'bat' } else { $script:stillOutdated }
+                    $names | ForEach-Object { & $row $_ }
+                }
+                $script:stillOutdated = @('jq')
+            }
+
+            It 'reports an app Scoop skipped with exit code 0 (running process) and keeps it in the cache' {
+                $script:stillOutdated = @('jq', 'git')
+
+                Update-Apps -Declared $d
+
+                Should -Invoke Write-Red -ParameterFilter { $Text -like 'Not updated: git is still outdated*' }
+                Should -Invoke Write-Red -Times 0 -Exactly -ParameterFilter { $Text -like 'Not updated: jq*' }
+                @((Read-PackageUpdatesCache).Apps).Name | Should -Be @('jq', 'git')
             }
 
             It 'updates Scoop, then every app, and keeps going after a failure' {
@@ -58,7 +75,7 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             It 'computes the list after updating Scoop, with the declared apps' {
                 Update-Apps -Declared $d
 
-                Should -Invoke Get-ScoopAppUpdates -Times 1 -Exactly -ParameterFilter { "$Names" -eq 'git jq bat' }
+                Should -Invoke Get-ScoopAppUpdates -Times 2 -Exactly -ParameterFilter { "$Names" -eq 'git jq bat' }
             }
 
             It 'keeps only the failed app in the cache and leaves the rest of it' {
@@ -72,6 +89,7 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             }
 
             It 'updates no app when none is outdated' {
+                $script:stillOutdated = @()
                 Mock Get-ScoopAppUpdates { }
 
                 Update-Apps -Declared $d
@@ -118,6 +136,18 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
 
                 $script:dotnetCalls | Should -Be @('tool update -g dotnet-ef', 'tool update -g refitter')
                 Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update .NET tool: refitter' }
+            }
+
+            It 'reports a failed tool even when dotnet writes to stdout' {
+                Mock dotnet {
+                    "Tool 'refitter' failed to update."
+                    $global:LASTEXITCODE = if ($args -contains 'refitter') { 1 } else { 0 }
+                }
+
+                Update-DotnetTools -Declared $d
+
+                Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update .NET tool: refitter' }
+                @((Read-PackageUpdatesCache).DotnetTools).Name | Should -Be @('refitter')
             }
 
             It 'keeps only the failed tool in the cache' {
