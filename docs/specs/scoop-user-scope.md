@@ -15,7 +15,7 @@ scripts deployed by chezmoi and limited to the machine part, the simple bootstra
 |---|---|---|---|
 | D1 | README table *Category* column under the new schema | **The profile name** (`base`, `shell`, `sdk`, `apps`, `ai`); YAML comments become free-form notes; the category glossary in `docs/packages.md` is replaced by a profile glossary | The issue's target YAML has glossary comments only in `shell`; profiles are now the grouping dimension, so one key, one meaning |
 | D2 | Acceptance "no reference to winget/DSC" vs `check-updates.ps1.tmpl` | `check-updates.ps1.tmpl` only switches its lists to `packages.yaml` here and keeps its winget logic until #45; the grep criterion excludes that file and the accepted ADR-0002 (an accepted ADR is never edited) | The issue itself defers the rewrite to #45 |
-| D3 | Admin-only commands removed from apply | **Parked, not dropped [revised]:** each goes into its own script that chezmoi deploys to `~/.config/dotfiles/admin/` and never runs. A script changes only the machine and prints the per-user step (WSL distro, `ssh-add`): an administrator elevating with their own account would put those into their own profile. The user-side WSL/SSH scripts try once (`run_once_`); when the machine part is missing they print how an administrator runs the matching script | `chezmoi apply` stays admin-free without losing Developer Mode, the WSL platform or the ssh-agent service, and no second apply is needed after the admin step |
+| D3 | Admin-only commands removed from apply | **Parked, not dropped [revised]:** each goes into its own script that chezmoi deploys to `~/.config/dotfiles/admin/` and never runs. A script changes only the machine and prints the per-user step (WSL distro, `ssh-add`): an administrator elevating with their own account would put those into their own profile. The user-side WSL/SSH scripts try once (`run_once_`); when the machine part is missing they skip with a one-line message that it needs an administrator | `chezmoi apply` stays admin-free without losing Developer Mode, the WSL platform or the ssh-agent service, and no second apply is needed after the admin step |
 | D4 | How the VM test reads the expected list | `chezmoi data` **[revised]**, no file deployed to `$HOME` | Replaces `~/.config/config.dsc.yaml`, which existed only for the test |
 | D5 | .NET SDK | `main/dotnet-sdk`, always the latest; no pin | Following the latest SDK is a benefit of Scoop (winget needed a major-version id) |
 
@@ -54,14 +54,13 @@ scripts deployed by chezmoi and limited to the machine part, the simple bootstra
   errors ignored) only if a value changed.
 - **R9 [revised]** `run_once_before_install-wsl.ps1.tmpl` (one try, D3): sets `WSL_UTF8=1` **[added: `wsl -l -q`
   is UTF-16 otherwise and `-contains` never matches]**; checks `wsl --status` **before** any other `wsl` call; if it
-  exits non-zero, prints `► Skipping WSL distro: WSL is not enabled`, the command an administrator runs in
-  their own PowerShell 7 (`pwsh -NoProfile -ExecutionPolicy Bypass -File <user home>\.config\dotfiles\admin\enable-wsl.ps1`)
-  and the per-user command the user runs after the restart, then exits 0; otherwise installs the distro when missing from `wsl -l -q` with
+  exits non-zero, prints one line `► Skipping WSL distro: WSL is not enabled (needs an administrator)` and exits 0
+  (the admin script prints the per-user step); otherwise installs the distro when missing from `wsl -l -q` with
   `wsl --install -d <distro> --web-download --no-launch` (`--web-download` works where the Microsoft Store is
   blocked; `--no-launch` keeps the first-run prompt from blocking apply). No `wsl --update`.
 - **R10 [revised]** `run_once_after_add-ssh-key.ps1` (one try, D3): if the `ssh-agent` service is not `Running`,
-  prints `► Skipping SSH key: ssh-agent is not running`, the administrator command for
-  `enable-ssh-agent.ps1` and the `ssh-add` command the user runs afterwards, then exits 0; otherwise `ssh-add ~\.ssh\id_ed25519`. No fingerprint check, no
+  prints one line `► Skipping SSH key: ssh-agent is not running (needs an administrator)` and exits 0; otherwise
+  `ssh-add ~\.ssh\id_ed25519`. No fingerprint check, no
   `Set-Service` / `Start-Service`.
 - **R11 [revised]** `run_once_after_yazi-plugins.ps1.tmpl` reads `.packages.global.profiles.shell.yazi_plugins`;
   `ya` is a Scoop shim, so no environment refresh.
@@ -138,7 +137,7 @@ scripts (#12). No uninstall, no state file, no version pins.
    steps print their skip messages; `Installed-Apps-Modules.Tests.ps1` passes; Windows Terminal starts with the
    managed settings and Hasklug Nerd Font; `dotnet ef --version` works in a new shell.
 4. From a second, administrator account each script in `~/.config/dotfiles/admin/` runs twice without error through
-   the printed `pwsh -NoProfile -ExecutionPolicy Bypass -File` command, and the second run changes nothing. After
+   `pwsh -NoProfile -ExecutionPolicy Bypass -File <script>`, and the second run changes nothing. After
    the restart the standard user runs the printed `wsl --install …` and `ssh-add …` without admin; the distro
    starts and `ssh-add -l` lists the key.
 5. Second apply runs none of the `run_onchange_` scripts; adding one app installs only that app.

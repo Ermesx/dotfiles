@@ -60,8 +60,8 @@ land in the administrator's profile. The admin scripts therefore change only the
 per-user step, which the user runs without admin rights.
 
 The unprivileged layer does not depend on the privileged one to succeed. A step that needs a machine-level
-prerequisite tries once during apply and, when the prerequisite is absent, skips with a message naming the admin
-script to run. After that, the admin script and the printed per-user step complete the work; no second apply is
+prerequisite tries once during apply and, when the prerequisite is absent, skips with a one-line message that it needs
+an administrator. After that, the admin script and the printed per-user step complete the work; no second apply is
 needed.
 
 ### Why Scoop
