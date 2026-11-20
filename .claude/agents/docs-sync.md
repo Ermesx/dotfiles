@@ -12,8 +12,9 @@ root. Spec: `docs/specs/docs-sync.md`.
 
 Read all of these before editing:
 
-- `home/.chezmoidata/packages.yaml` — ids and the group comments (`# shell`, `# git`, …). Source of truth for packages.
-- `docs/packages.md`, section *Categories* — the glossary. Its names are the only valid categories.
+- `home/.chezmoidata/packages.yaml` — ids and profile names. Source of truth for packages. YAML comments are
+  free-form notes: ignore them.
+- `docs/packages.md`, section *Profiles* — the glossary of profile names (for reference).
 - `ReadMe.md` — the current table between the packages markers (source of existing names and purposes).
 - `docs/terminal-bindings.md` — the current list between the bindings markers (source of existing action texts).
 - `home/dot_profile/PSReadLine_profile.ps1` and `home/dot_profile/psfzf_profile.ps1` — source of truth for bindings.
@@ -35,23 +36,23 @@ marker).** A report of "no marker problems" is only valid if that Grep showed ex
 
 ## 3. Packages region
 
-One Markdown table, header exactly `| Name | Category | Install Type | Purpose |` (keep the existing column
+One Markdown table, header exactly `| Name | Profile | Install Type | Purpose |` (keep the existing column
 alignment style: pad cells to the widest cell in the column).
 
-- **Rows:** one per id in `packages.windows.wingets`, `packages.windows.modules`, `packages.dotnet_tools`,
-  `packages.yazi_plugins`, plus one row for `packages.windows.wsl` (the distro name). `packages.linux` is out of scope.
-- **Install Type:** `App` (wingets), `Module`, `Tool` (dotnet_tools), `Yazi plugin`, `WSL distro`.
-- **Category:** the glossary name of the nearest group comment above the id **within the same YAML list** (or the
-  comment directly above the `wsl` key). A comment belonging to an earlier list never counts: an id that precedes
-  the first comment of its own list has no group. An id whose group is not in the glossary, or that has no group
-  comment, is **left out of the table and listed under
-  "Reported"** — do not guess a category.
-- **Order:** glossary order of the category (shell, fzf, git, dotnet, node, python, ai, containers, chezmoi, editors, browsers,
-  other), then source order (wingets, modules, dotnet_tools, yazi_plugins, wsl), then order in the YAML.
-- **Name and Purpose:** if the id already has a row, copy its Name and Purpose cells **verbatim** (match by the id
-  in parentheses in Name, or by the exact Name for ids without one). For a new id write
-  `Display name (id)` — plain `id` for modules, tools and the yazi plugin — and a purpose of at most 40
-  characters in the style of the existing rows. Never reword an existing cell.
+- **Rows:** one per item in every method under `packages.global.profiles.*` and `packages.windows.profiles.*`. A
+  method holds a list, except `wsl`, which is a single distro name (one row). The `pick` key of a profile is not a
+  method: skip it. `packages.linux` is out of scope.
+- **Install Type:** by method: `scoop` is `App`, `modules` is `Module`, `dotnet_tools` is `Tool`, `yazi_plugins` is
+  `Yazi plugin`, `wsl` is `WSL distro`.
+- **Profile:** the name of the profile that holds the item (`base`, `shell`, `sdk`, `apps`, `ai`). A profile name
+  outside this list is **reported** and its items are left out; do not guess a profile.
+- **Order:** by profile (`base`, `shell`, `sdk`, `apps`, `ai`), then by method (`scoop`, `modules`, `dotnet_tools`,
+  `yazi_plugins`, `wsl`), then by YAML order. `global` and `windows` items of one profile are interleaved by this
+  rule, not grouped by platform.
+- **Name and Purpose:** ids are Scoop entries (`[bucket/]app`). If the id already has a row (match by the id in
+  parentheses in Name, or by the exact Name for ids without one), copy its Name and Purpose cells **verbatim**. For
+  a new id write `Display name (<[bucket/]app>)` — plain id for modules, tools, the yazi plugin and the WSL
+  distro — and a purpose of at most 40 characters in the style of the existing rows. Never reword an existing cell otherwise.
 - **Removed ids:** rows whose id is no longer in the YAML are dropped.
 
 ## 4. Bindings region

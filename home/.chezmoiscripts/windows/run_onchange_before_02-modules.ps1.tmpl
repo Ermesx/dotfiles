@@ -1,0 +1,10 @@
+Write-Host "► Installing PowerShell modules" -ForegroundColor Cyan
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
+{{- if eq . "Pester" }}
+# The inbox Pester 3.4 is signed by another publisher
+Install-Module -Name Pester -Scope CurrentUser -Force -SkipPublisherCheck
+{{- else }}
+Install-Module -Name {{ . }} -Scope CurrentUser
+{{- end }}
+{{- end }}{{ end }}

@@ -1,0 +1,17 @@
+{{- $buckets := list -}}
+{{- range .packages.windows.profiles -}}
+{{-   range (get . "scoop" | default list) -}}
+{{-     if contains "/" . -}}
+{{-       $buckets = append $buckets (index (splitList "/" .) 0) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+Write-Host "► Adding Scoop buckets" -ForegroundColor Cyan
+{{- range $buckets | uniq }}
+scoop bucket add {{ . }}
+{{- end }}
+
+Write-Host "► Installing Scoop apps" -ForegroundColor Cyan
+{{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
+scoop install {{ . }}
+{{- end }}{{ end }}

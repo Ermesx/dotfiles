@@ -77,8 +77,14 @@ function Check-Updates {
     )
 
     if ($Now) {
-        $knownAppps = @({{ .packages.windows.wingets | quoteList | join ", " }})
-        $knowndModules = @({{ .packages.windows.modules | quoteList | join ", " }})
+        $knownAppps = @(
+{{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
+            {{ . | squote }}{{ end }}{{ end }}
+        )
+        $knowndModules = @(
+{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
+            {{ . | squote }}{{ end }}{{ end }}
+        )
 
         $apps = Get-AppUpdates | Where-Object { $knownAppps -contains $_.Id }
         $modules = Get-ModuleUpdates | Where-Object { $knowndModules -contains $_.Name }
@@ -160,8 +166,14 @@ if (-not (Get-EventSubscriber -SourceIdentifier $sourceId -ErrorAction SilentlyC
 
     Register-ObjectEvent -InputObject $Global:CheckUpdatesTimer -EventName Elapsed -SourceIdentifier $sourceId -Action {
         try {
-            $knownAppps = @({{ .packages.windows.wingets | quoteList | join ", " }})
-            $knowndModules = @({{ .packages.windows.modules | quoteList | join ", " }})
+            $knownAppps = @(
+{{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
+                {{ . | squote }}{{ end }}{{ end }}
+            )
+            $knowndModules = @(
+{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
+                {{ . | squote }}{{ end }}{{ end }}
+            )
 
             $apps = Get-AppUpdates | Where-Object { $knownAppps -contains $_.Id }
             $modules = Get-ModuleUpdates | Where-Object { $knowndModules -contains $_.Name }

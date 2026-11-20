@@ -1,6 +1,6 @@
 # ADR-0001: Install Windows software declaratively through DSC v3
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-0003](0003-windows-packages-via-scoop.md)
 - **Date:** 2025-09-01 (implemented in `32f284b`; recorded 2026-10-15)
 - **Decider:** repository owner
 

@@ -1,125 +1,99 @@
+# packages.<platform>.profiles.<name>.<method>: [items]
+#   platform   global (added to every platform) | windows | linux
+#   profile    chosen at `chezmoi init` (#20); base is always on; same names on every platform,
+#              content per platform; a profile may be missing on a platform
+#   pick: true each item is offered separately at init (default: whole profile)
+#   method     how the items are installed (listed per platform below)
 packages:
-  dotnet_tools:
-    # dotnet
-    - dotnet-ef
-    - dotnet-reportgenerator-globaltool
-    - dotnet-outdated-tool
-    - dotnet-user-secrets
-    - dotnet-dev-certs
-    - gitversion.tool
-    - dotnet-coverage
-    - dotnet-trace
-    - dotnet-counters
-    - dotnet-dump
-    - dotnet-stack
-    - refitter
 
-  yazi_plugins:
-    # shell
-    - yazi-rs/plugins:full-border
+  # methods: dotnet_tools (dotnet tool install -g), yazi_plugins (ya pkg add)
+  global:
+    profiles:
+      shell:
+        yazi_plugins: [yazi-rs/plugins:full-border]
+      sdk:
+        dotnet_tools:
+          - dotnet-ef
+          - dotnet-reportgenerator-globaltool
+          - dotnet-outdated-tool
+          - dotnet-user-secrets
+          - dotnet-dev-certs
+          - gitversion.tool
+          - dotnet-coverage
+          - dotnet-trace
+          - dotnet-counters
+          - dotnet-dump
+          - dotnet-stack
+          - refitter
 
+  # methods: scoop ([bucket/]app; buckets taken from the prefix), modules (Install-Module -Scope CurrentUser), wsl (one distro, a scalar)
   windows:
-    # other
-    wsl: Ubuntu-24.04
-    wingets:
-      # shell
-      - Microsoft.PowerShell
-      - Starship.Starship
-      - Microsoft.WindowsTerminal
-      - jqlang.jq
-      - ajeetdsouza.zoxide
-      - sxyazi.yazi
+    profiles:
+      base:
+        scoop:
+          - pwsh
+          - git
+          - chezmoi
+          - 7zip
+          - extras/windows-terminal
+          - extras/powertoys
+          - extras/caffeine
+          - nerd-fonts/Hasklig-NF
+      shell:
+        scoop:
+          # shell
+          - starship
+          - jq
+          - zoxide
+          - yazi
+          # fzf
+          - fzf
+          - fd
+          - ripgrep
+          - eza
+          - bat
+          # git
+          - extras/onefetch
+          - delta
+          - less
+          - extras/lazygit
+          - gitql
+          - gh
+          - gitleaks
+          - gpg
+        modules: [Terminal-Icons, PSfzf, posh-git]
+      sdk:
+        scoop:
+          - dotnet-sdk
+          - nodejs
+          - python
+          - uv
+          # containers: clients only, the engine is a separate task
+          - docker
+          - docker-compose
+          - docker-buildx
+          - lazydocker
+        modules: [DockerCompletion, powershell-yaml, Pester]
+        wsl: Ubuntu-24.04
+      apps:
+        pick: true
+        scoop:
+          - extras/vscode
+          - extras/rider
+          - extras/googlechrome
+          - extras/postman
+          - vagrant
+      ai:
+        pick: true
+        scoop: [claude-code]
 
-      # fzf
-      - junegunn.fzf
-      - sharkdp.fd
-      - BurntSushi.ripgrep.MSVC
-      - eza-community.eza
-      - sharkdp.bat
-
-      # git
-      - Git.Git
-      - o2sh.onefetch
-      - dandavison.delta
-      - jftuga.less
-      - JesseDuffield.lazygit
-      - amrdeveloper.gitql
-      - GitHub.cli
-      - Gitleaks.Gitleaks
-
-      # dotnet
-      - Microsoft.DotNet.SDK.10
-
-      # node
-      - OpenJS.NodeJS
-
-      # ai
-      - Anthropic.ClaudeCode
-
-      # python
-      - Python.PythonInstallManager
-
-      # containers
-      - Docker.DockerDesktop
-      - Hashicorp.Vagrant
-
-      # chezmoi
-      - twpayne.chezmoi
-
-      # editors
-      - Microsoft.VisualStudioCode
-      - JetBrains.Rider
-
-      # browsers
-      - Google.Chrome
-
-      # other
-      - Microsoft.PowerToys
-      - APIDocumentation.Scalar
-
-    modules:
-      # shell
-      - Microsoft.WinGet.Client
-      - Terminal-Icons
-
-      # fzf
-      - PSfzf
-
-      # git
-      - posh-git
-
-      # containers
-      - DockerCompletion
-
-      # other
-      - powershell-yaml
-      - Pester
-
+  # methods: brew, zsh_plugins (Linux scripts are out of scope, see #12)
   linux:
-    brews:
-      # shell
-      - zsh
-      - oh-my-zsh
-      - zoxide
-
-      # fzf
-      - fzf
-      - fd
-      - ripgrep
-      - eza
-      - fzf-tab
-
-      # git
-      - git
-      - lazygit
-      - gitql
-      - onefetch
-
-      # containers
-      - docker
-
-    casks:
-
-    modules:
-      - zsh-autosuggestions
-      - zsh-syntax-highlighting
+    profiles:
+      base:
+        brew: [git]
+      shell:
+        brew: [zsh, oh-my-zsh, zoxide, fzf, fd, ripgrep, eza, fzf-tab, lazygit, gitql, onefetch]
+        zsh_plugins: [zsh-autosuggestions, zsh-syntax-highlighting]
+      sdk:
+        brew: [docker]

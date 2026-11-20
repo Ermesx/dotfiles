@@ -7,20 +7,23 @@ need with `chezmoi --source . managed` while planning and keep it in your plan, 
 
 - One chezmoi source in `home/` (`.chezmoiroot`) renders per OS and host. Everything outside `home/` is repo
   tooling and is never applied to `$HOME`.
-- On Windows, software state is declarative: `home/.chezmoidata/packages.yaml` is rendered into a DSC v3 document
-  that drives `Microsoft.WinGet/Package`, `PowerShellModule/PSModuleResource`, and
-  `Microsoft.DotNet.Dsc/DotNetToolPackage` resources. Rationale and exceptions:
-  [ADR-0001](adr/0001-windows-packages-via-dsc-v3.md).
-- Bootstrap is `install.ps1` (published at `https://getdotfiles.short.gy/install.ps1`): it ensures winget, installs
-  chezmoi, Microsoft DSC, and PowerShell 7, then runs `chezmoi init --apply Ermesx`.
+- On Windows, software state is declarative and installed in user scope: the numbered install scripts render
+  `home/.chezmoidata/packages.yaml` into one command per item: Scoop apps, PowerShell modules (`CurrentUser`),
+  .NET global tools. Apply needs no admin rights; machine-level setup is in admin scripts that chezmoi deploys to
+  `~/.config/dotfiles/admin/` but never runs. Rationale and exceptions:
+  [ADR-0003](adr/0003-windows-packages-via-scoop.md).
+- Bootstrap is `install.ps1` (published at `https://getdotfiles.short.gy/install.ps1`), run from a non-elevated
+  shell: it sets the `CurrentUser` execution policy, installs Scoop if missing, installs git, chezmoi, and
+  PowerShell 7 from Scoop, then runs `chezmoi init --apply Ermesx`.
 
 ## Capabilities
 
 | Capability | Start from |
 |---|---|
 | Declarative install of apps, PowerShell modules, .NET tools, yazi plugins, WSL distro | `home/.chezmoidata/packages.yaml`, then its consumers (grep for `.packages`) |
-| Applying that state on Windows | The DSC template in `home/.chezmoitemplates/` and the numbered scripts in `home/.chezmoiscripts/windows/` |
-| One-off machine setup (font, WSL, ssh-agent key, key decryption) | `home/.chezmoiscripts/<os>/`; font choice in `home/.chezmoidata/` |
+| Applying that state on Windows | The numbered scripts `01-scoop`, `02-modules`, `03-dotnet-tools` (then `user-settings` after them) in `home/.chezmoiscripts/windows/` |
+| One-off machine setup (WSL distro, ssh-agent key, key decryption) | `home/.chezmoiscripts/<os>/` |
+| Setup that needs administrator rights (Developer Mode, WSL platform, ssh-agent service) | `home/dot_config/dotfiles/admin/` (deployed to `~/.config/dotfiles/admin/`); chezmoi never runs it, see [ADR-0003](adr/0003-windows-packages-via-scoop.md) |
 | PowerShell shell experience (modules, PSReadLine, fzf, completers, prompt, update checks) | The profile template under `home/readonly_Documents/PowerShell/` and the fragments it dot-sources |
 | Per-app configuration (terminal, git, starship, lazygit, bat, yazi, …) | `home/dot_*` for `$HOME`, `home/readonly_AppData/` for `%APPDATA%` / `%LOCALAPPDATA%` |
 | Secrets and identity | `*.age` / `encrypted_*` files and `home/.chezmoi.toml.tmpl` |

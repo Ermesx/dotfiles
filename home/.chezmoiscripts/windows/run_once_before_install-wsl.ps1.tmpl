@@ -1,10 +1,15 @@
-$distro = {{ .packages.windows.wsl | squote }}
-Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
+$distro = {{ .packages.windows.profiles.sdk.wsl | squote }}
 
-# Update WSL first time
-wsl.exe --update | Out-Null
+# wsl prints UTF-16 unless WSL_UTF8 is set; without it -contains never matches
+$env:WSL_UTF8 = '1'
 
-# Install WSL distro if not already installed
+wsl --status *> $null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "► Skipping WSL distro: WSL is not enabled (needs an administrator)" -ForegroundColor Yellow
+    exit 0
+}
+
 if (-not ((wsl -l -q) -contains $distro)) {
-    wsl --install -d $distro | Out-Null
+    Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
+    wsl --install -d $distro --web-download --no-launch
 }
