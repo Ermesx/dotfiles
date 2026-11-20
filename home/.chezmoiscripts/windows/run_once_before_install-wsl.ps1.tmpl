@@ -5,8 +5,11 @@ $env:WSL_UTF8 = '1'
 
 wsl --status *> $null
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "► Skipping WSL distro: WSL is not enabled. An administrator runs:" -ForegroundColor Yellow
-    Write-Host "  & `"$HOME\scoop\apps\pwsh\current\pwsh.exe`" -NoProfile -ExecutionPolicy Bypass -File `"$HOME\.config\dotfiles\admin\enable-wsl.ps1`""
+    Write-Host "► Skipping WSL distro: WSL is not enabled" -ForegroundColor Yellow
+    Write-Host "  An administrator reviews and runs, in their own PowerShell 7:"
+    Write-Host "    pwsh -NoProfile -ExecutionPolicy Bypass -File `"$HOME\.config\dotfiles\admin\enable-wsl.ps1`""
+    Write-Host "  Then, after a restart, you run (no admin needed):"
+    Write-Host "    wsl --install -d $distro --web-download --no-launch"
     exit 0
 }
 

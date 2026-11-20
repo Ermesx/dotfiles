@@ -54,14 +54,14 @@ scripts deployed by chezmoi and limited to the machine part, the simple bootstra
   errors ignored) only if a value changed.
 - **R9 [revised]** `run_once_before_install-wsl.ps1.tmpl` (one try, D3): sets `WSL_UTF8=1` **[added: `wsl -l -q`
   is UTF-16 otherwise and `-contains` never matches]**; checks `wsl --status` **before** any other `wsl` call; if it
-  exits non-zero, prints `► Skipping WSL distro: WSL is not enabled. An administrator runs:` and the full
-  `pwsh -NoProfile -ExecutionPolicy Bypass -File <user home>\.config\dotfiles\admin\enable-wsl.ps1` command, then
-  exits 0; otherwise installs the distro when missing from `wsl -l -q` with
+  exits non-zero, prints `► Skipping WSL distro: WSL is not enabled`, the command an administrator runs in
+  their own PowerShell 7 (`pwsh -NoProfile -ExecutionPolicy Bypass -File <user home>\.config\dotfiles\admin\enable-wsl.ps1`)
+  and the per-user command the user runs after the restart, then exits 0; otherwise installs the distro when missing from `wsl -l -q` with
   `wsl --install -d <distro> --web-download --no-launch` (`--web-download` works where the Microsoft Store is
   blocked; `--no-launch` keeps the first-run prompt from blocking apply). No `wsl --update`.
 - **R10 [revised]** `run_once_after_add-ssh-key.ps1` (one try, D3): if the `ssh-agent` service is not `Running`,
-  prints `► Skipping SSH key: ssh-agent is not running. An administrator runs:` and the full command for
-  `enable-ssh-agent.ps1`, then exits 0; otherwise `ssh-add ~\.ssh\id_ed25519`. No fingerprint check, no
+  prints `► Skipping SSH key: ssh-agent is not running`, the administrator command for
+  `enable-ssh-agent.ps1` and the `ssh-add` command the user runs afterwards, then exits 0; otherwise `ssh-add ~\.ssh\id_ed25519`. No fingerprint check, no
   `Set-Service` / `Start-Service`.
 - **R11 [revised]** `run_once_after_yazi-plugins.ps1.tmpl` reads `.packages.global.profiles.shell.yazi_plugins`;
   `ya` is a Scoop shim, so no environment refresh.
@@ -150,5 +150,9 @@ scripts (#12). No uninstall, no state file, no version pins.
 - Whether `~\.dotnet\tools` lands on `PATH` with the Scoop SDK is unverified (Acceptance 3).
 - A failed install does not fail apply and is not retried until the list changes (accepted in the review); R19
   detects it, `scoop install <app>` fixes it by hand.
+- The admin scripts live in the user's profile, which the user can write to; an administrator runs them elevated
+  with their own `pwsh`, so they review the (short) script first. Accepted for a personal setup; see ADR-0003.
+- `dotnet tool install -g` on an already installed tool may update it on recent SDKs instead of failing, which
+  would make a list change also update the tools. Confirm on the VM; if so, accept it here or render a skip.
 - `Install-Module` without `-Force` could prompt for the NuGet provider on a fresh profile; PowerShell 7 ships it
   with PackageManagement, so no prompt is expected. Confirm on the VM.

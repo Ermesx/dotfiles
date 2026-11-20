@@ -14,7 +14,7 @@
   checks. The commands converge by themselves (`scoop install`, `scoop bucket add`, `Install-Module`,
   `dotnet tool install` skip or warn on what is installed); a failure shows in the output and in
   `Installed-Apps-Modules.Tests.ps1`. Add a state check only where a command would fail or prompt otherwise (the
-  WSL distro, the SSH key).
+  WSL distro, the ssh-agent service).
 - User-facing progress lines use `Write-Host "► <Action>" -ForegroundColor Cyan`.
 
 ## Generated documentation

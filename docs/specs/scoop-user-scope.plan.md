@@ -1,5 +1,7 @@
 # Scoop User-Scope Install Implementation Plan
 
+> **Superseded in part (2026-11-20).** This is the original execution plan. The PR #50 review changed the design: no `packages.tmpl` view or `refresh-env.ps1` partial, no `Package-View.Tests.ps1`, flat install scripts, admin scripts in `home/dot_config/dotfiles/admin/` instead of `scripts/admin/`. The requirements marked **[revised]** in [`scoop-user-scope.md`](scoop-user-scope.md) are authoritative.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Windows setup installs every app, module, .NET tool and user setting without admin rights, through Scoop, from one package view.

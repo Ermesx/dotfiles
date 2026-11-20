@@ -90,6 +90,9 @@ is not worth an engine and its prerelease resource modules.
 - **The model survives the engine change.** Because consumers depend on the list, not on the engine, replacing
   winget + DSC with Scoop does not change how software is declared, how the profile and tests read it, or how
   updates are handled. The same property will let a future engine change stay local.
+- **The admin scripts sit in a user-writable location.** An administrator runs them elevated from the user's
+  profile with their own PowerShell 7, so they read the script before running it; the scripts are kept short for
+  that reason. A managed fleet that cannot accept this copies them to an admin-only location first.
 - **Bucket choice is a trust decision.** Scoop manifests come from bucket repositories, some community-maintained.
   Adding a bucket is reviewed like adding a dependency.
 - **Drift is detected by comparing the declared list with what Scoop reports** instead of a DSC test run; removing

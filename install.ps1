@@ -3,8 +3,9 @@ param (
     [string]$GITHUB_USERNAME = 'Ermesx'
 )
 
-# Scoop and the profile need scripts to run
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+# Scoop and the profile need scripts to run; a Process-scope policy (e.g. -ExecutionPolicy Bypass)
+# makes this report an override, which is expected
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force -ErrorAction SilentlyContinue
 
 if (-not (Get-Command -Name scoop -ErrorAction SilentlyContinue)) {
 

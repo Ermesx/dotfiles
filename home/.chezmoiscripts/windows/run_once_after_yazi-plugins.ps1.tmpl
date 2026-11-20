@@ -3,7 +3,7 @@ $installedPlugins = ya pkg list
 
 Write-Host "► Installing yazi plugins" -ForegroundColor Cyan
 {{ range .packages.global.profiles.shell.yazi_plugins }}
-if ($installedPlugins -notlike  {{ . | squote }} ) {
+if (-not ($installedPlugins -like {{ print "*" . "*" | squote }})) {
     ya pkg add {{ . | squote }} | Out-Null
 }
 {{ end }}
