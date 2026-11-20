@@ -1,34 +1,10 @@
-{{- $pkgs := includeTemplate "packages.tmpl" . | fromJson -}}
-$modules = @({{ range $pkgs.modules }}
-    {{ . | squote }}{{ end }}
-)
-$failedModules = @()
-
 Write-Host "► Installing PowerShell modules" -ForegroundColor Cyan
-if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-}
-
-$installed = (Get-InstalledModule -ErrorAction SilentlyContinue).Name
-foreach ($m in $modules) {
-    if ($installed -contains $m) { continue }
-    try {
-        if ($m -eq 'Pester') {
-            # The inbox Pester 3.4 is signed by another publisher.
-            Install-Module -Name $m -Scope CurrentUser -Force -SkipPublisherCheck -ErrorAction Stop
-        } else {
-            Install-Module -Name $m -Scope CurrentUser -Force -ErrorAction Stop
-        }
-    } catch {
-        $failedModules += [pscustomobject]@{ Name = $m; Reason = $_.Exception.Message }
-    }
-}
-
-if ($failedModules) {
-    Write-Host "► Failed" -ForegroundColor Red
-    foreach ($f in $failedModules) {
-        Write-Host "  ✗ $($f.Name): $($f.Reason)  (retry with: Install-Module $($f.Name) -Scope CurrentUser)"
-    }
-    exit 1
-}
-exit 0
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
+{{- if eq . "Pester" }}
+# The inbox Pester 3.4 is signed by another publisher
+Install-Module -Name Pester -Scope CurrentUser -Force -SkipPublisherCheck
+{{- else }}
+Install-Module -Name {{ . }} -Scope CurrentUser
+{{- end }}
+{{- end }}{{ end }}

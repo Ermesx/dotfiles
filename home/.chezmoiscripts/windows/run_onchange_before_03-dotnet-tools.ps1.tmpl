@@ -1,23 +1,9 @@
-{{- $pkgs := includeTemplate "packages.tmpl" . | fromJson -}}
-{{ template "refresh-env.ps1" . }}
-$tools = @({{ range $pkgs.dotnet_tools }}
-    {{ . | squote }}{{ end }}
-)
-$failedTools = @()
+# dotnet-sdk writes its PATH entry and DOTNET_ROOT to the user registry, which this process,
+# started by chezmoi before the install, does not see yet
+$env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'User') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'Machine')
+$env:DOTNET_ROOT = [Environment]::GetEnvironmentVariable('DOTNET_ROOT', 'User')
 
 Write-Host "► Installing .NET tools" -ForegroundColor Cyan
-$installed = dotnet tool list -g | Select-Object -Skip 2 | ForEach-Object { ($_ -split '\s+')[0] }
-foreach ($t in $tools) {
-    if ($installed -contains $t) { continue }
-    dotnet tool install -g $t
-    if ($LASTEXITCODE -ne 0) { $failedTools += $t }
-}
-
-if ($failedTools) {
-    Write-Host "► Failed" -ForegroundColor Red
-    foreach ($t in $failedTools) {
-        Write-Host "  ✗ $t  (see the error with: dotnet tool install -g $t)"
-    }
-    exit 1
-}
-exit 0
+{{- range .packages.global.profiles }}{{ range (get . "dotnet_tools" | default list) }}
+dotnet tool install -g {{ . }}
+{{- end }}{{ end }}

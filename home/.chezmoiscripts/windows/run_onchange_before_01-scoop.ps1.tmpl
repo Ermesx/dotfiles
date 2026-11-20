@@ -1,52 +1,17 @@
-{{- $pkgs := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- $buckets := list -}}
-{{- range $pkgs.scoop -}}
-{{-   if contains "/" . -}}
-{{-     $buckets = append $buckets (index (splitList "/" .) 0) -}}
+{{- range .packages.windows.profiles -}}
+{{-   range (get . "scoop" | default list) -}}
+{{-     if contains "/" . -}}
+{{-       $buckets = append $buckets (index (splitList "/" .) 0) -}}
+{{-     end -}}
 {{-   end -}}
 {{- end -}}
-{{ template "refresh-env.ps1" . }}
-$buckets = @({{ range $buckets | uniq }}
-    {{ . | squote }}{{ end }}
-)
-$apps = @({{ range $pkgs.scoop }}
-    {{ . | squote }}{{ end }}
-)
-$failedBuckets = @()
-$failedApps = @()
-
 Write-Host "► Adding Scoop buckets" -ForegroundColor Cyan
-$known = (scoop bucket list).Name
-foreach ($bucket in $buckets) {
-    if ($known -notcontains $bucket) {
-        scoop bucket add $bucket
-    }
-}
-$known = (scoop bucket list).Name
-foreach ($bucket in $buckets) {
-    if ($known -notcontains $bucket) { $failedBuckets += $bucket }
-}
+{{- range $buckets | uniq }}
+scoop bucket add {{ . }}
+{{- end }}
 
 Write-Host "► Installing Scoop apps" -ForegroundColor Cyan
-foreach ($app in $apps) {
-    scoop install $app
-}
-
-$installed = scoop list
-foreach ($app in $apps) {
-    $name = ($app -split '/')[-1]
-    $entry = $installed | Where-Object Name -eq $name
-    if (-not $entry -or $entry.Info -match 'failed') { $failedApps += $app }
-}
-
-if ($failedBuckets -or $failedApps) {
-    Write-Host "► Failed" -ForegroundColor Red
-    foreach ($bucket in $failedBuckets) {
-        Write-Host "  ✗ bucket $bucket  (check: scoop bucket add $bucket)"
-    }
-    foreach ($app in $failedApps) {
-        Write-Host "  ✗ $app  (clear with: scoop uninstall $(($app -split '/')[-1]); then chezmoi apply)"
-    }
-    exit 1
-}
-exit 0
+{{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
+scoop install {{ . }}
+{{- end }}{{ end }}
