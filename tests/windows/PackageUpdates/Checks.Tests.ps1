@@ -8,12 +8,13 @@ BeforeDiscovery {
 Describe 'PackageUpdates checks' {
 
     BeforeAll {
-        # Scoop is not installed on the host; Mock needs a command to replace
+        # Scoop is not on the host and dotnet may be missing; Mock needs a command to replace
         function global:scoop { }
+        function global:dotnet { }
     }
 
     AfterAll {
-        Remove-Item function:global:scoop -ErrorAction SilentlyContinue
+        Remove-Item function:global:scoop, function:global:dotnet -ErrorAction SilentlyContinue
     }
 
     InModuleScope PackageUpdates {
@@ -113,31 +114,28 @@ Describe 'PackageUpdates checks' {
                 Mock Get-NuGetLatestStableVersion {
                     switch ($Id) {
                         'dotnet-ef' { [version]'10.0.0' }
+                        'upgrade-assistant' { [version]'1.0.600' }
                         default { $null }
                     }
                 }
             }
 
-            It 'reports declared installed tools with a newer stable version' {
-                $rows = @(Get-DotnetToolUpdates -Ids 'dotnet-ef', 'refitter', 'dotnet-trace')
+            It 'reports every installed tool with a newer stable version, declared or not' {
+                $rows = @(Get-DotnetToolUpdates)
 
-                $rows.Count | Should -Be 1
-                $rows[0].Name | Should -Be 'dotnet-ef'
+                $rows.Name | Should -Be @('dotnet-ef', 'upgrade-assistant')
                 "$($rows[0].Old)" | Should -Be '9.0.10'
                 "$($rows[0].New)" | Should -Be '10.0.0'
             }
 
-            It 'queries NuGet only for installed declared tools' {
-                Get-DotnetToolUpdates -Ids 'dotnet-ef', 'refitter', 'dotnet-trace' | Out-Null
+            It 'still reports the others when NuGet fails for one tool' {
+                Get-DotnetToolUpdates | Out-Null
 
-                Should -Invoke Get-NuGetLatestStableVersion -Times 2 -Exactly
-                Should -Invoke Get-NuGetLatestStableVersion -Times 0 -Exactly -ParameterFilter {
-                    $Id -in 'upgrade-assistant', 'dotnet-trace'
-                }
+                Should -Invoke Get-NuGetLatestStableVersion -Times 3 -Exactly
             }
 
             It 'lists the global tools as JSON' {
-                Get-DotnetToolUpdates -Ids 'dotnet-ef' | Out-Null
+                Get-DotnetToolUpdates | Out-Null
 
                 Should -Invoke dotnet -ParameterFilter { ($args -join ' ') -eq 'tool list -g --format json' }
             }

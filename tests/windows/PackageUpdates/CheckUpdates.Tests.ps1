@@ -8,12 +8,13 @@ BeforeDiscovery {
 Describe 'Update-PackageUpdatesCache and Check-Updates' {
 
     BeforeAll {
-        # Scoop is not installed on the host; Mock needs a command to replace
+        # Scoop is not on the host and dotnet may be missing; Mock needs a command to replace
         function global:scoop { }
+        function global:dotnet { }
     }
 
     AfterAll {
-        Remove-Item function:global:scoop -ErrorAction SilentlyContinue
+        Remove-Item function:global:scoop, function:global:dotnet -ErrorAction SilentlyContinue
     }
 
     InModuleScope PackageUpdates {
@@ -21,7 +22,8 @@ Describe 'Update-PackageUpdatesCache and Check-Updates' {
         BeforeEach {
             $script:CacheFile = Join-Path $TestDrive 'cache.json'
             Remove-Item $script:CacheFile -ErrorAction SilentlyContinue
-            $d = @{ Apps = @('git'); Modules = @('PSfzf'); DotnetTools = @('dotnet-ef') }
+            $script:LockFile = Join-Path $TestDrive "refresh-$([guid]::NewGuid()).lock"
+            $d =@{ Apps = @('git'); Modules = @('PSfzf') }
 
             Mock scoop { $global:LASTEXITCODE = 0 }
             Mock Get-ScoopAppUpdates { [pscustomobject]@{ Name = 'git'; Old = '2.50'; New = '2.51' } }
@@ -39,7 +41,7 @@ Describe 'Update-PackageUpdatesCache and Check-Updates' {
                 Should -Invoke scoop -Times 1 -Exactly -ParameterFilter { ($args -join ' ') -eq 'update' }
                 Should -Invoke Get-ScoopAppUpdates -ParameterFilter { "$Names" -eq 'git' }
                 Should -Invoke Get-ModuleUpdates -ParameterFilter { "$Names" -eq 'PSfzf' }
-                Should -Invoke Get-DotnetToolUpdates -ParameterFilter { "$Ids" -eq 'dotnet-ef' }
+                Should -Invoke Get-DotnetToolUpdates -Times 1 -Exactly
                 $cache = Read-PackageUpdatesCache
                 @($cache.Apps).Count | Should -Be 1
                 @($cache.Modules).Count | Should -Be 1
@@ -57,6 +59,43 @@ Describe 'Update-PackageUpdatesCache and Check-Updates' {
 
                 $script:lastRunDuringUpdate | Should -Not -BeNullOrEmpty
                 ((Get-Date) - $script:lastRunDuringUpdate).TotalMinutes | Should -BeLessThan 1
+            }
+
+            It 'does nothing while another refresh holds the lock' {
+                $held = [System.IO.File]::Open($script:LockFile, 'OpenOrCreate', 'ReadWrite', 'None')
+                try {
+                    Update-PackageUpdatesCache -Declared $d | Should -BeFalse
+                }
+                finally {
+                    $held.Dispose()
+                }
+
+                Should -Invoke scoop -Times 0 -Exactly
+                Should -Invoke Get-ScoopAppUpdates -Times 0 -Exactly
+                (Read-PackageUpdatesCache).LastRun | Should -BeNullOrEmpty
+            }
+
+            It 'releases the lock when it is done' {
+                Update-PackageUpdatesCache -Declared $d | Should -BeTrue
+
+                Test-Path $script:LockFile | Should -BeFalse
+            }
+
+            It 'keeps the previous section when one check throws, and still runs the others' {
+                Write-PackageUpdatesCache -Cache ([pscustomobject]@{
+                    LastRun = (Get-Date).AddHours(-5)
+                    Apps = @([pscustomobject]@{ Name = 'old-app'; Old = '1'; New = '2' })
+                    Modules = @()
+                    DotnetTools = @()
+                })
+                Mock Get-ScoopAppUpdates { throw 'scoop is not recognized' }
+
+                Update-PackageUpdatesCache -Declared $d | Should -BeTrue
+
+                $cache = Read-PackageUpdatesCache
+                @($cache.Apps).Name | Should -Be @('old-app')
+                @($cache.Modules).Name | Should -Be @('PSfzf')
+                @($cache.DotnetTools).Name | Should -Be @('dotnet-ef')
             }
 
             It 'still checks when scoop update fails' {
@@ -92,6 +131,14 @@ Describe 'Update-PackageUpdatesCache and Check-Updates' {
 
                 Should -Invoke Write-Host -ParameterFilter { "$Object" -eq 'No update data yet. Run Check-Updates -Now.' }
                 Should -Invoke Write-PrettyTable -Times 0 -Exactly
+            }
+
+            It 'says so with -Now when another refresh is running, and shows the last data' {
+                Mock Update-PackageUpdatesCache { $false }
+
+                Check-Updates -Now -Declared $d
+
+                Should -Invoke Write-Host -ParameterFilter { "$Object" -eq 'A refresh is already running; showing the last data.' }
             }
 
             It 'refreshes first with -Now and shows every section' {

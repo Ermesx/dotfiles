@@ -8,12 +8,13 @@ BeforeDiscovery {
 Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
 
     BeforeAll {
-        # Scoop is not installed on the host; Mock needs a command to replace
+        # Scoop is not on the host and dotnet may be missing; Mock needs a command to replace
         function global:scoop { }
+        function global:dotnet { }
     }
 
     AfterAll {
-        Remove-Item function:global:scoop -ErrorAction SilentlyContinue
+        Remove-Item function:global:scoop, function:global:dotnet -ErrorAction SilentlyContinue
     }
 
     InModuleScope PackageUpdates {
@@ -28,7 +29,7 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
                 Modules = @(& $row 'cached-module')
                 DotnetTools = @(& $row 'cached-tool')
             })
-            $d = @{ Apps = @('git', 'jq', 'bat'); Modules = @('PSfzf', 'posh-git'); DotnetTools = @('dotnet-ef', 'refitter') }
+            $d = @{ Apps = @('git', 'jq', 'bat'); Modules = @('PSfzf', 'posh-git') }
 
             Mock Write-Host { }
             Mock Write-Cyan { }
@@ -112,6 +113,12 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
                 Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update module: PSfzf' }
             }
 
+            It 'shows why a module failed' {
+                Update-Modules -Declared $d
+
+                Should -Invoke Write-Host -ParameterFilter { "$Object" -match 'locked' }
+            }
+
             It 'keeps only the failed module in the cache' {
                 Update-Modules -Declared $d
 
@@ -132,7 +139,7 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             }
 
             It 'updates every tool and keeps going after a failure' {
-                Update-DotnetTools -Declared $d
+                Update-DotnetTools
 
                 $script:dotnetCalls | Should -Be @('tool update -g dotnet-ef', 'tool update -g refitter')
                 Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update .NET tool: refitter' }
@@ -144,14 +151,14 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
                     $global:LASTEXITCODE = if ($args -contains 'refitter') { 1 } else { 0 }
                 }
 
-                Update-DotnetTools -Declared $d
+                Update-DotnetTools
 
                 Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update .NET tool: refitter' }
                 @((Read-PackageUpdatesCache).DotnetTools).Name | Should -Be @('refitter')
             }
 
             It 'keeps only the failed tool in the cache' {
-                Update-DotnetTools -Declared $d
+                Update-DotnetTools
 
                 @((Read-PackageUpdatesCache).DotnetTools).Name | Should -Be @('refitter')
             }

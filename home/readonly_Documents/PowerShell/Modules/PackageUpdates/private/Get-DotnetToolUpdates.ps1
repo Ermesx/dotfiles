@@ -1,8 +1,6 @@
 function Get-DotnetToolUpdates {
-    param(
-        [string[]]$Ids = @()
-    )
-
+    # Every installed global tool, declared in packages.yaml or not: updating a .NET tool affects
+    # nothing outside it, unlike an app installed outside the dotfiles
     $installed = try {
         (dotnet tool list -g --format json | ConvertFrom-Json -ErrorAction Stop).data
     }
@@ -10,8 +8,7 @@ function Get-DotnetToolUpdates {
         @()
     }
 
-    # Declared but not installed tools are skipped: installing is chezmoi's job
-    foreach ($tool in $installed | Where-Object { $_.packageId -in $Ids }) {
+    foreach ($tool in $installed) {
         $latest = Get-NuGetLatestStableVersion -Id $tool.packageId
         if ($latest -and $latest -gt [version]$tool.version) {
             [pscustomobject]@{

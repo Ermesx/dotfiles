@@ -4,8 +4,8 @@ function Check-Updates {
         [hashtable]$Declared = $Global:PackageUpdatesDeclared
     )
 
-    if ($Now) {
-        Update-PackageUpdatesCache -Declared $Declared
+    if ($Now -and -not (Update-PackageUpdatesCache -Declared $Declared)) {
+        Write-Host 'A refresh is already running; showing the last data.'
     }
     $cache = Read-PackageUpdatesCache
 

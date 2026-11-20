@@ -19,7 +19,13 @@ function Invoke-PackageUpdateLoop {
         Write-Green -Text "$($row.New)" -NoNewLine
         Write-Host ']'
 
-        $ok = try { & $Update $row.Name } catch { $false }
+        $ok = try {
+            & $Update $row.Name
+        }
+        catch {
+            Write-Host "   $($_.Exception.Message)"
+            $false
+        }
         if (-not $ok) {
             Write-Red -Text "Failed to update ${Kind}: $($row.Name)"
             $row

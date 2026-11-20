@@ -1,5 +1,7 @@
 # Check-Updates on Scoop Implementation Plan
 
+> **Superseded in part (2026-11-21).** This is the original execution plan. Review findings changed the design: `Update-Apps` checks the state again after the loop (R9), update output goes to the host (R9a), every installed .NET tool is checked and `DotnetTools` is no longer declared (D6), the refresh takes an exclusive lock file and isolates each check (R7). The requirements marked **[added]** / **[revised]** in [`check-updates-scoop.md`](check-updates-scoop.md) are authoritative.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** `Check-Updates` / `Update-*` report and update declared Scoop apps, PowerShell modules and .NET global tools, refreshed in the background without blocking the prompt.

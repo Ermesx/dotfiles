@@ -39,7 +39,7 @@ Rationale: [ADR-0002](docs/adr/0002-chezmoi-as-dotfiles-manager.md); source layo
 | Add a secret | `chezmoi add --encrypt <target>` |
 | Resolve drift or a conflict | `chezmoi merge <target>` |
 | Commit and publish | `chezmoi cd`, then `git commit` / `git push` on a branch off `develop` |
-| Upgrade apps, modules and .NET tools | `Check-Updates [-Now]`, `Update-Apps`, `Update-Modules`, `Update-DotnetTools` (PowerShell profile; only what `packages.yaml` declares) |
+| Upgrade apps, modules and .NET tools | `Check-Updates [-Now]`, `Update-Apps`, `Update-Modules`, `Update-DotnetTools` (PowerShell profile; apps and modules declared in `packages.yaml`, every installed .NET tool) |
 
 Things that bite:
 

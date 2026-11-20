@@ -27,6 +27,7 @@ Describe 'PackageUpdates cache' {
             It 'returns empty data for <Name> content' -ForEach @(
                 @{ Name = 'empty'; Content = '' }
                 @{ Name = 'invalid'; Content = '{ not json' }
+                @{ Name = 'invalid lastRun'; Content = '{ "lastRun": "not-a-date", "apps": [] }' }
             ) {
                 Set-Content -Path $script:CacheFile -Value $Content
 

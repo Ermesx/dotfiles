@@ -1,4 +1,5 @@
-# Packages declared in packages.yaml; Check-Updates and Update-* (module PackageUpdates) touch only these
+# Scoop apps and modules declared in packages.yaml; Check-Updates and Update-* (module PackageUpdates)
+# touch only these. .NET tools are not listed: every installed global tool is checked and updated.
 $Global:PackageUpdatesDeclared = @{
     Apps = @(
 {{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
@@ -6,10 +7,6 @@ $Global:PackageUpdatesDeclared = @{
     )
     Modules = @(
 {{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
-        {{ . | squote }}{{ end }}{{ end }}
-    )
-    DotnetTools = @(
-{{- range .packages.global.profiles }}{{ range (get . "dotnet_tools" | default list) }}
         {{ . | squote }}{{ end }}{{ end }}
     )
 }
