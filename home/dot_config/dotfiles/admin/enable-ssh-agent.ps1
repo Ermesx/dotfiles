@@ -6,4 +6,4 @@ Set-Service ssh-agent -StartupType Automatic
 Start-Service ssh-agent
 
 Write-Host "► Next step" -ForegroundColor Yellow
-Write-Host '  As the user, not as administrator, load the key: ssh-add $HOME\.ssh\id_ed25519'
+Write-Host "  As the user, not as administrator: Complete-UserSetup"
