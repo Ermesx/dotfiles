@@ -9,6 +9,19 @@ Vagrant.configure("2") do |config|
     windows.winrm.retry_delay = 30
 
     windows.vm.synced_folder "..", "/Users/vagrant/.local/share/chezmoi", type: "virtualbox"
+    # Neutral path for the standard user: it cannot read vagrant's profile, and a share inside its own
+    # profile folder before the first login makes Windows create the profile under another name
+    windows.vm.synced_folder "..", "C:/dotfiles-src", type: "virtualbox"
+
+    # Standard user (Users group only) for the no-admin acceptance run (docs/testing.md).
+    # The password only protects this throwaway local VM, like the box's own vagrant/vagrant.
+    windows.vm.provision "shell", privileged: true, inline: <<~'POWERSHELL'
+      if (-not (Get-LocalUser -Name dotfiles -ErrorAction SilentlyContinue)) {
+          $password = ConvertTo-SecureString 'dotfiles' -AsPlainText -Force
+          New-LocalUser -Name dotfiles -Password $password -PasswordNeverExpires | Out-Null
+          Add-LocalGroupMember -Group Users -Member dotfiles
+      }
+    POWERSHELL
 
     windows.vm.provider "virtualbox" do |v|
       v.memory = 8192

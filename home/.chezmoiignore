@@ -20,3 +20,17 @@ readonly_Documents/
 .claude
 {{- end -}}
 
+{{- if eq (env "CI") "true" }}
+# CI: needs decryption, which never happens in CI (docs/testing.md).
+# Targets are names without chezmoi prefixes; the source of each script is in its comment.
+.ssh
+.config/git/user.gitconfig
+# run_onchange_before_decrypt-private-key.ps1.tmpl / .sh.tmpl: decrypt the age key with a passphrase
+.chezmoiscripts/windows/decrypt-private-key.ps1
+.chezmoiscripts/linux/decrypt-private-key.sh
+# run_once_after_add-ssh-key.ps1: ssh-add of the decrypted private key
+.chezmoiscripts/windows/add-ssh-key.ps1
+# CI: the hosted runner cannot install a WSL distro (run_once_before_install-wsl.ps1.tmpl)
+.chezmoiscripts/windows/install-wsl.ps1
+{{- end }}
+

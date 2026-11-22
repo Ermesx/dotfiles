@@ -37,6 +37,10 @@
 # Editor-based Rest Client
 .idea/httpRequests
 
+# Pester result files (Invoke-Pester -CI or TestResult.Enabled); generated reports never belong in the repo
+testResults.xml
+coverage.xml
+
 ### Zsh ###
 # Zsh compiled script + zrecompile backup
 *.zwc

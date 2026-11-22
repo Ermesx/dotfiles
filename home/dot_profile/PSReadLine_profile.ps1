@@ -1,9 +1,11 @@
 # PSReadline configuration
 Set-PSReadLineOption -EditMode Windows
 
-# Predictcion history
-Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-Set-PSReadLineOption -PredictionViewStyle InlineView
+# Prediction history; PSReadLine refuses it when output is redirected (CI, `pwsh -c … | …`)
+if (-not [Console]::IsOutputRedirected) {
+    Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+    Set-PSReadLineOption -PredictionViewStyle InlineView
+}
 
 # Better arrows history navigation
 Set-PSReadLineOption -HistorySearchCursorMovesToEnd

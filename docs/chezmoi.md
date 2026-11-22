@@ -30,6 +30,12 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
 
 - Encryption is `age`. The identity is `~/.config/chezmoi/key.txt`, itself decrypted on first apply from an `.age`
   file in `home/` with a passphrase. The recipient is in `home/.chezmoi.toml.tmpl`.
+- The git identity and signing key live in `home/dot_config/git/user.gitconfig.tmpl` (decrypted), which
+  `.gitconfig` pulls in with `[include]`; `.gitconfig` itself never decrypts.
+- With `CI=true` (what GitHub sets; any other value, e.g. a stray `CI=1`, keeps everything managed), the
+  `{{ if eq (env "CI") "true" }}` block in `home/.chezmoiignore` drops every target that needs decryption. A
+  new decryption point needs an entry there; `tests/static/NoDecryptInCi.Tests.ps1` fails until it has one
+  ([testing.md](testing.md)).
 - Add or change encrypted files only with `chezmoi add --encrypt <target>` or `chezmoi edit <target>`.
 - Sensitive data never goes into the repo in plain text. Secrets (tokens, keys) stay out of tool config files: pass
   them as environment variables set from `.encrypted-data.toml.age`. Everything else that is private or identifying

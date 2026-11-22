@@ -1,0 +1,85 @@
+name: ci
+
+# Static, apply and post-apply tests on a clean Windows. The repo is public: this workflow uses no secrets and never
+# decrypts anything; every target that needs decryption is ignored when CI is set (docs/testing.md).
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same PR cancels its run still in progress; pushes to develop all finish, so every merge has
+# its own result
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        # The built-in `pwsh` shell loads the profile, which apply installs. Same Stop preference and exit-code
+        # handling as the built-in one, plus -NoProfile so steps after apply stay fast and isolated.
+        # The runner fills {0} with String.Format, so literal braces are doubled
+        shell: >-
+          pwsh -NoLogo -NoProfile -NonInteractive -Command
+          "$ErrorActionPreference = 'Stop'; . '{0}'; if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) {{ exit $LASTEXITCODE }}"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Assert no age identity
+        run: if (Test-Path "$HOME/.config/chezmoi/key.txt") { throw 'An age identity exists on the runner' }
+
+      # The runner is elevated; the Scoop installer allows that when CI is set. This layer does not prove
+      # "no admin" (the VM does)
+      - name: Install Scoop
+        run: |
+          irm https://get.scoop.sh | iex
+          "$HOME\scoop\shims" >> $env:GITHUB_PATH
+
+      - name: Install chezmoi and Pester
+        run: |
+          scoop install chezmoi
+          Install-Module Pester -MinimumVersion 6.0.0 -Scope CurrentUser -Force -SkipPublisherCheck
+
+      # The module path prefix makes the unit tests load the modules from the source, not an installed copy.
+      # -CI: fail the step on any failed test
+      - name: Static and unit tests
+        run: |
+          $env:PSModulePath = "$PWD\home\readonly_Documents\PowerShell\Modules;$env:PSModulePath"
+          Invoke-Pester -Path tests/static, tests/windows/Write-Pretty, tests/windows/PackageUpdates, tests/windows/AdminSetup -Output Detailed -CI
+
+      # Same path as the VM: install.ps1 on a copy of this checkout. chezmoi init finds a git repo in its source
+      # folder and skips the clone, so the PR's commit is applied, not the default branch
+      - name: Apply dotfiles with install.ps1
+        run: |
+          New-Item -ItemType Directory -Force "$HOME\.local\share" | Out-Null
+          Copy-Item $env:GITHUB_WORKSPACE "$HOME\.local\share\chezmoi" -Recurse -Force
+          & "$env:GITHUB_WORKSPACE\install.ps1"
+
+      # Scoop and its apps write PATH to the user registry, which this step's process does not see yet
+      - name: Post-apply tests
+        run: |
+          $env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'User') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'Machine') + ";$env:PATH"
+          Invoke-Pester -Path tests/windows/Installed-Apps-Modules.Tests.ps1, tests/windows/Profile.Tests.ps1 -Output Detailed -CI
+
+      # The git identity and signing key come from encrypted data and never reach CI. --includes: ~/.gitconfig
+      # pulls the identity in through [include], which --global alone does not follow
+      - name: Assert nothing was decrypted
+        if: always()
+        run: |
+          foreach ($path in "$HOME/.config/chezmoi/key.txt", "$HOME/.ssh/id_ed25519", "$HOME/.config/git/user.gitconfig") {
+              if (Test-Path $path) { throw "$path exists on the runner" }
+          }
+          foreach ($key in 'user.signingkey', 'user.email') {
+              if (git config --global --includes --get $key) { throw "git $key is set on the runner" }
+          }
+          exit 0

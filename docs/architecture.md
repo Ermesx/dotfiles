@@ -28,7 +28,7 @@ need with `chezmoi --source . managed` while planning and keep it in your plan, 
 | Per-app configuration (terminal, git, starship, lazygit, bat, yazi, …) | `home/dot_*` for `$HOME`, `home/readonly_AppData/` for `%APPDATA%` / `%LOCALAPPDATA%` |
 | Secrets and identity | `*.age` / `encrypted_*` files and `home/.chezmoi.toml.tmpl` |
 | OS-specific behavior | `.chezmoiignore` files and `.chezmoi.os` branches inside templates |
-| Testing a full install | `tests/` (Vagrant + Pester) |
+| Testing (static checks, CI, full install) | `tests/static/` (static layer), `.github/workflows/ci.yml` (CI on `windows-latest`), `tests/` (Vagrant + Pester); layers in [testing.md](testing.md) |
 | Claude Code configuration (`~/.claude`, allowlisted files only) | `home/dot_claude/` and the `.claude` entries in `home/.chezmoiignore`; rationale in [specs/claude-config.md](specs/claude-config.md) |
 | README package table and key bindings list kept in sync with their sources | `.claude/agents/docs-sync.md` (agent) and `.claude/hooks/docs-sync-trigger.py` (reminder hook, wired in `.claude/settings.json`) |
 
