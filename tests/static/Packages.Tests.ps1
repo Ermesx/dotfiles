@@ -21,6 +21,8 @@ Describe 'packages.yaml schema' {
         @{ Case = 'pick that is not a boolean';    Key = 'pick';   Json = '{"windows":{"profiles":{"apps":{"pick":"yes","scoop":["vscode"]}}}}' }
         @{ Case = 'wsl as a list';                 Key = 'wsl';    Json = '{"windows":{"profiles":{"sdk":{"wsl":["a","b"]}}}}' }
         @{ Case = 'a method as a scalar';          Key = 'scoop';  Json = '{"windows":{"profiles":{"base":{"scoop":"git"}}}}' }
+        @{ Case = 'a platform without profiles';   Key = 'profiles'; Json = '{"windows":{}}' }
+        @{ Case = 'null profiles';                 Key = 'profiles'; Json = '{"windows":{"profiles":null}}' }
     ) {
         $problems = @(Get-PackagesSchemaProblem -Packages ($Json | ConvertFrom-Json))
 

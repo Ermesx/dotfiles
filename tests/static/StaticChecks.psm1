@@ -151,6 +151,10 @@ function Get-PackagesSchemaProblem {
 
     foreach ($platform in $Packages.PSObject.Properties) {
         if ($platform.Name -notin $script:AllowedMethods.Keys) { "unknown platform '$($platform.Name)'"; continue }
+        # Without a profiles mapping the install scripts render nothing for the platform, silently
+        if ($platform.Value.profiles -isnot [pscustomobject]) {
+            "$($platform.Name): 'profiles' is missing or not a mapping"
+        }
 
         foreach ($key in $platform.Value.PSObject.Properties) {
             if ($key.Name -ne 'profiles') { "$($platform.Name): unknown key '$($key.Name)', only 'profiles'"; continue }

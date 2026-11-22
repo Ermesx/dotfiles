@@ -44,10 +44,14 @@ Describe 'no decryption when CI is set' {
             $env:CI = $_
             $ignore = Get-Content -Raw (Join-Path $root 'home/.chezmoiignore') |
                 chezmoi --config $config --source $root execute-template
+            $exitCode = $LASTEXITCODE
         } finally {
             $env:CI = $previous
         }
 
+        # A failed or empty render would pass the last assertion on its own
+        $exitCode | Should -Be 0
+        $ignore | Should -Contain '.claude/*'
         $ignore | Should -Not -Contain '.config/git/user.gitconfig'
     }
 

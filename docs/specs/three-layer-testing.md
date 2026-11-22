@@ -9,6 +9,10 @@ to a requirement, to "already done", or to a later issue.
 
 ## Facts checked on 2026-11-22 (chezmoi v2.73.1)
 
+State of `develop` **before** this change. After D1 the two decrypting lines live in
+`home/dot_config/git/user.gitconfig.tmpl` (target `.config/git/user.gitconfig`), and `dot_gitconfig.tmpl` (target
+`.gitconfig`) no longer decrypts; the CI list is in D2 and `docs/testing.md`.
+
 - Decryption points in `home/` (by consumer, not only by grep): `dot_ssh/encrypted_id_ed25519.age`,
   `dot_ssh/encrypted_id_ed25519.pub.age`, `dot_gitconfig.tmpl` lines 2–3 (`include | decrypt` of
   `.encrypted-data.toml.age` and the public key), the two `run_onchange_before_decrypt-private-key` scripts
