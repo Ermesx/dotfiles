@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1784" height="750" viewBox="0 0 1784 750">
+  <!-- Source of docs/arch.png (ADR-0003). Re-render with a headless Chrome screenshot at 1784x750. -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3a5fb0"/>
+    </marker>
+    <style>
+      text { font-family: "Noto Sans", "Segoe UI", sans-serif; }
+      .title { font-size: 27px; font-weight: 700; fill: #222; }
+      .note { font-size: 20px; fill: #777; font-style: italic; }
+      .step { font-size: 25px; font-weight: 700; fill: #c00000; }
+      .run { font-size: 24px; font-weight: 700; fill: #c00000; }
+      .minor { font-size: 25px; fill: #c00000; }
+      .item { font-size: 22px; fill: #c00000; }
+      .box { fill: none; stroke: #222; stroke-width: 3; }
+      .flow { fill: none; stroke: #3a5fb0; stroke-width: 3.5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect x="2" y="2" width="1780" height="746" fill="#fff" stroke="#222" stroke-width="3"/>
+
+  <!-- Bootstrap: install.ps1, standard user -->
+  <text class="title" x="28" y="58">install.ps1</text>
+  <text class="note" x="28" y="90">standard user · no elevation</text>
+
+  <text class="step" x="48" y="200">.\ install scoop</text>
+  <text class="step" x="48" y="240">.\ scoop install git chezmoi pwsh</text>
+  <text class="minor" x="48" y="310">.\ refresh $PATH</text>
+  <text class="step" x="48" y="400">.\ chezmoi init --apply $GH_USER</text>
+  <path class="flow" d="M 452 391 H 520 Q 530 391 530 381 V 107 Q 530 97 540 97 H 594"/>
+
+  <!-- Unprivileged layer: chezmoi apply -->
+  <rect class="box" x="600" y="52" width="1155" height="448"/>
+  <text class="title" x="625" y="97">chezmoi apply</text>
+  <text class="note" x="820" y="97">unprivileged layer</text>
+
+  <text class="run" x="625" y="168">.\ run scoop</text>
+  <path class="flow" d="M 775 160 H 935 Q 945 160 945 170 V 226"/>
+  <rect class="box" x="620" y="232" width="355" height="238"/>
+  <text class="title" x="797" y="272" text-anchor="middle">scoop</text>
+  <text class="item" x="642" y="320">.\ install packages</text>
+  <text class="item" x="642" y="358">.\ configure system</text>
+
+  <text class="run" x="1005" y="168">.\ apply dotfiles</text>
+  <path class="flow" d="M 1193 160 H 1250 Q 1260 160 1260 170 V 226"/>
+  <rect class="box" x="1000" y="232" width="355" height="238"/>
+  <text class="title" x="1177" y="272" text-anchor="middle">dotfiles</text>
+  <text class="item" x="1022" y="320">.profile</text>
+  <text class="item" x="1022" y="358">.config</text>
+  <text class="item" x="1022" y="396">.apps_settings</text>
+
+  <text class="run" x="1385" y="168">.\ deploy admin scripts</text>
+  <path class="flow" d="M 1655 160 H 1690 Q 1700 160 1700 170 V 226"/>
+  <rect class="box" x="1380" y="232" width="355" height="238"/>
+  <text class="title" x="1557" y="272" text-anchor="middle">admin scripts</text>
+  <text class="item" x="1402" y="320">~/.config/dotfiles/admin/</text>
+
+  <!-- Privileged layer: run separately by an administrator -->
+  <path class="flow" d="M 1557 470 V 594" stroke-dasharray="10 8"/>
+  <text class="run" x="1540" y="553" text-anchor="end">.\ run admin-setup.ps1</text>
+  <rect class="box" x="600" y="600" width="1155" height="120" stroke-dasharray="14 10"/>
+  <text class="title" x="625" y="645">privileged layer</text>
+  <text class="note" x="850" y="645">admin user</text>
+  <text class="item" x="642" y="695">.\ enable-developer-mode</text>
+  <text class="item" x="942" y="695">.\ enable-wsl</text>
+  <text class="item" x="1122" y="695">.\ enable-ssh-agent</text>
+</svg>
