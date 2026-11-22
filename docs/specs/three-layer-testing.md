@@ -78,6 +78,9 @@ State of `develop` **before** this change. After D1 the two decrypting lines liv
   the static layer still checks those manifests, the VM installs them). Rejected: caching installed apps (CI would
   stop testing the install, and app env vars such as `DOTNET_ROOT` would need restoring); caching `~/scoop/cache`
   (tried: with a warm 1.3 GB cache apply took 4m10s vs 4m03s cold, plus 15 s restore — removed).
+- D2: CI ignores the whole `.ssh` folder instead of the two key files (owner review). Simpler, and anything added
+  under `.ssh` later stays out of CI by default.
+- Scoop installs with plain `irm get.scoop.sh | iex`: its installer allows an elevated shell when `CI` is set.
 - Every CI step runs with `pwsh -NoProfile` (custom default shell with the built-in shell's Stop preference and
   exit-code handling), so post-apply steps do not load the installed profile.
 

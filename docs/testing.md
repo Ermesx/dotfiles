@@ -27,7 +27,7 @@ value keeps them managed, so a stray `CI=1` on a real machine cannot silently dr
 
 | Target | Why |
 |---|---|
-| `.ssh/id_ed25519`, `.ssh/id_ed25519.pub` | Encrypted files |
+| `.ssh` (whole folder) | Holds the encrypted key pair; nothing else under it belongs on a runner |
 | `.config/git/user.gitconfig` | Git identity and signing key, decrypted from `.encrypted-data.toml.age`; `.gitconfig` includes it, and git skips the missing file |
 | `.chezmoiscripts/windows/decrypt-private-key.ps1`, `.chezmoiscripts/linux/decrypt-private-key.sh` | Decrypt the age identity with a passphrase |
 | `.chezmoiscripts/windows/add-ssh-key.ps1` | Uses the decrypted private key |
