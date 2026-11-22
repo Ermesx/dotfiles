@@ -96,11 +96,10 @@ and adds what the issue leaves open after reading the code (marked **[added]**).
 
 ### Docs and tests
 
-- **R10** `ReadMe.md`: a section "Administrator step (Windows)" — what needs admin and why (one sentence, link to
-  ADR-0003); running `admin-setup.ps1` or a single script on a private machine; what to send IT on a managed one
-  (the four files to review, since the aggregate dot-sources its siblings from a user-writable folder — ADR-0003
-  *Consequences*; the absolute path, as the reminder prints it; do not run the per-user steps; restart); after the
-  restart the user runs `Complete-UserSetup`; apply prints the reminder until the administrator step is done.
+- **R10** `ReadMe.md`: a short section "Administrator step (Windows)" that says the step is needed, not how
+  every part works: what needs admin, that an administrator (the owner or IT) runs `admin-setup.ps1` once, that apply
+  reminds with the full command until then, that the user finishes with `Complete-UserSetup` after a restart, and a
+  link to ADR-0003. (Simplified in the PR #53 review.)
 - **R11** `docs/packages.md`: drop "(the aggregate script and the reminder are #44)", mention the aggregate, the
   reminder and `Complete-UserSetup`, and list the function as the consumer of the `wsl` distro in place of the admin
   WSL script. `docs/architecture.md`: the admin row names `admin-setup.ps1`, the reminder and `Complete-UserSetup`.
@@ -150,6 +149,6 @@ Mapping to the issue's criteria in brackets.
   `wsl --update` may download a newer WSL, which is not "changes nothing" in the strict sense. D2 does not check
   them, so they cannot fail the aggregate; Acceptance 4 records what they print.
 - Admin scripts live in a user-writable folder (ADR-0003). The aggregate widens this to "whatever sits next to it
-  under the three names"; IT must review all four files (R10).
+  under the three names"; IT reviews what it runs (accepted in the PR #53 review).
 - Pester mocking of the native `wsl` / `ssh-add` commands is assumed to work (a global stub function plus `Mock`);
   the first failing test run of Task 1 proves it before any implementation exists.
