@@ -21,7 +21,12 @@ sh -c "$(curl -fsLS https://getdotfiles.short.gy/install.sh)"
 General Architecture
 ---------------------------------------------------------------
 
-![arch.png](docs/arch.png)
+![Windows setup: install.ps1 bootstraps Scoop and chezmoi as a standard user; chezmoi apply installs packages and
+dotfiles without elevation and deploys admin scripts that an administrator runs separately](docs/arch.png)
+
+Setup runs without admin rights; the few machine-level steps live in a separate privileged layer. Rationale:
+[ADR-0003](docs/adr/0003-windows-packages-via-scoop.md); where each capability lives:
+[docs/architecture.md](docs/architecture.md). The diagram's source is [docs/arch.svg](docs/arch.svg).
 
 Daily use
 ---------------------------------------------------------------
