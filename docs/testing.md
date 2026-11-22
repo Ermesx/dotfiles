@@ -46,6 +46,14 @@ One job on `windows-latest`, no secrets, `contents: read`. Order: assert no iden
 chezmoi and Pester 6 → static and unit tests → `chezmoi init --apply --source $GITHUB_WORKSPACE` → post-apply
 tests (`Installed-Apps-Modules.Tests.ps1`, `Profile.Tests.ps1`) → assert nothing was decrypted.
 
+Speed:
+- Every step runs with `pwsh -NoProfile`, as the built-in `pwsh` shell loads the profile, which apply installs.
+- `~/scoop/cache` (downloads) is cached between runs; each run still installs every app. Downloads take ~1.5 min of
+  ~11 min of Scoop; most of it is extraction.
+- With `CI=true` the Scoop install skips the profiles in `ci.skip_scoop_profiles` (`home/.chezmoidata/ci.yaml`,
+  today `apps`: the heavy GUI apps, ~8 min). The static layer still checks their manifests, and the VM installs
+  them.
+
 The runner is elevated, so CI does **not** prove that apply works without admin; the VM does. CI never runs
 `install.ps1`, which clones the default branch instead of the PR.
 

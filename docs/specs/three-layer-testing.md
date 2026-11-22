@@ -67,6 +67,16 @@ to a requirement, to "already done", or to a later issue.
   templates) are scanned too, since CI renders them although they are not targets.
 - R6 step 7 also fails on `~/.config/git/user.gitconfig` and reads git with `--includes`.
 
+### Changed by the owner before review (2026-11-22)
+
+- D7 replaced: measured on the first green run, Scoop took ~11 min of the 14.5-min apply, of which downloads ~1.5
+  min and extraction/install ~9 min. Chosen: cache `~/scoop/cache` (downloads; every run still installs) **and**
+  skip the heavy `apps` profile in CI via `ci.skip_scoop_profiles` in `home/.chezmoidata/ci.yaml` (CI=true only;
+  the static layer still checks those manifests, the VM installs them). Rejected: caching installed apps (CI would
+  stop testing the install, and app env vars such as `DOTNET_ROOT` would need restoring).
+- Every CI step runs with `pwsh -NoProfile` (custom default shell with the built-in shell's Stop preference and
+  exit-code handling), so post-apply steps do not load the installed profile.
+
 ## Requirements
 
 ### CI mode in the chezmoi source
