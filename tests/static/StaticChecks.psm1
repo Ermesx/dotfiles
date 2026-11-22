@@ -14,7 +14,6 @@ function Get-NoKeyConfig {
             'encryption = "age"'
             '[age]'
             "identity = '$(Join-Path $dir 'no-such-key.txt')'"
-            'recipient = "age1xvez3je4mhx7xswxu6gpalmrxq88uktcncthtqs8m7zcjgnjd4qsq05uw8"'
             '[warnings]'
             'configFileTemplateHasChanged = false'
         ) | Set-Content -Path $path

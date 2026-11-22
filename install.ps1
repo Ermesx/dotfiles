@@ -25,5 +25,6 @@ $userPath = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
 $machinePath = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $env:PATH = "$userPath;$machinePath"
 
-# Install chezmoi and apply dotfiles
-chezmoi init --apply $GITHUB_USERNAME
+# Install chezmoi and apply dotfiles. A CI runner has no TTY: chezmoi reads prompt answers from stdin there
+$initArgs = if ($env:CI -eq 'true') { @('--no-tty') } else { @() }
+chezmoi init --apply $GITHUB_USERNAME @initArgs

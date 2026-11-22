@@ -42,9 +42,14 @@ an age identity, `~/.ssh/id_ed25519`, `~/.config/git/user.gitconfig`, or a git `
 
 ## CI
 
-One job on `windows-latest`, no secrets, `contents: read`. Order: assert no identity → Scoop (`-RunAsAdmin`) →
-chezmoi and Pester 6 → static and unit tests → `chezmoi init --apply --source $GITHUB_WORKSPACE` → post-apply
-tests (`Installed-Apps-Modules.Tests.ps1`, `Profile.Tests.ps1`) → assert nothing was decrypted.
+One job on `windows-latest`, no secrets, `contents: read`. Order: assert no identity → Scoop (`irm | iex`; its
+installer allows the elevated runner when `CI` is set) → chezmoi and Pester 6 → static and unit tests → apply with
+`install.ps1` → post-apply tests (`Installed-Apps-Modules.Tests.ps1`, `Profile.Tests.ps1`) → assert nothing was
+decrypted. The static step runs first so the no-decryption guard stops a bad change before anything is applied.
+
+Apply works like the VM: the checkout is copied to `~/.local/share/chezmoi`, then `install.ps1` runs. `chezmoi init`
+finds a git repo there and skips the clone, so the PR's commit is applied, not the default branch. Scoop is already
+installed, so `install.ps1` skips that part; with `CI=true` it passes `--no-tty` to `chezmoi init` (no TTY on a runner).
 
 Speed:
 - Every step runs with `pwsh -NoProfile`, as the built-in `pwsh` shell loads the profile, which apply installs.
@@ -55,8 +60,7 @@ Speed:
   today `apps`: the heavy GUI apps, ~8 min). The static layer still checks their manifests, and the VM installs
   them.
 
-The runner is elevated, so CI does **not** prove that apply works without admin; the VM does. CI never runs
-`install.ps1`, which clones the default branch instead of the PR.
+The runner is elevated, so CI does **not** prove that apply works without admin; the VM does.
 
 ## VM
 

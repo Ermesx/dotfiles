@@ -81,6 +81,10 @@ State of `develop` **before** this change. After D1 the two decrypting lines liv
 - D2: CI ignores the whole `.ssh` folder instead of the two key files (owner review). Simpler, and anything added
   under `.ssh` later stays out of CI by default.
 - Scoop installs with plain `irm get.scoop.sh | iex`: its installer allows an elevated shell when `CI` is set.
+- R6 step 5 replaced (owner review): apply runs `install.ps1` on a copy of the checkout in `~/.local/share/chezmoi`,
+  as the VM does, so CI also covers `install.ps1` (except its Scoop-install branch: Scoop is already there for the
+  static step). `install.ps1` passes `--no-tty` to `chezmoi init` only when `CI=true`. The static layer still runs
+  before apply. The test-only no-key config carries no age recipient (owner: no keys in tests, not even public).
 - Every CI step runs with `pwsh -NoProfile` (custom default shell with the built-in shell's Stop preference and
   exit-code handling), so post-apply steps do not load the installed profile.
 

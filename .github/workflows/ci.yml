@@ -57,8 +57,13 @@ jobs:
           $env:PSModulePath = "$PWD\home\readonly_Documents\PowerShell\Modules;$env:PSModulePath"
           Invoke-Pester -Path tests/static, tests/windows/Write-Pretty, tests/windows/PackageUpdates, tests/windows/AdminSetup -Output Detailed -CI
 
-      - name: Apply dotfiles
-        run: chezmoi init --apply --source $env:GITHUB_WORKSPACE --no-tty
+      # Same path as the VM: install.ps1 on a copy of this checkout. chezmoi init finds a git repo in its source
+      # folder and skips the clone, so the PR's commit is applied, not the default branch
+      - name: Apply dotfiles with install.ps1
+        run: |
+          New-Item -ItemType Directory -Force "$HOME\.local\share" | Out-Null
+          Copy-Item $env:GITHUB_WORKSPACE "$HOME\.local\share\chezmoi" -Recurse -Force
+          & "$env:GITHUB_WORKSPACE\install.ps1"
 
       # Scoop and its apps write PATH to the user registry, which this step's process does not see yet
       - name: Post-apply tests
