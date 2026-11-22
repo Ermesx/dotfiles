@@ -19,10 +19,11 @@ jobs:
     defaults:
       run:
         # The built-in `pwsh` shell loads the profile, which apply installs. Same Stop preference and exit-code
-        # handling as the built-in one, plus -NoProfile so steps after apply stay fast and isolated
+        # handling as the built-in one, plus -NoProfile so steps after apply stay fast and isolated.
+        # The runner fills {0} with String.Format, so literal braces are doubled
         shell: >-
           pwsh -NoLogo -NoProfile -NonInteractive -Command
-          "$ErrorActionPreference = 'Stop'; . '{0}'; if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }"
+          "$ErrorActionPreference = 'Stop'; . '{0}'; if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) {{ exit $LASTEXITCODE }}"
     steps:
       - uses: actions/checkout@v4
         with:
