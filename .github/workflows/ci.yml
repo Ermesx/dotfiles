@@ -1,0 +1,75 @@
+name: ci
+
+# Static, apply and post-apply tests on a clean Windows. The repo is public: this workflow uses no secrets and never
+# decrypts anything; every target that needs decryption is ignored when CI is set (docs/testing.md).
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Assert no age identity
+        run: if (Test-Path "$HOME/.config/chezmoi/key.txt") { throw 'An age identity exists on the runner' }
+
+      - name: Install Scoop
+        # The runner is elevated, so Scoop needs -RunAsAdmin; this layer does not prove "no admin" (the VM does)
+        run: |
+          & ([scriptblock]::Create((Invoke-RestMethod 'https://get.scoop.sh'))) -RunAsAdmin
+          "$HOME\scoop\shims" >> $env:GITHUB_PATH
+
+      - name: Install chezmoi and Pester
+        run: |
+          scoop install chezmoi
+          Install-Module Pester -MinimumVersion 6.0.0 -Scope CurrentUser -Force -SkipPublisherCheck
+
+      - name: Static and unit tests
+        run: |
+          $env:PSModulePath = "$PWD\home\readonly_Documents\PowerShell\Modules;$env:PSModulePath"
+          Import-Module Pester -MinimumVersion 6.0.0
+          $config = New-PesterConfiguration
+          $config.Run.Path = 'tests/static', 'tests/windows/Write-Pretty', 'tests/windows/PackageUpdates', 'tests/windows/AdminSetup'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          Invoke-Pester -Configuration $config
+
+      - name: Apply dotfiles
+        run: chezmoi init --apply --source $env:GITHUB_WORKSPACE --no-tty
+
+      - name: Post-apply tests
+        run: |
+          # Scoop and its apps write PATH to the user registry, which this step's process does not see yet
+          $env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'User') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'Machine')
+          Import-Module Pester -MinimumVersion 6.0.0
+          $config = New-PesterConfiguration
+          $config.Run.Path = 'tests/windows/Installed-Apps-Modules.Tests.ps1', 'tests/windows/Profile.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          Invoke-Pester -Configuration $config
+
+      - name: Assert nothing was decrypted
+        if: always()
+        run: |
+          foreach ($path in "$HOME/.config/chezmoi/key.txt", "$HOME/.ssh/id_ed25519") {
+              if (Test-Path $path) { throw "$path exists on the runner" }
+          }
+          # The git identity and signing key come from encrypted data and never reach CI
+          foreach ($key in 'user.signingkey', 'user.email') {
+              if (git config --global --get $key) { throw "git $key is set on the runner" }
+          }
+          exit 0
