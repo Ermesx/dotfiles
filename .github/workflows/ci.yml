@@ -38,15 +38,6 @@ jobs:
           & ([scriptblock]::Create((Invoke-RestMethod 'https://get.scoop.sh'))) -RunAsAdmin
           "$HOME\scoop\shims" >> $env:GITHUB_PATH
 
-      # Downloads only: every run still installs for real. Restored after the Scoop install, which refuses a
-      # non-empty ~/scoop. Most of the time is extraction, not download (docs/testing.md)
-      - name: Cache Scoop downloads
-        uses: actions/cache@v4
-        with:
-          path: ~\scoop\cache
-          key: scoop-cache-${{ runner.os }}-${{ hashFiles('home/.chezmoidata/packages.yaml') }}
-          restore-keys: scoop-cache-${{ runner.os }}-
-
       - name: Install chezmoi and Pester
         run: |
           scoop install chezmoi

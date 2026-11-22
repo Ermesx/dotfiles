@@ -70,10 +70,10 @@ to a requirement, to "already done", or to a later issue.
 ### Changed by the owner before review (2026-11-22)
 
 - D7 replaced: measured on the first green run, Scoop took ~11 min of the 14.5-min apply, of which downloads ~1.5
-  min and extraction/install ~9 min. Chosen: cache `~/scoop/cache` (downloads; every run still installs) **and**
-  skip the heavy `apps` profile in CI via `ci.skip_scoop_profiles` in `home/.chezmoidata/ci.yaml` (CI=true only;
+  min and extraction/install ~9 min. Chosen: skip the heavy `apps` profile in CI via `ci.skip_scoop_profiles` in `home/.chezmoidata/ci.yaml` (CI=true only;
   the static layer still checks those manifests, the VM installs them). Rejected: caching installed apps (CI would
-  stop testing the install, and app env vars such as `DOTNET_ROOT` would need restoring).
+  stop testing the install, and app env vars such as `DOTNET_ROOT` would need restoring); caching `~/scoop/cache`
+  (tried: with a warm 1.3 GB cache apply took 4m10s vs 4m03s cold, plus 15 s restore — removed).
 - Every CI step runs with `pwsh -NoProfile` (custom default shell with the built-in shell's Stop preference and
   exit-code handling), so post-apply steps do not load the installed profile.
 

@@ -48,8 +48,8 @@ tests (`Installed-Apps-Modules.Tests.ps1`, `Profile.Tests.ps1`) → assert nothi
 
 Speed:
 - Every step runs with `pwsh -NoProfile`, as the built-in `pwsh` shell loads the profile, which apply installs.
-- `~/scoop/cache` (downloads) is cached between runs; each run still installs every app. Downloads take ~1.5 min of
-  ~11 min of Scoop; most of it is extraction.
+- No download cache: measured with a warm `~/scoop/cache` (1.3 GB), apply took as long as without it (4m10s vs
+  4m03s), as extraction, not download, takes the time.
 - With `CI=true` the Scoop install skips the profiles in `ci.skip_scoop_profiles` (`home/.chezmoidata/ci.yaml`,
   today `apps`: the heavy GUI apps, ~8 min). The static layer still checks their manifests, and the VM installs
   them.
