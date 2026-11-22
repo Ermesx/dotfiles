@@ -1,0 +1,21 @@
+# Reminds that the admin-only setup is missing; never runs it and never fails apply.
+# The probes match the ones the user-side scripts use to skip, so the two never disagree.
+
+# Developer Mode: a standard user can read HKLM
+$devMode = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' `
+    -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue).AllowDevelopmentWithoutDevLicense -eq 1
+
+# WSL platform: same check as run_once_before_install-wsl
+wsl --status *> $null
+$wsl = $LASTEXITCODE -eq 0
+
+# ssh-agent service: same check as run_once_after_add-ssh-key
+$agent = (Get-Service ssh-agent -ErrorAction SilentlyContinue).Status -eq 'Running'
+
+if (-not ($devMode -and $wsl -and $agent)) {
+    # Absolute path from the user's profile: an administrator's ~ would point to their own profile
+    $script = Join-Path $HOME '.config\dotfiles\admin\admin-setup.ps1'
+    Write-Host "► Administrator step needed" -ForegroundColor Yellow
+    Write-Host "  Run as an administrator: pwsh -NoProfile -ExecutionPolicy Bypass -File `"$script`""
+}
+exit 0

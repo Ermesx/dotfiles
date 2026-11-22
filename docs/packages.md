@@ -8,11 +8,14 @@
   platform. `pick: true` marks a profile whose items are offered one by one at init; it is ignored until #20.
 - Consumers read the tree directly: they range over `.packages.<platform>.profiles` and read a method with
   `get . "<method>" | default list`, because not every profile has every method. Items that live in one place
-  are read by path (`.packages.windows.profiles.sdk.wsl`, `.packages.global.profiles.shell.yazi_plugins`).
+  are read by path (`.packages.windows.profiles.sdk.wsl`, `.packages.global.profiles.shell.yazi_plugins`). The
+  WSL distro has two consumers: `run_once_before_install-wsl.ps1.tmpl` and the profile function
+  `Complete-UserSetup` (`home/dot_profile/user-setup_profile.ps1.tmpl`).
 - Everything installed on Windows lands in user scope and needs no admin rights. What does need admin (Developer
   Mode, the WSL platform, the `ssh-agent` service) is in admin scripts that chezmoi deploys to
-  `~/.config/dotfiles/admin/` and never runs (the aggregate script and the reminder are #44). They change only the
-  machine and print the per-user step (installing the WSL distro, `ssh-add`), which the user runs without admin.
+  `~/.config/dotfiles/admin/` and never runs; `admin-setup.ps1` runs all three, and every apply ends with a reminder
+  (`run_after_zz-admin-reminder.ps1`) while any of them is missing. They change only the machine and point the user
+  at `Complete-UserSetup` (installs the WSL distro, loads the SSH key), which the user runs without admin.
 - A change to `packages.yaml` reruns the install scripts on the next apply (see `docs/chezmoi.md`). Check what a
   script will run by rendering it (command in `AGENTS.md`).
 - Updating installed software is Scoop's job, not the YAML's: no version pins.

@@ -7,5 +7,4 @@ wsl --update
 
 Write-Host "► Next steps" -ForegroundColor Yellow
 Write-Host "  1. Restart the computer."
-Write-Host "  2. As the user, not as administrator, install the distro:"
-Write-Host "     wsl --install -d {{ .packages.windows.profiles.sdk.wsl }} --web-download --no-launch"
+Write-Host "  2. As the user, not as administrator, in a new PowerShell window: Complete-UserSetup"

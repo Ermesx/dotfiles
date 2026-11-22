@@ -18,6 +18,14 @@ iex (irm 'https://getdotfiles.short.gy/install.ps1' | Out-String)
 sh -c "$(curl -fsLS https://getdotfiles.short.gy/install.sh)"
 ```
 
+Administrator step (Windows)
+---------------------------------------------------------------
+
+Install and apply need no admin rights. Developer Mode, the WSL platform and the `ssh-agent` service do: an
+administrator (you, or IT on a managed machine) runs `admin-setup.ps1` once. Until then every `chezmoi apply` ends
+with a reminder that gives the full command. After a restart, finish as yourself with `Complete-UserSetup` (WSL
+distro and SSH key). Details: [ADR-0003](docs/adr/0003-windows-packages-via-scoop.md).
+
 General Architecture
 ---------------------------------------------------------------
 

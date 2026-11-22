@@ -23,7 +23,7 @@ need with `chezmoi --source . managed` while planning and keep it in your plan, 
 | Declarative install of apps, PowerShell modules, .NET tools, yazi plugins, WSL distro | `home/.chezmoidata/packages.yaml`, then its consumers (grep for `.packages`) |
 | Applying that state on Windows | The numbered scripts `01-scoop`, `02-modules`, `03-dotnet-tools` (then `user-settings` after them) in `home/.chezmoiscripts/windows/` |
 | One-off machine setup (WSL distro, ssh-agent key, key decryption) | `home/.chezmoiscripts/<os>/` |
-| Setup that needs administrator rights (Developer Mode, WSL platform, ssh-agent service) | `home/dot_config/dotfiles/admin/` (deployed to `~/.config/dotfiles/admin/`); chezmoi never runs it, see [ADR-0003](adr/0003-windows-packages-via-scoop.md) |
+| Setup that needs administrator rights (Developer Mode, WSL platform, ssh-agent service) | `home/dot_config/dotfiles/admin/` (deployed to `~/.config/dotfiles/admin/`, `admin-setup.ps1` runs all); chezmoi never runs it, see [ADR-0003](adr/0003-windows-packages-via-scoop.md). Reminder at the end of apply: `home/.chezmoiscripts/windows/run_after_zz-admin-reminder.ps1`; the user's follow-up: `Complete-UserSetup` in `home/dot_profile/user-setup_profile.ps1.tmpl` |
 | PowerShell shell experience (modules, PSReadLine, fzf, completers, prompt, update checks) | The profile template under `home/readonly_Documents/PowerShell/` and the fragments it dot-sources |
 | Per-app configuration (terminal, git, starship, lazygit, bat, yazi, …) | `home/dot_*` for `$HOME`, `home/readonly_AppData/` for `%APPDATA%` / `%LOCALAPPDATA%` |
 | Secrets and identity | `*.age` / `encrypted_*` files and `home/.chezmoi.toml.tmpl` |
