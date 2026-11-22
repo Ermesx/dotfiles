@@ -48,6 +48,7 @@ tests (`Installed-Apps-Modules.Tests.ps1`, `Profile.Tests.ps1`) → assert nothi
 
 Speed:
 - Every step runs with `pwsh -NoProfile`, as the built-in `pwsh` shell loads the profile, which apply installs.
+- A newer push to a PR cancels that PR's run still in progress (`concurrency`); pushes to `develop` all finish.
 - No download cache: measured with a warm `~/scoop/cache` (1.3 GB), apply took as long as without it (4m10s vs
   4m03s), as extraction, not download, takes the time.
 - With `CI=true` the Scoop install skips the profiles in `ci.skip_scoop_profiles` (`home/.chezmoidata/ci.yaml`,

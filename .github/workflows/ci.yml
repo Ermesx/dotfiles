@@ -12,6 +12,12 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same PR cancels its run still in progress; pushes to develop all finish, so every merge has
+# its own result
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   windows:
     runs-on: windows-latest
