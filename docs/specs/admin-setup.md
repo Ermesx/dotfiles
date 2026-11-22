@@ -58,12 +58,17 @@ and adds what the issue leaves open after reading the code (marked **[added]**).
 
 - **R13** Defines `Complete-UserSetup` (no parameters), loaded by the profile's glob over `~/.profile/*.ps1` (no
   profile edit). It:
+  - **[added in review]** probes the machine part with the same tests as the skip scripts and skips a step with a
+    Yellow one-line hint to run the administrator step when it is missing (`wsl --status` non-zero; ssh-agent not
+    `Running`): without the platform, `wsl --install` would ask for elevation;
   - sets `$distro` from `.packages.windows.profiles.sdk.wsl` (rendered with `squote`) and `$env:WSL_UTF8 = '1'`
-    (`wsl -l -q` is UTF-16 otherwise and `-contains` never matches);
+    (`wsl -l -q` is UTF-16 otherwise and `-contains` never matches), restoring the previous value afterwards because
+    the function runs in the user's session;
   - when `(wsl -l -q) -contains $distro` is false, prints `► Installing WSL <distro>` (Cyan) and runs
     `wsl --install -d $distro --web-download --no-launch`;
   - prints `► Add ssh key` (Cyan) and runs `ssh-add (Join-Path $HOME '.ssh' 'id_ed25519')`.
-  No admin, no state check beyond the distro list; rerunning is safe (`ssh-add` re-adds the same key).
+  No admin; rerunning is safe (`ssh-add` re-adds the same key). The logic duplicates the two `run_once_` user-side
+  scripts on purpose: those run before chezmoi deploys `~/.profile/`, so they cannot call the function.
 
 ### Reminder (`home/.chezmoiscripts/windows/run_after_zz-admin-reminder.ps1`)
 
@@ -136,7 +141,11 @@ Mapping to the issue's criteria in brackets.
 
 - `wsl --status` exit code with WSL enabled but a restart pending is unverified (carried over from #43). If it is
   `0`, the reminder goes silent before the restart; if non-zero, the reminder keeps asking for `admin-setup.ps1`
-  until the restart (harmless: idempotent). Confirm on the VM (Acceptance 4).
+  until the restart (harmless: idempotent). Also unverified: its exit code with the platform enabled but **no distro
+  installed yet** (between the admin step and `Complete-UserSetup`); non-zero would make the reminder ask for the
+  administrator step that is already done — and, worse, `Complete-UserSetup` and `run_once_before_install-wsl` (same
+  probe, from #43) would never install the distro. Confirm both on the VM (Acceptance 4–5); if non-zero, switch the
+  probe in all three places.
 - Exit codes and output of `wsl --install --no-distribution` and `wsl --update` on a second run are unverified;
   `wsl --update` may download a newer WSL, which is not "changes nothing" in the strict sense. D2 does not check
   them, so they cannot fail the aggregate; Acceptance 4 records what they print.

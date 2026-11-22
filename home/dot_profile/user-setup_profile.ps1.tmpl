@@ -1,15 +1,33 @@
 # Per-user part of the admin setup: run as yourself after the administrator step and a restart
 function Complete-UserSetup {
-    # WSL distros are per user, so the administrator's script only enables the platform
-    $distro = {{ .packages.windows.profiles.sdk.wsl | squote }}
-    # wsl prints UTF-16 unless WSL_UTF8 is set; without it -contains never matches
-    $env:WSL_UTF8 = '1'
-    if (-not ((wsl -l -q) -contains $distro)) {
-        Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
-        wsl --install -d $distro --web-download --no-launch
+    # WSL distros are per user, so the administrator's script only enables the platform.
+    # Same probe as run_once_before_install-wsl: without the platform, wsl --install would ask for elevation
+    wsl --status *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "► Skipping WSL distro: WSL is not enabled (run the administrator step, then restart)" -ForegroundColor Yellow
+    }
+    else {
+        $distro = {{ .packages.windows.profiles.sdk.wsl | squote }}
+        # wsl prints UTF-16 unless WSL_UTF8 is set; without it -contains never matches. Restored after, as this runs in the session
+        $utf8 = $env:WSL_UTF8
+        $env:WSL_UTF8 = '1'
+        try {
+            if (-not ((wsl -l -q) -contains $distro)) {
+                Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
+                wsl --install -d $distro --web-download --no-launch
+            }
+        }
+        finally {
+            $env:WSL_UTF8 = $utf8
+        }
     }
 
-    # The agent keeps keys per user
-    Write-Host "► Add ssh key" -ForegroundColor Cyan
-    ssh-add (Join-Path $HOME '.ssh' 'id_ed25519')
+    # The agent keeps keys per user. Same probe as run_once_after_add-ssh-key
+    if ((Get-Service ssh-agent -ErrorAction SilentlyContinue).Status -ne 'Running') {
+        Write-Host "► Skipping SSH key: ssh-agent is not running (run the administrator step)" -ForegroundColor Yellow
+    }
+    else {
+        Write-Host "► Add ssh key" -ForegroundColor Cyan
+        ssh-add (Join-Path $HOME '.ssh' 'id_ed25519')
+    }
 }

@@ -33,7 +33,8 @@ chezmoi deploys their scripts to `~\.config\dotfiles\admin\` and never runs them
 
 - **Private machine:** run that command in an elevated PowerShell 7. `admin-setup.ps1` runs
   `enable-developer-mode.ps1`, `enable-ssh-agent.ps1` and `enable-wsl.ps1` in that order and stops at the first
-  error; each of them also runs on its own. All are safe to rerun.
+  PowerShell error (`wsl`'s own failures only show in its output, so read it before restarting); each of them also
+  runs on its own. All are safe to rerun.
 - **Managed machine:** send IT the command above. They review the four `.ps1` files in that folder first (it is
   writable by you, and `admin-setup.ps1` runs the other three), run it from their own administrator account, and
   do not run the per-user step: a WSL distro or an agent key would land in their profile, not yours.
