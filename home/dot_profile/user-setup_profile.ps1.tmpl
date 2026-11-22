@@ -1,0 +1,15 @@
+# Per-user part of the admin setup: run as yourself after the administrator step and a restart
+function Complete-UserSetup {
+    # WSL distros are per user, so the administrator's script only enables the platform
+    $distro = {{ .packages.windows.profiles.sdk.wsl | squote }}
+    # wsl prints UTF-16 unless WSL_UTF8 is set; without it -contains never matches
+    $env:WSL_UTF8 = '1'
+    if (-not ((wsl -l -q) -contains $distro)) {
+        Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
+        wsl --install -d $distro --web-download --no-launch
+    }
+
+    # The agent keeps keys per user
+    Write-Host "► Add ssh key" -ForegroundColor Cyan
+    ssh-add (Join-Path $HOME '.ssh' 'id_ed25519')
+}
