@@ -204,4 +204,17 @@ function Get-ScoopItemProblem {
     }
 }
 
-Export-ModuleMember -Function Get-*Violation, Get-CiIgnoredTarget, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem
+function Get-BrokenMarkdownLink {
+    param([Parameter(Mandatory)] [string]$Path)
+
+    $folder = Split-Path (Resolve-Path $Path)
+    foreach ($match in [regex]::Matches((Get-Content -Raw $Path), '\]\(([^)\s]+)\)')) {
+        $target = $match.Groups[1].Value
+        # Only relative file links; web links and in-page anchors are out of scope
+        if ($target -match '^(https?:|mailto:|#)') { continue }
+        $file = ($target -split '#')[0]
+        if (-not (Test-Path (Join-Path $folder $file))) { $target }
+    }
+}
+
+Export-ModuleMember -Function Get-*Violation, Get-CiIgnoredTarget, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem, Get-BrokenMarkdownLink
