@@ -68,23 +68,37 @@ function Get-ManagedPath([string]$Source, [switch]$NoCi, [switch]$SourceRelative
     $result.Output
 }
 
+# A decrypt call: the template function inside {{ … }}, or the CLI (`chezmoi age decrypt`) in a script.
+# The bare word is not enough: file names and comments mention decrypt scripts without decrypting anything.
+$script:TemplateDecrypt = '\{\{[^}]*\bdecrypt\b'
+$script:AnyDecrypt = "$script:TemplateDecrypt|\bage\s+decrypt\b"
+
 function Get-CiDecryptionViolation {
     param([Parameter(Mandatory)] [string]$Source)
 
     $root = Get-SourceRoot $Source
-    $violations = foreach ($path in (Get-ManagedPath $Source -SourceRelative)) {
+
+    # chezmoi's own files are not targets, yet CI renders them: config template, data, externals, ignore files,
+    # shared templates. Scripts are covered below (only the CI-ignored ones may decrypt).
+    $violations = @(Get-ChildItem $root -Recurse -File -Force |
+        ForEach-Object { [IO.Path]::GetRelativePath($root, $_.FullName) -replace '\\', '/' } |
+        Where-Object { $_ -match '(^|/)\.chezmoi' -and $_ -notlike '.chezmoiscripts/*' } |
+        Where-Object { Select-String -Path (Join-Path $root $_) -Pattern $script:AnyDecrypt -Quiet })
+
+    try {
+        $managed = Get-ManagedPath $Source -SourceRelative
+    } catch {
+        # Listing targets renders externals and ignore files; a decrypt there fails without a key.
+        # That failure is the violation already found above.
+        if ($violations) { return @($violations) | Sort-Object -Unique }
+        throw
+    }
+
+    $violations += foreach ($path in $managed) {
         if ((Split-Path $path -Leaf) -match 'encrypted_') { $path; continue }
         # Any file, not only templates: a plain script can run `chezmoi age decrypt` too
         $file = Join-Path $root $path
-        if ((Test-Path $file -PathType Leaf) -and (Select-String -Path $file -Pattern '\bdecrypt\b' -Quiet)) { $path }
-    }
-
-    # Shared templates are not targets, but any target may include them
-    $shared = Join-Path $root '.chezmoitemplates'
-    if (Test-Path $shared) {
-        $violations += Get-ChildItem $shared -File -Recurse |
-            Where-Object { Select-String -Path $_.FullName -Pattern '\bdecrypt\b' -Quiet } |
-            ForEach-Object { [IO.Path]::GetRelativePath($root, $_.FullName) -replace '\\', '/' }
+        if ((Test-Path $file -PathType Leaf) -and (Select-String -Path $file -Pattern $script:AnyDecrypt -Quiet)) { $path }
     }
     @($violations) | Sort-Object -Unique
 }
@@ -106,7 +120,7 @@ function Get-TemplateRenderFailure {
         $isTemplate = $file.Name -like '*.tmpl' -or $file.Name -eq '.chezmoiignore' -or $path -like '.chezmoitemplates/*'
         if (-not $isTemplate) { continue }
         # Templates that decrypt are kept out of CI by the guard; rendering them here would need the key
-        if (Select-String -Path $file.FullName -Pattern '\bdecrypt\b' -Quiet) { continue }
+        if (Select-String -Path $file.FullName -Pattern $script:TemplateDecrypt -Quiet) { continue }
 
         $arguments = @('execute-template')
         if ($path -eq '.chezmoi.toml.tmpl') { $arguments += '--init' }

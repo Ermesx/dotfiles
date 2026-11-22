@@ -54,7 +54,7 @@ jobs:
       - name: Post-apply tests
         run: |
           # Scoop and its apps write PATH to the user registry, which this step's process does not see yet
-          $env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'User') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'Machine')
+          $env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'User') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'Machine') + ";$env:PATH"
           Import-Module Pester -MinimumVersion 6.0.0
           $config = New-PesterConfiguration
           $config.Run.Path = 'tests/windows/Installed-Apps-Modules.Tests.ps1', 'tests/windows/Profile.Tests.ps1'
@@ -65,11 +65,12 @@ jobs:
       - name: Assert nothing was decrypted
         if: always()
         run: |
-          foreach ($path in "$HOME/.config/chezmoi/key.txt", "$HOME/.ssh/id_ed25519") {
+          foreach ($path in "$HOME/.config/chezmoi/key.txt", "$HOME/.ssh/id_ed25519", "$HOME/.config/git/user.gitconfig") {
               if (Test-Path $path) { throw "$path exists on the runner" }
           }
-          # The git identity and signing key come from encrypted data and never reach CI
+          # The git identity and signing key come from encrypted data and never reach CI.
+          # --includes: ~/.gitconfig pulls the identity in through [include], which --global alone does not follow
           foreach ($key in 'user.signingkey', 'user.email') {
-              if (git config --global --get $key) { throw "git $key is set on the runner" }
+              if (git config --global --includes --get $key) { throw "git $key is set on the runner" }
           }
           exit 0

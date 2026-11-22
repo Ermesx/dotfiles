@@ -59,6 +59,14 @@ to a requirement, to "already done", or to a later issue.
 | D8 | VM standard user | The Vagrant provisioner creates a local standard user `dotfiles` (member of `Users` only) with password `dotfiles`, and syncs the repo root a second time to the neutral `C:/dotfiles-src`. The person logs in to the VM window as that user and runs `run-tests.ps1`, which copies `C:\dotfiles-src` to `~\.local\share\chezmoi` (working copy, uncommitted changes included) when that folder is missing. Interactive on purpose: the key passphrase prompt needs a person | A synced folder under `C:\Users\<new user>` before the first login makes Windows create the profile under another folder name; the existing sync sits in `vagrant`'s profile, which a standard user cannot read. The password protects a throwaway local VM, like the box's own `vagrant`/`vagrant` | Running as that user from the admin session via a scheduled task (non-interactive, cannot answer the passphrase) |
 | D9 | ADR | None: test infrastructure, no change to how the dotfiles work. The decisions live here | An ADR per CI choice is ceremony | ADR-0005 |
 
+### Amended in the branch code review (2026-11-22)
+
+- D2: the block is `{{ if eq (env "CI") "true" }}`, so a stray `CI=1` on a real machine keeps the identity managed.
+- D3: "contains `decrypt`" means a decrypt **call** — `{{ … decrypt … }}` or `chezmoi age decrypt` — not the bare
+  word in names or comments; and chezmoi's own files (config template, data, externals, ignore files, shared
+  templates) are scanned too, since CI renders them although they are not targets.
+- R6 step 7 also fails on `~/.config/git/user.gitconfig` and reads git with `--includes`.
+
 ## Requirements
 
 ### CI mode in the chezmoi source

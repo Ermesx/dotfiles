@@ -21,8 +21,9 @@ never used, so a check that would decrypt fails on the host exactly as in CI.
 
 ## Never decrypt in CI
 
-The repo is public (rule in [`AGENTS.md`](../AGENTS.md)). CI sets `CI`, and the `{{ if env "CI" }}` block in
-`home/.chezmoiignore` drops every target that needs decryption:
+The repo is public (rule in [`AGENTS.md`](../AGENTS.md)). GitHub sets `CI=true`, and the
+`{{ if eq (env "CI") "true" }}` block in `home/.chezmoiignore` drops every target that needs decryption (any other
+value keeps them managed, so a stray `CI=1` on a real machine cannot silently drop the identity):
 
 | Target | Why |
 |---|---|
@@ -32,10 +33,12 @@ The repo is public (rule in [`AGENTS.md`](../AGENTS.md)). CI sets `CI`, and the 
 | `.chezmoiscripts/windows/add-ssh-key.ps1` | Uses the decrypted private key |
 | `.chezmoiscripts/windows/install-wsl.ps1` | Not decryption: the hosted runner cannot install a WSL distro |
 
-`tests/static/NoDecryptInCi.Tests.ps1` fails when, with `CI` set, a managed file is `encrypted_*` or contains
-`decrypt`, or when the set of targets the block drops differs from this table. **Adding a decryption point** (e.g. GPG
+`tests/static/NoDecryptInCi.Tests.ps1` fails when, with `CI=true`, a managed file is `encrypted_*` or calls
+decrypt (`{{ … decrypt … }}` or `chezmoi age decrypt`), when one of chezmoi's own files (config template, data,
+externals, ignore files, shared templates) does, or when the set of targets the block drops differs from this table. **Adding a decryption point** (e.g. GPG
 keys): add its target to the block and to the test's expected list, then to this table. The workflow also fails if
-an age identity, `~/.ssh/id_ed25519`, or a git `user.email` / `user.signingkey` exists on the runner.
+an age identity, `~/.ssh/id_ed25519`, `~/.config/git/user.gitconfig`, or a git `user.email` / `user.signingkey`
+(read with `--includes`) exists on the runner.
 
 ## CI
 
@@ -54,8 +57,8 @@ The runner is elevated, so CI does **not** prove that apply works without admin;
   points to a host path.
 - Log in to the VM window as `dotfiles` and run
   `powershell -ExecutionPolicy Bypass -File C:\vagrant\run-tests.ps1 -BRANCH <branch>`; answer the key passphrase.
-  `run-tests.ps1` copies `C:\dotfiles-src` to `~\.local\share\chezmoi` (uncommitted changes included), so
-  `chezmoi init` skips the clone; for the `vagrant` account the share in its profile is used as before.
+  `run-tests.ps1` replaces `~\.local\share\chezmoi` with a fresh copy of `C:\dotfiles-src` on every run (uncommitted
+  changes included), so `chezmoi init` skips the clone; for the `vagrant` account the share in its profile is used as before.
 - `run-tests.ps1` downloads only `install.ps1` from GitHub (`.../refs/heads/<branch>/install.ps1`), so push changes
   to `install.ps1` before testing them.
 - After the run, check: all Pester tests pass, no UAC prompt, `git config user.name` / `user.email` are set and a

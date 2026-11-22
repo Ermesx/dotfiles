@@ -20,7 +20,7 @@ readonly_Documents/
 .claude
 {{- end -}}
 
-{{- if env "CI" }}
+{{- if eq (env "CI") "true" }}
 # CI: needs decryption, which never happens in CI (docs/testing.md)
 .ssh/id_ed25519
 .ssh/id_ed25519.pub

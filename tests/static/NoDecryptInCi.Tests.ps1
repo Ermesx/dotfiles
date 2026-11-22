@@ -35,6 +35,22 @@ Describe 'no decryption when CI is set' {
         )
     }
 
+    It 'keeps the identity managed when CI is <_>, not true' -ForEach '1', 'false' {
+        # A toolchain may leave CI set on a real machine; only GitHub's CI=true may drop the identity
+        $config = Join-Path $TestDrive 'empty.toml'
+        Set-Content -Path $config -Value ''
+        $previous = $env:CI
+        try {
+            $env:CI = $_
+            $ignore = Get-Content -Raw (Join-Path $root 'home/.chezmoiignore') |
+                chezmoi --config $config --source $root execute-template
+        } finally {
+            $env:CI = $previous
+        }
+
+        $ignore | Should -Not -Contain '.config/git/user.gitconfig'
+    }
+
     It 'reports an unguarded decrypt template' {
         $source = New-Fixture @{ 'dot_leak.tmpl' = '{{ "x" | decrypt }}' }
 
@@ -51,6 +67,24 @@ Describe 'no decryption when CI is set' {
         $source = New-Fixture @{ '.chezmoiscripts/run_once_x.ps1' = 'chezmoi age decrypt --passphrase k.age' }
 
         Get-CiDecryptionViolation -Source $source | Should -Contain '.chezmoiscripts/run_once_x.ps1'
+    }
+
+    It 'reports decrypt in the config template' {
+        $source = New-Fixture @{ '.chezmoi.toml.tmpl' = '[data]{{ "x" | decrypt }}' }
+
+        Get-CiDecryptionViolation -Source $source | Should -Contain '.chezmoi.toml.tmpl'
+    }
+
+    It 'reports decrypt in an external definition' {
+        $source = New-Fixture @{ '.chezmoiexternal.toml.tmpl' = '{{ decrypt "x" }}' }
+
+        Get-CiDecryptionViolation -Source $source | Should -Contain '.chezmoiexternal.toml.tmpl'
+    }
+
+    It 'does not report a file that only names decrypt in text' {
+        $source = New-Fixture @{ 'dot_notes.md' = 'see decrypt-private-key.ps1 for how keys are decrypted' }
+
+        Get-CiDecryptionViolation -Source $source | Should -BeNullOrEmpty
     }
 
     It 'reports an encrypted file that CI does not ignore' {

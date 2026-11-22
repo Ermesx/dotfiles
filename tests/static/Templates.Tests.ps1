@@ -40,6 +40,12 @@ Describe 'template rendering' {
         (Get-TemplateRenderFailure -Source $source).Path | Should -Be '.chezmoitemplates/x.tmpl'
     }
 
+    It 'renders a .chezmoiignore that names decrypt scripts' {
+        $source = New-Fixture @{ '.chezmoiignore' = "decrypt-private-key.ps1`n{{ if }}" }
+
+        (Get-TemplateRenderFailure -Source $source).Path | Should -Be '.chezmoiignore'
+    }
+
     It 'renders a template that CI ignores' {
         $source = New-Fixture @{
             '.chezmoiignore' = '{{ if env "CI" }}.x{{ end }}'
