@@ -23,3 +23,11 @@ pwsh -NoProfile -Command 'Import-Module Pester -MinimumVersion 6.0.0; $env:PSMod
 
 Without the `PSModulePath` prefix, `Import-Module` loads the *installed* copy from `~/Documents`. The
 `PackageUpdates` tests mock `scoop`, `dotnet`, the Gallery and NuGet; real updates are checked in the VM.
+
+The admin-setup tests load scripts from the source, so they need no `PSModulePath` prefix. They mock `wsl`,
+`ssh-add`, the service and the registry, and run the aggregate against stub item scripts; the real admin scripts
+run only in the VM:
+
+```powershell
+pwsh -NoProfile -Command 'Import-Module Pester -MinimumVersion 6.0.0; Invoke-Pester tests/windows/AdminSetup -Output Detailed'
+```

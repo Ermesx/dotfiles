@@ -18,6 +18,32 @@ iex (irm 'https://getdotfiles.short.gy/install.ps1' | Out-String)
 sh -c "$(curl -fsLS https://getdotfiles.short.gy/install.sh)"
 ```
 
+Administrator step (Windows)
+---------------------------------------------------------------
+
+Install and apply run without admin rights. Three things are machine-wide by nature and need an administrator once:
+Developer Mode, the WSL platform and the `ssh-agent` service ([ADR-0003](docs/adr/0003-windows-packages-via-scoop.md)).
+chezmoi deploys their scripts to `~\.config\dotfiles\admin\` and never runs them; until they have run, every
+`chezmoi apply` ends with a reminder:
+
+```
+► Administrator step needed
+  Run as an administrator: pwsh -NoProfile -ExecutionPolicy Bypass -File "C:\Users\<you>\.config\dotfiles\admin\admin-setup.ps1"
+```
+
+- **Private machine:** run that command in an elevated PowerShell 7. `admin-setup.ps1` runs
+  `enable-developer-mode.ps1`, `enable-ssh-agent.ps1` and `enable-wsl.ps1` in that order and stops at the first
+  error; each of them also runs on its own. All are safe to rerun.
+- **Managed machine:** send IT the command above. They review the four `.ps1` files in that folder first (it is
+  writable by you, and `admin-setup.ps1` runs the other three), run it from their own administrator account, and
+  do not run the per-user step: a WSL distro or an agent key would land in their profile, not yours.
+
+Then restart and, as yourself, in a new PowerShell window:
+
+```powershell
+Complete-UserSetup   # installs the WSL distro from packages.yaml and loads ~\.ssh\id_ed25519 into ssh-agent
+```
+
 General Architecture
 ---------------------------------------------------------------
 
