@@ -96,4 +96,25 @@ function Get-CiIgnoredTarget {
     Get-ManagedPath $Source -NoCi | Where-Object { $_ -notin $withCi } | Sort-Object
 }
 
-Export-ModuleMember -Function Get-*Violation, Get-CiIgnoredTarget
+function Get-TemplateRenderFailure {
+    param([Parameter(Mandatory)] [string]$Source)
+
+    $root = Get-SourceRoot $Source
+    foreach ($file in Get-ChildItem $root -Recurse -File -Force) {
+        $path = [IO.Path]::GetRelativePath($root, $file.FullName) -replace '\\', '/'
+        # Every template, managed or ignored in CI: an ignored one still runs on a real machine
+        $isTemplate = $file.Name -like '*.tmpl' -or $file.Name -eq '.chezmoiignore' -or $path -like '.chezmoitemplates/*'
+        if (-not $isTemplate) { continue }
+        # Templates that decrypt are kept out of CI by the guard; rendering them here would need the key
+        if (Select-String -Path $file.FullName -Pattern '\bdecrypt\b' -Quiet) { continue }
+
+        $arguments = @('execute-template')
+        if ($path -eq '.chezmoi.toml.tmpl') { $arguments += '--init' }
+        $result = Invoke-ChezmoiCi -Source $Source -Arguments $arguments -InputText ([string](Get-Content -Raw $file.FullName))
+        if ($result.ExitCode -ne 0) {
+            [pscustomobject]@{ Path = $path; Error = $result.Error }
+        }
+    }
+}
+
+Export-ModuleMember -Function Get-*Violation, Get-CiIgnoredTarget, Get-TemplateRenderFailure
