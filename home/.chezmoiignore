@@ -20,3 +20,15 @@ readonly_Documents/
 .claude
 {{- end -}}
 
+{{- if env "CI" }}
+# CI: needs decryption, which never happens in CI (docs/testing.md)
+.ssh/id_ed25519
+.ssh/id_ed25519.pub
+.config/git/user.gitconfig
+.chezmoiscripts/windows/decrypt-private-key.ps1
+.chezmoiscripts/linux/decrypt-private-key.sh
+.chezmoiscripts/windows/add-ssh-key.ps1
+# CI: the hosted runner cannot install a WSL distro (docs/testing.md)
+.chezmoiscripts/windows/install-wsl.ps1
+{{- end }}
+
