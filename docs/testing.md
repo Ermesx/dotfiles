@@ -29,6 +29,7 @@ value keeps them managed, so a stray `CI=1` on a real machine cannot silently dr
 |---|---|
 | `.ssh` (whole folder) | Holds the encrypted key pair; nothing else under it belongs on a runner |
 | `.config/git/user.gitconfig` | Git identity and signing key, decrypted from `.encrypted-data.toml.age`; `.gitconfig` includes it, and git skips the missing file |
+| `.config/git/allowed_signers` | The SSH signing key and its email, for local signature checks; built from the same decrypted sources as `user.gitconfig` |
 | `.chezmoiscripts/windows/decrypt-private-key.ps1`, `.chezmoiscripts/linux/decrypt-private-key.sh` | Decrypt the age identity with a passphrase |
 | `.chezmoiscripts/windows/add-ssh-key.ps1` | Uses the decrypted private key |
 | `.chezmoiscripts/windows/install-wsl.ps1` | Not decryption: the hosted runner cannot install a WSL distro |
