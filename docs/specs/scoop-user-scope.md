@@ -122,8 +122,8 @@ scripts deployed by chezmoi and limited to the machine part, the simple bootstra
 ## Non-goals
 
 The admin aggregate script and reminder (#44), profile selection (#20), Check-Updates rewrite (#45), migrating a winget
-machine (#46), CI and a provisioned standard user in Vagrant (#47), container engine (#48), GPG keys (#49), Linux
-scripts (#12). No uninstall, no state file, no version pins.
+machine (#46), CI and a provisioned standard user in Vagrant (#47), container engine (#48), GPG keys (#49,
+dropped: signing uses SSH), Linux scripts (#12). No uninstall, no state file, no version pins.
 
 ## Acceptance
 
