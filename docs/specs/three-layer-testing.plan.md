@@ -25,7 +25,7 @@
 
 1. **Host check passes because the host has the key** → every chezmoi call uses the no-key config; Task 1 test `reports an unguarded decrypt template` runs on the host where `key.txt` exists and must still report it.
 2. **CI block drops more than intended** (`.ssh/*`, a typo matching nothing) → Task 1 test `ignores exactly the agreed targets in CI` compares the set diff with the D2 list.
-3. **A future decryption point** (e.g. GPG, #49) added without a CI entry → Task 1 fixture tests for both `encrypted_` and `decrypt`; Acceptance 4 proves it in a real run.
+3. **A future decryption point** (e.g. `allowed_signers`, #55) added without a CI entry → Task 1 fixture tests for both `encrypted_` and `decrypt`; Acceptance 4 proves it in a real run.
 4. **Profile loads with hidden non-terminating errors** → Task 4 `Profile.Tests.ps1` fails on any error record written while loading and prints them; `$Error` is not counted.
 5. **Network flake reads as a missing package** → only 404 means `'no manifest'`, other statuses retry then report `'network error'`; Task 3 test `reports a server error as a network error`.
 
