@@ -35,8 +35,8 @@ value keeps them managed, so a stray `CI=1` on a real machine cannot silently dr
 
 `tests/static/NoDecryptInCi.Tests.ps1` fails when, with `CI=true`, a managed file is `encrypted_*` or calls
 decrypt (`{{ … decrypt … }}` or `chezmoi age decrypt`), when one of chezmoi's own files (config template, data,
-externals, ignore files, shared templates) does, or when the set of targets the block drops differs from this table. **Adding a decryption point** (e.g. GPG
-keys): add its target to the block and to the test's expected list, then to this table. The workflow also fails if
+externals, ignore files, shared templates) does, or when the set of targets the block drops differs from this table. **Adding a decryption point** (e.g. a new
+encrypted file or a template that decrypts): add its target to the block and to the test's expected list, then to this table. The workflow also fails if
 an age identity, `~/.ssh/id_ed25519`, `~/.config/git/user.gitconfig`, or a git `user.email` / `user.signingkey`
 (read with `--includes`) exists on the runner.
 

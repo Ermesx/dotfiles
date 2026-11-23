@@ -95,7 +95,6 @@ Things that bite:
 | gitql (gitql)                                              | shell   | App          | Query Git repos with SQL-like syntax |
 | GitHub CLI (gh)                                            | shell   | App          | GitHub from the terminal             |
 | Gitleaks (gitleaks)                                        | shell   | App          | Secret scanner for Git repos         |
-| GnuPG (gpg)                                                | shell   | App          | Encryption and signing tool          |
 | Terminal-Icons                                             | shell   | Module       | File and folder icons in terminal    |
 | PSfzf                                                      | shell   | Module       | PowerShell integration for fzf       |
 | posh-git                                                   | shell   | Module       | Git prompt enhancements              |

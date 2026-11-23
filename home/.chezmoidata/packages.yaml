@@ -60,7 +60,6 @@ packages:
           - gitql
           - gh
           - gitleaks
-          - gpg
         modules: [Terminal-Icons, PSfzf, posh-git]
       sdk:
         scoop:
