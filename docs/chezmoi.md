@@ -31,7 +31,8 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
 - Encryption is `age`. The identity is `~/.config/chezmoi/key.txt`, itself decrypted on first apply from an `.age`
   file in `home/` with a passphrase. The recipient is in `home/.chezmoi.toml.tmpl`.
 - The git identity and signing key live in `home/dot_config/git/user.gitconfig.tmpl` (decrypted), which
-  `.gitconfig` pulls in with `[include]`; `.gitconfig` itself never decrypts.
+  `.gitconfig` pulls in with `[include]`; `.gitconfig` itself never decrypts. Commits are signed with the SSH key;
+  `home/dot_config/git/allowed_signers.tmpl` (decrypted) lists it so git can verify signatures locally.
 - With `CI=true` (what GitHub sets; any other value, e.g. a stray `CI=1`, keeps everything managed), the
   `{{ if eq (env "CI") "true" }}` block in `home/.chezmoiignore` drops every target that needs decryption. A
   new decryption point needs an entry there; `tests/static/NoDecryptInCi.Tests.ps1` fails until it has one

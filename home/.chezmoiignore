@@ -25,6 +25,7 @@ readonly_Documents/
 # Targets are names without chezmoi prefixes; the source of each script is in its comment.
 .ssh
 .config/git/user.gitconfig
+.config/git/allowed_signers
 # run_onchange_before_decrypt-private-key.ps1.tmpl / .sh.tmpl: decrypt the age key with a passphrase
 .chezmoiscripts/windows/decrypt-private-key.ps1
 .chezmoiscripts/linux/decrypt-private-key.sh

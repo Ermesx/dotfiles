@@ -29,6 +29,7 @@ Describe 'no decryption when CI is set' {
             '.chezmoiscripts/windows/add-ssh-key.ps1'
             '.chezmoiscripts/windows/decrypt-private-key.ps1'
             '.chezmoiscripts/windows/install-wsl.ps1'
+            '.config/git/allowed_signers'
             '.config/git/user.gitconfig'
             '.ssh/id_ed25519'
             '.ssh/id_ed25519.pub'
