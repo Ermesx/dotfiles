@@ -4,9 +4,18 @@
 {{ end }}
 
 # Import installed modules
-{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
-Import-Module -Name {{ . | squote -}}
-{{ end }}{{ end }}
+{{- /* Only the profiles that were installed: same rule as run_onchange_before_01-scoop (with CI=true, not
+       ci.skip_scoop_profiles), so e.g. DockerCompletion is not imported where the containers profile was skipped */}}
+{{- $skip := list }}
+{{- if eq (env "CI") "true" }}{{ $skip = .ci.skip_scoop_profiles }}{{ end }}
+{{- range $name, $profile := .packages.windows.profiles }}
+{{-   if not (has $name $skip) }}
+{{-     range (get $profile "modules" | default list) }}
+Import-Module -Name {{ . | squote }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+
 # Import Custom Modules
 Import-Module -Name 'Write-Pretty' -Force
 
