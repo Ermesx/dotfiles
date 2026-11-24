@@ -1,12 +1,5 @@
 {
   "version": 19,
-  "application": {
-    "autoStart": true,
-    "startInBackground": true,
-    "updater": {
-      "enabled": false
-    }
-  },
   "containerEngine": {
     "name": "moby"
   },
