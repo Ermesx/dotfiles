@@ -1,4 +1,4 @@
 # CI only (CI=true): profiles whose Scoop apps the install script skips on the GitHub runner. Their apps take most
 # of the install time; the static layer still checks every manifest, and the VM installs them (docs/testing.md).
 ci:
-  skip_scoop_profiles: [apps]
+  skip_scoop_profiles: [apps, containers]

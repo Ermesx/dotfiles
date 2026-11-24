@@ -44,10 +44,10 @@ alignment style: pad cells to the widest cell in the column).
   method: skip it. `packages.linux` is out of scope.
 - **Install Type:** by method: `scoop` is `App`, `modules` is `Module`, `dotnet_tools` is `Tool`, `yazi_plugins` is
   `Yazi plugin`, `wsl` is `WSL distro`.
-- **Profile:** the name of the profile that holds the item (`base`, `shell`, `sdk`, `apps`, `ai`). A profile name
-  outside this list is **reported** and its items are left out; do not guess a profile.
-- **Order:** by profile (`base`, `shell`, `sdk`, `apps`, `ai`), then by method (`scoop`, `modules`, `dotnet_tools`,
-  `yazi_plugins`, `wsl`), then by YAML order. `global` and `windows` items of one profile are interleaved by this
+- **Profile:** the name of the profile that holds the item (`base`, `shell`, `sdk`, `containers`, `apps`, `ai`). A
+  profile name outside this list is **reported** and its items are left out; do not guess a profile.
+- **Order:** by profile (`base`, `shell`, `sdk`, `containers`, `apps`, `ai`), then by method (`scoop`, `modules`,
+  `dotnet_tools`, `yazi_plugins`, `wsl`), then by YAML order. `global` and `windows` items of one profile are interleaved by this
   rule, not grouped by platform.
 - **Name and Purpose:** ids are Scoop entries (`[bucket/]app`). If the id already has a row (match by the id in
   parentheses in Name, or by the exact Name for ids without one), copy its Name and Purpose cells **verbatim**. For
