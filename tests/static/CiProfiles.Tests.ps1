@@ -31,4 +31,15 @@ Describe 'profiles skipped in CI' {
     It 'installs every profile on a real machine' {
         Get-ScoopScript '' | Should -Contain 'scoop install extras/rider'
     }
+
+    It 'installs no container app when CI is true' {
+        $script = Get-ScoopScript 'true'
+
+        $script | Should -Not -Contain 'scoop install extras/rancher-desktop'
+        $script | Should -Not -Contain 'scoop install lazydocker'
+    }
+
+    It 'installs Rancher Desktop on a real machine' {
+        Get-ScoopScript '' | Should -Contain 'scoop install extras/rancher-desktop'
+    }
 }
