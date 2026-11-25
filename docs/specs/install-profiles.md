@@ -17,15 +17,15 @@ showed (marked **[added]**).
 | D4 | Tools that `base` configs call | **Agreed 2026-11-25:** `extras/vscode`, `delta`, `less`, `jq` move to `base` | **[added]** `.gitconfig` (`pager`, `interactive.diffFilter`, `textconv = jq .`, mergetool `code`) and `.chezmoi.toml.tmpl` (`[diff] pager`, `[edit] command`) are deployed on every machine; without `shell` `git diff`, `git log`, `git add -p` and `chezmoi diff` fail, and VS Code is the editor everywhere |
 | D5 | Config that needs a tool from another profile | **Agreed 2026-11-25:** conditioned on the tool being in the view, by its name, never on a profile name | Moving a tool between profiles stays one line in `packages.yaml` |
 | D6 | Claude configuration when `claude-code` is not selected | **Agreed 2026-11-25:** not deployed at all (`~/.claude`, `ai-commit.ps1`, lazygit's `<c-a>` command) | It is dead without Claude; the replacement assistant and a shared AI configuration are a separate issue |
-| D7 | CI selection | **Agreed 2026-11-25:** `ci.skip_scoop_profiles` is removed; CI and the VM pass the selection with `--promptMultichoice` | One selection mechanism instead of two |
+| D7 | CI selection | **Agreed 2026-11-25:** `ci.skip_scoop_profiles` is removed; CI and the VM pass the selection in environment variables (D15) | One selection mechanism instead of two |
 | D8 | Defaults at the first init | **Agreed 2026-11-25:** every profile and every pick preselected | Accepting the defaults installs what one apply installs today; nothing disappears silently |
 | D9 | Pester on the VM | **Agreed 2026-11-25:** the VM test runner installs Pester itself, as CI does | `base + shell` has no `sdk`, so no Pester to run the tests with |
 | D10 | `ai` with one item | **Agreed 2026-11-25:** stays `pick: true` | A second assistant comes with the follow-up issue |
 | D11 | A new item added to a `pick` profile after init | **Agreed 2026-11-25:** init also stores the items it offered; an after-apply notice lists items not offered yet, until `chezmoi init --prompt` decides them; new items are preselected in that prompt | **[added]** Otherwise the item is in no stored pick and `promptMultichoiceOnce` does not ask again, so it is silently not installed. A `run_onchange_` notice would show once and could be missed; an empty `run_after_` script is not run, so the notice costs nothing while nothing is pending. Asking at apply is impossible: the config template runs only at init |
 | D12 | WSL platform in the admin step | **Agreed 2026-11-25:** the reminder's WSL probe and `enable-wsl` in `admin-setup.ps1` exist only when the view has a WSL distro or `rancher-desktop` (D5) | **[added]** Today the reminder prints on every apply until WSL is enabled, so a `base + shell` machine without admin rights would see it forever; Rancher Desktop needs the platform without `sdk` |
-| D13 | Pick choice labels | **[added, builder check]** The app name without the bucket (`rider`); the view maps it back to the YAML item | `--promptMultichoice` splits values on `/`, so `extras/rider` cannot be passed non-interactively (verified on v2.73.1) |
-| D14 | Empty selection given non-interactively | **[added, builder check]** Not supported: a flag must name at least one value (`Profiles=` fails with `invalid choice`). `base` alone can be chosen only interactively | The VM and CI always select at least `shell` |
-| D15 | How CI and the VM pass the selection to `install.ps1` | **[added, builder check]** A parameter `-InitArgs [string[]]`, forwarded to `chezmoi init`; the VM runner runs the downloaded script with `& ([scriptblock]::Create((Invoke-RestMethod $url))) -InitArgs …` instead of `Invoke-Expression` | `Invoke-Expression` cannot pass parameters; the public `irm \| iex` one-liner stays and prompts interactively |
+| D13 | Pick choice labels | **[added, builder check]** The app name without the bucket (`rider`); the view maps it back to the YAML item | Short, readable labels; `/` in `extras/rider` also clashes with `--promptMultichoice`'s value separator (verified on v2.73.1) |
+| D14 | Only `base`, chosen non-interactively | **[added, builder check]** `DOTFILES_PROFILES=base` (D15) | `--promptMultichoice` cannot pass an empty choice (`Profiles=` fails with `invalid choice`); `base` as a value is unambiguous (verified on v2.73.1) |
+| D15 | How CI and the VM pass the selection | **Agreed 2026-11-25:** environment variables read by the config template: `DOTFILES_PROFILES` and `DOTFILES_PICKS_<PROFILE>` (e.g. `DOTFILES_PICKS_AI`); when set, the template uses them instead of prompting. `install.ps1` and the VM runner's `Invoke-Expression` stay as they are; no `--promptMultichoice` | chezmoi's documented pattern for non-interactive machines (`env` in the config template, user guide "Containers and VMs"). Works for the public `irm \| iex` one-liner too, needs no new parameter and no `[scriptblock]::Create` (owner's call) |
 
 ## Requirements
 
@@ -45,9 +45,13 @@ showed (marked **[added]**).
   Verified: with a hard-coded default, `chezmoi init --prompt --promptDefaults` replaced a stored pick of
   `rider/postman` with all items.
 - **R3** The answers survive a plain `chezmoi init` (no `--prompt`) and every `chezmoi apply`. Verified on v2.73.1.
-- **R4** Non-interactive form, verified on v2.73.1:
-  `chezmoi init --promptMultichoice "Profiles=shell/sdk/ai" --promptMultichoice "ai items=claude-code"` — the key is
-  the prompt text, values are separated by `/`, at least one value (D14).
+- **R4** Non-interactive form (D15): when `DOTFILES_PROFILES` is set, the template takes the profiles from it
+  instead of prompting — names separated by `,`, `base` allowed and dropped (`base` alone = only `base`, D14). Likewise
+  `DOTFILES_PICKS_<PROFILE>` (profile name upper-cased) for the picks of that profile, as labels (D13). The values are
+  stored like prompt answers, so a later init without the variables keeps them. An unknown name fails the init with a
+  message naming it and the valid choices (`fail`), so a typo cannot silently select nothing. Verified on v2.73.1:
+  `DOTFILES_PROFILES=shell,sdk` stores `["shell","sdk"]`, a later init without the variable keeps it, `base` stores
+  `[]`. Example (CI): `DOTFILES_PROFILES=shell,sdk,ai`, `DOTFILES_PICKS_AI=claude-code`.
 - **R5** `chezmoi init --prompt` asks every prompt again with the stored answers as defaults (R2). Deselecting
   uninstalls nothing (R30).
 
@@ -142,11 +146,13 @@ showed (marked **[added]**).
 ### CI and the VM
 
 - **R25** `home/.chezmoidata/ci.yaml` is removed, with every reference to `ci.skip_scoop_profiles`.
-- **R26** `install.ps1` takes `-InitArgs [string[]]` and appends it to `chezmoi init` (D15, R4); without it,
-  `chezmoi init` prompts as usual. CI selects `shell`, `sdk`, `ai` with `ai items=claude-code`: no `apps`, no
-  `containers`, as today. **[added]** `vscode` now installs in CI as part of `base` (D4); accepted.
-- **R27** `tests/run-tests.ps1` takes the selection and passes it as `-InitArgs` (D15); a later run can add a profile
-  with `chezmoi init --prompt --promptMultichoice … --apply`. It installs Pester itself before the tests (D9).
+- **R26** `install.ps1` is unchanged (D15). The CI workflow sets `DOTFILES_PROFILES=shell,sdk,ai` and
+  `DOTFILES_PICKS_AI=claude-code` for the apply step: no `apps`, no `containers`, as today. **[added]** `vscode` now
+  installs in CI as part of `base` (D4); accepted.
+- **R27** `tests/run-tests.ps1` takes the selection as parameters (`-Profiles`, `-Picks` as a hashtable of profile →
+  labels), sets the variables for its own process before `Invoke-Expression`, and leaves the user's environment
+  untouched. A later run with more profiles adds them (`chezmoi init --apply` with the new variables). It installs
+  Pester itself before the tests (D9).
 
 ### Admin step (D12)
 
@@ -211,7 +217,7 @@ showed (marked **[added]**).
 - ADR-0005 and this spec committed.
 - `chezmoi init` asks for profiles and, for `apps` / `ai`, for items; the answers are stored and not asked again;
   `chezmoi init --prompt` asks again with the stored answers as defaults.
-- On the VM as a standard user: `base + shell` applies cleanly; adding `sdk` with `chezmoi init --prompt … --apply`
+- On the VM as a standard user: `base + shell` applies cleanly; adding `sdk` (`DOTFILES_PROFILES=shell,sdk`, `chezmoi init --apply`)
   installs only `sdk`.
 - `$PROFILE` loads without errors for any combination; completers, inits and imports exist only for selected tools.
 - On `base + shell` the admin reminder does not mention WSL, and `admin-setup.ps1` does not enable it.

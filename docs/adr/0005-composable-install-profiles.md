@@ -32,8 +32,9 @@ The choice is made at `chezmoi init`, stored in the chezmoi config, and changed 
 - Deselecting a profile or an item uninstalls nothing.
 - An item added later to a `pick` profile is not installed silently: init remembers what it offered, and every apply
   lists new items until `chezmoi init --prompt` decides them.
-- CI and the VM choose non-interactively (`chezmoi init --promptMultichoice`); `ci.skip_scoop_profiles` goes away, so
-  there is one selection mechanism.
+- CI and the VM choose non-interactively through environment variables the config template reads
+  (`DOTFILES_PROFILES`, `DOTFILES_PICKS_<PROFILE>`), chezmoi's documented pattern for containers and VMs;
+  `ci.skip_scoop_profiles` goes away, so there is one selection mechanism.
 
 ## Options considered
 
