@@ -5,6 +5,13 @@
 BeforeAll {
     $root = (Resolve-Path "$PSScriptRoot/../..").Path
 
+    # Labels of the ai profile as packages.yaml declares them (item without the bucket)
+    $data = (& chezmoi --source $root data --format json | ConvertFrom-Json)
+    $aiDefinitions = @($data.packages.global.profiles.ai, $data.packages.($data.chezmoi.os).profiles.ai) | Where-Object { $_ }
+    $aiLabels = @($aiDefinitions | ForEach-Object { $_.PSObject.Properties } | Where-Object { $_.Name -notin 'pick', 'wsl' } |
+        ForEach-Object { $_.Value } | ForEach-Object { ($_ -split '/')[-1] })
+    $aiList = ($aiLabels | ForEach-Object { '"' + $_ + '"' }) -join ', '
+
     # $Existing is the config already on the machine; Output is the config init wrote
     function Invoke-InitTemplate([hashtable]$Env = @{}, [string[]]$Flags = @(), [string]$Existing = '') {
         $config = Join-Path $TestDrive "$([guid]::NewGuid()).toml"
@@ -62,7 +69,16 @@ Describe 'selection at init' {
     }
 
     It 'takes every pick when DOTFILES_PROFILES is set without DOTFILES_PICKS' {
-        $result = Invoke-InitTemplate -Env @{ DOTFILES_PROFILES = 'apps' }
+        # A stored answer makes the test discriminating: a prompt would return it, the environment mode must not
+        $existing = @'
+[data]
+profiles = ["apps"]
+[data.picks]
+apps = ["rider"]
+[data.offered]
+apps = ["vscode", "rider", "googlechrome", "postman", "vagrant"]
+'@
+        $result = Invoke-InitTemplate -Env @{ DOTFILES_PROFILES = 'apps' } -Existing $existing
 
         $result.ExitCode | Should -Be 0
         foreach ($label in 'rider', 'googlechrome', 'postman', 'vagrant') {
@@ -74,10 +90,11 @@ Describe 'selection at init' {
         $result = Invoke-InitTemplate -Flags '--prompt', '--promptDefaults'
 
         $result.ExitCode | Should -Be 0
+        $aiLabels | Should -Contain 'claude-code'
         foreach ($name in 'ai', 'apps', 'containers', 'sdk', 'shell') {
             $result.Output | Should -Match "profiles = \[[^\]]*`"$name`""
         }
-        $result.Output | Should -Match '(?s)\[data\.picks\]\s+ai = \["claude-code"\]\s+apps = \[[^\]]*"rider"[^\]]*"vagrant"'
+        $result.Output | Should -Match "(?s)\[data\.picks\]\s+ai = \[$([regex]::Escape($aiList))\]\s+apps = \[[^\]]*`"rider`"[^\]]*`"vagrant`""
     }
 
     It 'fails on an unknown pick' {
@@ -95,7 +112,7 @@ Describe 'selection at init' {
         $result.Output | Should -Match '(?s)\[data\.offered\].*apps = \[[^\]]*"googlechrome"'
         $result.Output | Should -Match '(?s)\[data\.offered\].*apps = \[[^\]]*"postman"'
         $result.Output | Should -Match '(?s)\[data\.offered\].*apps = \[[^\]]*"vagrant"'
-        $result.Output | Should -Match '(?s)\[data\.offered\].*ai = \["claude-code"\]'
+        $result.Output | Should -Match "(?s)\[data\.offered\].*ai = \[$([regex]::Escape($aiList))\]"
     }
 
     It 'keeps stored picks and preselects new items with --promptDefaults' {
