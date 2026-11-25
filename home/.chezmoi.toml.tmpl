@@ -1,3 +1,72 @@
+{{- /*
+  Install profiles (#20, ADR-0005): the selection is asked once and stored under [data], then read by the packages view.
+  DOTFILES_PROFILES and DOTFILES_PICKS_<PROFILE> (CI, VM) replace the prompts; the answer is stored the same way.
+  Profile names and pick flags are read from packages.yaml with include: the config template gets no .packages data,
+  and the view needs the selection, so it cannot be used here.
+*/ -}}
+{{- $packages := (include ".chezmoidata/packages.yaml" | fromYaml).packages -}}
+{{- $sources := list (dig "global" "profiles" (dict) $packages) (dig .chezmoi.os "profiles" (dict) $packages) -}}
+{{- $names := list -}}
+{{- range $source := $sources }}{{ range $name, $def := $source }}{{ $names = append $names $name }}{{ end }}{{ end -}}
+{{- $choices := without ($names | uniq | sortAlpha) "base" -}}
+
+{{- /* Profiles: env var, else prompt (default: the stored answer, otherwise every profile) */ -}}
+{{- $selected := list -}}
+{{- if env "DOTFILES_PROFILES" -}}
+{{-   range $name := splitList "," (env "DOTFILES_PROFILES") -}}
+{{-     $name = trim $name -}}
+{{-     if not (has $name (list "" "base")) -}}
+{{-       if not (has $name $choices) }}{{ fail (printf "DOTFILES_PROFILES: unknown profile %q; choose from %s" $name (join ", " $choices)) }}{{ end -}}
+{{-       $selected = append $selected $name -}}
+{{-     end -}}
+{{-   end -}}
+{{- else -}}
+{{-   $default := $choices -}}
+{{-   if hasKey . "profiles" }}{{ $default = .profiles }}{{ end -}}
+{{-   range $name := promptMultichoiceOnce . "profiles" "Profiles" $choices $default }}{{ $selected = append $selected $name }}{{ end -}}
+{{- end -}}
+{{- $selected = $selected | uniq -}}
+
+{{- /* Picks: one prompt per selected pick profile; offered is written for every pick profile */ -}}
+{{- $picks := dict -}}
+{{- $offered := dict -}}
+{{- range $profile := $names | uniq | sortAlpha -}}
+{{-   $labels := list -}}
+{{-   $isPick := false -}}
+{{-   range $source := $sources -}}
+{{-     $def := dig $profile (dict) $source -}}
+{{-     if dig "pick" false $def }}{{ $isPick = true }}{{ end -}}
+{{-     range $method, $items := $def -}}
+{{-       if not (has $method (list "pick" "wsl")) }}{{ range $item := $items }}{{ $labels = append $labels (splitList "/" $item | last) }}{{ end }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{-   if $isPick -}}
+{{-     $offered = set $offered $profile $labels -}}
+{{-     if has $profile $selected -}}
+{{-       $chosen := list -}}
+{{-       $var := printf "DOTFILES_PICKS_%s" ($profile | upper) -}}
+{{-       if env $var -}}
+{{-         range $label := splitList "," (env $var) -}}
+{{-           $label = trim $label -}}
+{{-           if $label -}}
+{{-             if not (has $label $labels) }}{{ fail (printf "%s: unknown item %q; choose from %s" $var $label (join ", " $labels)) }}{{ end -}}
+{{-             $chosen = append $chosen $label -}}
+{{-           end -}}
+{{-         end -}}
+{{-       else -}}
+{{-         $default := $labels -}}
+{{-         $storedPicks := dig "picks" (dict) $ -}}
+{{-         if hasKey $storedPicks $profile -}}
+{{-           $previous := dig "offered" (dict) $ | dig $profile (list) -}}
+{{-           $default = index $storedPicks $profile -}}
+{{-           range $label := $labels }}{{ if not (has $label $previous) }}{{ $default = append $default $label }}{{ end }}{{ end -}}
+{{-         end -}}
+{{-         range $label := promptMultichoiceOnce $ (printf "picks.%s" $profile) (printf "%s items" $profile) $labels $default }}{{ $chosen = append $chosen $label }}{{ end -}}
+{{-       end -}}
+{{-       $picks = set $picks $profile ($chosen | uniq) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
 progress = true
 encryption = "age"
 
@@ -21,3 +90,13 @@ args = ["--wait"]
 [interpreters.ps1]
 command = "pwsh"
 args = ["-NoLogo", "-NoProfile"]
+
+[data]
+profiles = {{ $selected | toJson }}
+
+[data.picks]
+{{ range $profile, $labels := $picks }}{{ $profile }} = {{ $labels | toJson }}
+{{ end }}
+[data.offered]
+{{ range $profile, $labels := $offered }}{{ $profile }} = {{ $labels | toJson }}
+{{ end -}}
