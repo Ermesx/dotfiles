@@ -53,6 +53,9 @@
 {{-             $chosen = append $chosen $label -}}
 {{-           end -}}
 {{-         end -}}
+{{-       else if env "DOTFILES_PROFILES" -}}
+{{- /* Non-interactive run: never prompt, take every item (D8) */ -}}
+{{-         $chosen = $labels -}}
 {{-       else -}}
 {{-         $default := $labels -}}
 {{-         $storedPicks := dig "picks" (dict) $ -}}

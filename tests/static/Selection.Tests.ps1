@@ -61,6 +61,25 @@ Describe 'selection at init' {
         $result.Output | Should -Match '(?s)\[data\.picks\]\s+ai = \["claude-code"\]'
     }
 
+    It 'takes every pick when DOTFILES_PROFILES is set without DOTFILES_PICKS' {
+        $result = Invoke-InitTemplate -Env @{ DOTFILES_PROFILES = 'apps' }
+
+        $result.ExitCode | Should -Be 0
+        foreach ($label in 'rider', 'googlechrome', 'postman', 'vagrant') {
+            $result.Output | Should -Match "(?s)\[data\.picks\]\s+apps = \[[^\]]*`"$label`""
+        }
+    }
+
+    It 'selects everything with no stored answer' {
+        $result = Invoke-InitTemplate -Flags '--prompt', '--promptDefaults'
+
+        $result.ExitCode | Should -Be 0
+        foreach ($name in 'ai', 'apps', 'containers', 'sdk', 'shell') {
+            $result.Output | Should -Match "profiles = \[[^\]]*`"$name`""
+        }
+        $result.Output | Should -Match '(?s)\[data\.picks\]\s+ai = \["claude-code"\]\s+apps = \[[^\]]*"rider"[^\]]*"vagrant"'
+    }
+
     It 'fails on an unknown pick' {
         $result = Invoke-InitTemplate -Env @{ DOTFILES_PROFILES = 'apps'; DOTFILES_PICKS_APPS = 'ridr' }
 
