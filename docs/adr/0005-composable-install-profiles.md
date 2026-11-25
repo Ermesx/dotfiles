@@ -1,6 +1,6 @@
 # ADR-0005: Composable install profiles, chosen at init
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-25
 - **Decider:** repository owner
 - **Related:** [ADR-0003](0003-windows-packages-via-scoop.md) (amends "each consumer reads the list directly"),

@@ -1,7 +1,7 @@
 # Spec: Composable install profiles with per-item picks
 
 Issue: [#20](https://github.com/Ermesx/dotfiles/issues/20) · ADR: [ADR-0005](../adr/0005-composable-install-profiles.md) ·
-Status: Draft · Date: 2026-11-25
+Status: Approved · Date: 2026-11-25
 
 The issue fixes the direction (profiles that compose, per-item picks in `pick` profiles, selection at `chezmoi init`,
 nothing uninstalled). This spec turns it into requirements and corrects what reading the code and chezmoi v2.73.1
@@ -121,7 +121,7 @@ showed (marked **[added]**).
   | `PSfzf` | all of `psfzf_profile.ps1` |
   | `onefetch` | all of `onefetch_profile.ps1` |
 
-  What stays general (aliases `gi`, `file`; the `winget` completer; `_env-variables`, `PSReadLine`, `gitignore`,
+  What stays general (aliases `gi`, `file` and the `winget` completer, moved to `general_profile.ps1`; `_env-variables`, `PSReadLine`, `gitignore`,
   `Write-Pretty`) is always loaded. `_env-variables_profile.ps1` keeps its variables for yazi, ripgrep and fzf: an
   unused variable is inert.
 - **R19** A tool fragment is deployed and dot-sourced only when its name is in the view's `tools`: `.chezmoiignore`
