@@ -63,10 +63,10 @@ function Get-SourceRoot([string]$Source) {
     if (Test-Path $marker) { Join-Path $Source (Get-Content -Raw $marker).Trim() } else { $Source }
 }
 
-function Get-ManagedPath([string]$Source, [switch]$NoCi, [switch]$SourceRelative) {
+function Get-ManagedPath([string]$Source, [switch]$NoCi, [switch]$SourceRelative, [hashtable]$Data) {
     $arguments = @('managed', '--include=files,scripts,symlinks')
     if ($SourceRelative) { $arguments += @('--path-style', 'source-relative') }
-    $result = Invoke-ChezmoiCi -Source $Source -Arguments $arguments -NoCi:$NoCi
+    $result = Invoke-ChezmoiCi -Source $Source -Arguments $arguments -NoCi:$NoCi -Data $Data
     if ($result.ExitCode -ne 0) { throw "chezmoi managed failed: $($result.Error)" }
     $result.Output
 }

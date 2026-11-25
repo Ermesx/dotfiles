@@ -20,6 +20,15 @@ readonly_Documents/
 .claude
 {{- end -}}
 
+{{- /* PowerShell profile fragments of tools that are not selected (the packages view); the profile does not dot-source them either */}}
+{{- $v := includeTemplate "packages.tmpl" . | fromJson }}
+{{- range (glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*")) }}
+{{- $tool := base . | replace ".tmpl" "" | replace ".ps1" "" }}
+{{- if not (has $tool $v.tools) }}
+.profile/tools/{{ $tool }}.ps1
+{{- end }}
+{{- end }}
+
 {{- if eq (env "CI") "true" }}
 # CI: needs decryption, which never happens in CI (docs/testing.md).
 # Targets are names without chezmoi prefixes; the source of each script is in its comment.

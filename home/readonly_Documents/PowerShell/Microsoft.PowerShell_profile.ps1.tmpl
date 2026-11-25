@@ -2,6 +2,9 @@
 {{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.ps1*")) }}
 # {{ include . | sha256sum -}}
 {{ end }}
+{{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/tools/*")) }}
+# {{ include . | sha256sum -}}
+{{ end }}
 
 # Import installed modules
 {{- /* Only the modules of the selected profiles (the packages view), so e.g. DockerCompletion is not imported without containers */}}
@@ -19,3 +22,10 @@ Import-Module -Name 'Write-Pretty' -Force
 {{- range (glob  (joinPath .chezmoi.sourceDir "dot_profile/*.ps1*")) }}
 . {{ replace $base $target . | replace ".tmpl" "" | squote -}}
 {{ end }}
+
+# Tool fragments: only the selected tools; starship before zoxide, zoxide last (both hook the prompt)
+{{- range (list "bat" "fd" "ripgrep" "delta" "chezmoi" "dotnet-sdk" "Terminal-Icons" "yazi" "PSfzf" "onefetch" "starship" "zoxide") }}
+{{- if has . $v.tools }}
+. {{ print $target "tools/" . ".ps1" | squote }}
+{{- end }}
+{{- end }}
