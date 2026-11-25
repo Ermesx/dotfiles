@@ -27,5 +27,12 @@ agent; for edits made elsewhere (editor, another tool), run it yourself.
 
 ## PowerShell profile
 
-The profile imports every module under `.packages.windows.profiles.*.modules`, then dot-sources every `~/.profile/*.ps1` by glob
-at apply time. A new fragment in `home/dot_profile/` needs no profile edit.
+The profile imports the modules of the selected profiles (`modules` in the view, see [packages.md](packages.md)),
+then dot-sources every `~/.profile/*.ps1` by glob at apply time. A new general fragment in `home/dot_profile/`
+needs no profile edit.
+
+Code that belongs to one tool lives in `home/dot_profile/tools/<tool>.ps1`, named like the tool's label in the
+view's `tools`. The profile template loads those fragments in a fixed order (`starship` before `zoxide`, `zoxide`
+last, as both hook the prompt), only for selected tools, and `.chezmoiignore` deploys only those files. A new tool
+fragment needs its name added to the order list in the template. Fragments carry no `Get-Command` guard: the
+selection guarantees the tool.
