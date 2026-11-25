@@ -49,7 +49,15 @@ Describe 'profile template' {
         Get-SourcedTool $rendered | Should -Contain 'chezmoi'
         Get-SourcedTool $rendered | Should -Contain 'delta'
         Get-SourcedTool $rendered | Should -Not -Contain 'bat'
-        $rendered | Should -Not -Contain "Import-Module -Name 'PSfzf'"
+        Get-SourcedTool $rendered | Should -Not -Contain 'PSfzf'
+    }
+
+    It 'dot-sources every tool fragment in the full view' {
+        # The load order is a fixed list in the template: a fragment missing from it is deployed but never loaded
+        $sourced = @(Get-SourcedTool (Get-Rendered $profileTemplate))
+        $fragments = Get-ChildItem $toolsDir -File | ForEach-Object { $_.Name -replace '\.ps1(\.tmpl)?$', '' }
+
+        foreach ($fragment in $fragments) { $sourced | Should -Contain $fragment }
     }
 
     It 'loads zoxide last and starship before it' {
