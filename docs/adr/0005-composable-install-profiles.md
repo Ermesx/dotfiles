@@ -30,6 +30,8 @@ The choice is made at `chezmoi init`, stored in the chezmoi config, and changed 
 - A config or profile fragment that needs a tool from another profile is conditioned on **that tool** being in the
   view, never on a profile name, so moving a tool between profiles stays a one-line change in `packages.yaml`.
 - Deselecting a profile or an item uninstalls nothing.
+- An item added later to a `pick` profile is not installed silently: init remembers what it offered, and every apply
+  lists new items until `chezmoi init --prompt` decides them.
 - CI and the VM choose non-interactively (`chezmoi init --promptMultichoice`); `ci.skip_scoop_profiles` goes away, so
   there is one selection mechanism.
 
@@ -48,6 +50,8 @@ The choice is made at `chezmoi init`, stored in the chezmoi config, and changed 
   installs today.
 - `vscode`, `delta`, `less` and `jq` move to `base`: the git and chezmoi configs in `base` call them.
 - The Claude configuration (`~/.claude`, lazygit's AI commit command) is deployed only when `claude-code` is selected.
+- The admin step asks for the WSL platform only where a WSL distro or Rancher Desktop is selected, so a machine
+  without them and without admin rights is not reminded forever.
 - Configuration files of unselected tools (yazi, lazygit, fzf, starship) are still deployed; they are inert without
   the tool.
 - An item removed from the selection stays installed until removed by hand (`scoop uninstall`).

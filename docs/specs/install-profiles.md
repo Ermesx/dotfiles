@@ -21,7 +21,11 @@ showed (marked **[added]**).
 | D8 | Defaults at the first init | **Agreed 2026-11-25:** every profile and every pick preselected | Accepting the defaults installs what one apply installs today; nothing disappears silently |
 | D9 | Pester on the VM | **Agreed 2026-11-25:** the VM test runner installs Pester itself, as CI does | `base + shell` has no `sdk`, so no Pester to run the tests with |
 | D10 | `ai` with one item | **Agreed 2026-11-25:** stays `pick: true` | A second assistant comes with the follow-up issue |
-| O1 | A new item added to a `pick` profile after init | **Open — see below** | **[added]** It is in no stored pick and `promptMultichoiceOnce` does not ask again, so it is silently not installed |
+| D11 | A new item added to a `pick` profile after init | **Agreed 2026-11-25:** init also stores the items it offered; an after-apply notice lists items not offered yet, until `chezmoi init --prompt` decides them; new items are preselected in that prompt | **[added]** Otherwise the item is in no stored pick and `promptMultichoiceOnce` does not ask again, so it is silently not installed. A `run_onchange_` notice would show once and could be missed; an empty `run_after_` script is not run, so the notice costs nothing while nothing is pending. Asking at apply is impossible: the config template runs only at init |
+| D12 | WSL platform in the admin step | **Agreed 2026-11-25:** the reminder's WSL probe and `enable-wsl` in `admin-setup.ps1` exist only when the view has a WSL distro or `rancher-desktop` (D5) | **[added]** Today the reminder prints on every apply until WSL is enabled, so a `base + shell` machine without admin rights would see it forever; Rancher Desktop needs the platform without `sdk` |
+| D13 | Pick choice labels | **[added, builder check]** The app name without the bucket (`rider`); the view maps it back to the YAML item | `--promptMultichoice` splits values on `/`, so `extras/rider` cannot be passed non-interactively (verified on v2.73.1) |
+| D14 | Empty selection given non-interactively | **[added, builder check]** Not supported: a flag must name at least one value (`Profiles=` fails with `invalid choice`). `base` alone can be chosen only interactively | The VM and CI always select at least `shell` |
+| D15 | How CI and the VM pass the selection to `install.ps1` | **[added, builder check]** A parameter `-InitArgs [string[]]`, forwarded to `chezmoi init`; the VM runner runs the downloaded script with `& ([scriptblock]::Create((Invoke-RestMethod $url))) -InitArgs …` instead of `Invoke-Expression` | `Invoke-Expression` cannot pass parameters; the public `irm \| iex` one-liner stays and prompts interactively |
 
 ## Requirements
 
@@ -32,14 +36,18 @@ showed (marked **[added]**).
     `.packages.<os>.profiles` except `base`, deduplicated, alphabetical; `base` is never offered and always selected.
   - `picks.<profile>`: one prompt per selected profile with `pick: true` on the current platform, prompt text
     `<profile> items` (e.g. `apps items`); choices: every list item of that profile on the current platform and in
-    `global`, as written in the YAML (`extras/rider`, not `rider`). A profile that is not selected stores no picks.
+    `global`, labelled by its name without the bucket (`rider` for `extras/rider`, D13). A profile that is not
+    selected stores no picks.
+  - `offered.<profile>`: written (not asked) for every profile with `pick: true` on the platform, whether selected or
+    not: the labels of all its items at this init (D11).
 - **R2** **[added]** The default of every prompt is the stored answer when there is one, otherwise everything (D8).
+  For a picks prompt the default is the stored picks plus every item not in `offered` (new items preselected, D11).
   Verified: with a hard-coded default, `chezmoi init --prompt --promptDefaults` replaced a stored pick of
   `rider/postman` with all items.
 - **R3** The answers survive a plain `chezmoi init` (no `--prompt`) and every `chezmoi apply`. Verified on v2.73.1.
 - **R4** Non-interactive form, verified on v2.73.1:
   `chezmoi init --promptMultichoice "Profiles=shell/sdk/ai" --promptMultichoice "ai items=claude-code"` — the key is
-  the prompt text, values are separated by `/`.
+  the prompt text, values are separated by `/`, at least one value (D14).
 - **R5** `chezmoi init --prompt` asks every prompt again with the stored answers as defaults (R2). Deselecting
   uninstalls nothing (R30).
 
@@ -50,8 +58,8 @@ showed (marked **[added]**).
 - **R7** A profile is selected when it is `base` or listed in `.profiles`. **[added]** When `.profiles` is missing
   (no init yet, or `--config` with an empty file as the static tests use), every profile is selected and every pick
   is taken, so templates render as today.
-- **R8** An item of a selected `pick` profile is included only when it is listed in `.picks.<profile>`; `pick` itself
-  is never an item.
+- **R8** An item of a selected `pick` profile is included only when its label (name without the bucket) is listed in
+  `.picks.<profile>`; `pick` itself is never an item. Labels are unique within a profile (R28).
 - **R9** Keys:
   - one key per list method present on the platform (`scoop`, `modules`, `dotnet_tools`, `yazi_plugins`; on Linux
     `brew`, `zsh_plugins`), each a list of strings, items as written in the YAML, deduplicated, in a stable order
@@ -59,7 +67,9 @@ showed (marked **[added]**).
   - `wsl`: the distro name, or an empty string when no selected profile declares one;
   - `profiles`: the selected profile names;
   - `tools`: every selected `scoop` item with the `bucket/` prefix stripped, plus every selected module, `.NET` tool
-    and yazi plugin — the names used by "is this tool selected" checks (R16, R19, R22).
+    and yazi plugin — the names used by "is this tool selected" checks (R19, R22, R23, R33);
+  - `pending`: per selected `pick` profile, the labels of its items not in `.offered.<profile>`; empty when
+    `.offered` is missing (no init yet) (D11).
 - **R10** The output depends only on the YAML and the selection, so it is byte-identical between runs. Install
   scripts rerun exactly when the view part they render changes (verified with a probe source: a change to an
   unselected profile reran nothing; selecting `sdk` reran the Scoop script and the `run_once_` WSL script).
@@ -132,19 +142,45 @@ showed (marked **[added]**).
 ### CI and the VM
 
 - **R25** `home/.chezmoidata/ci.yaml` is removed, with every reference to `ci.skip_scoop_profiles`.
-- **R26** `install.ps1` accepts the selection non-interactively and forwards it to `chezmoi init` (R4); without it,
+- **R26** `install.ps1` takes `-InitArgs [string[]]` and appends it to `chezmoi init` (D15, R4); without it,
   `chezmoi init` prompts as usual. CI selects `shell`, `sdk`, `ai` with `ai items=claude-code`: no `apps`, no
-  `containers`, as today.
-- **R27** The VM runner can apply a given selection and can later add a profile with
-  `chezmoi init --prompt … --apply`. It installs Pester itself before the tests (D9).
+  `containers`, as today. **[added]** `vscode` now installs in CI as part of `base` (D4); accepted.
+- **R27** `tests/run-tests.ps1` takes the selection and passes it as `-InitArgs` (D15); a later run can add a profile
+  with `chezmoi init --prompt --promptMultichoice … --apply`. It installs Pester itself before the tests (D9).
+
+### Admin step (D12)
+
+- **R32** WSL is needed when the view's `wsl` is not empty or `rancher-desktop` is in `tools`.
+- **R33** `run_after_zz-admin-reminder.ps1` becomes a template; its WSL probe, and WSL as a reason to print the
+  reminder, render only when WSL is needed. Developer Mode and `ssh-agent` are unchanged.
+- **R34** `admin-setup.ps1` becomes a template that dot-sources `enable-wsl.ps1` only when WSL is needed;
+  `.chezmoiignore` excludes `enable-wsl.ps1` otherwise. The "restart" next step stays (Developer Mode and the
+  ssh-agent service do not need it, but it is harmless). `tests/windows/AdminSetup/*` render the templates instead of
+  copying the source files.
+
+### New pick items (D11)
+
+- **R35** `run_after_zz-new-picks.ps1.tmpl` renders only when the view's `pending` has an item, so chezmoi does not run
+  it otherwise. It prints, and always exits 0:
+
+  ```
+  ► New items to choose from (not installed):
+      apps: obsidian
+      ai:   github-copilot
+    Choose with: chezmoi init --prompt; chezmoi apply
+  ```
+
+  It keeps printing on every apply until `chezmoi init --prompt` stores the new `offered`.
 
 ### Tests
 
 - **R28** Static: a test file for the view renders it with fixture configs and checks: no selection → everything
   (R7); a selection → only those profiles plus `base`; a `pick` profile → only the picked items; `global` merged;
-  `tools` strips buckets; `wsl` empty without `sdk`. `CiProfiles.Tests.ps1` is replaced by it. A test checks that
-  every `home/dot_profile/tools/*` name exists in the full view's `tools`, so renaming a tool in the YAML cannot orphan
-  a fragment.
+  `tools` strips buckets; `wsl` empty without `sdk`; `pending` lists items missing from `offered` and is empty without
+  `offered`. `CiProfiles.Tests.ps1` is replaced by it. A test checks that every `home/dot_profile/tools/*` name
+  exists in the full view's `tools`, so renaming a tool in the YAML cannot orphan a fragment. A test checks that the
+  labels of every `pick` profile are unique (D13). Templates that changed behaviour (R33–R35, lazygit R24) render
+  correctly with and without the tool they depend on.
 - **R29** Post-apply: `Installed-Apps-Modules.Tests.ps1` takes its expected lists from the view rendered with the
   machine's config; `Profile.Tests.ps1` still loads `$PROFILE` without errors for whatever was selected.
 
@@ -159,20 +195,10 @@ showed (marked **[added]**).
 
 - **R31** `docs/packages.md` (selection, view, "condition on the tool" rule, how to add a profile), `docs/chezmoi.md`
   (`init --prompt`), `docs/conventions.md` (tool fragments replace "a new fragment needs no profile edit" for
-  tool-specific code), `docs/testing.md` (CI selection replaces `ci.skip_scoop_profiles`), `docs/architecture.md`,
+  tool-specific code), `docs/testing.md` (CI selection replaces `ci.skip_scoop_profiles`, `run-tests.ps1` selection),
+  `docs/architecture.md` (the view, the new-picks notice, the admin step depending on WSL),
   `AGENTS.md` Commands (change the selection), then the docs-sync agent regenerates the ReadMe table (profiles change
   for `vscode`, `delta`, `less`, `jq`).
-
-## Open question O1: new items in a `pick` profile
-
-After init, an item added to `apps` or `ai` is in no stored pick, and the next apply does not ask, so it is not
-installed and nobody is told.
-
-| Option | Behaviour | Cost |
-|---|---|---|
-| **A. Notice (recommended)** | The config template also stores `offered.<profile>` (the items shown at the last prompt). A `run_after_` script prints the items of selected `pick` profiles that are not in `offered` and the command `chezmoi init --prompt` | One more data key and a short script, like the admin reminder |
-| B. Store exclusions instead of picks | New items install everywhere by default | Contradicts the reason for picks: a new heavy app lands on the work laptop unasked |
-| C. Accept it | New items need a manual `chezmoi init --prompt` | Silent; breaks "nothing disappears silently" |
 
 ## Non-goals
 
@@ -188,4 +214,7 @@ installed and nobody is told.
 - On the VM as a standard user: `base + shell` applies cleanly; adding `sdk` with `chezmoi init --prompt … --apply`
   installs only `sdk`.
 - `$PROFILE` loads without errors for any combination; completers, inits and imports exist only for selected tools.
+- On `base + shell` the admin reminder does not mention WSL, and `admin-setup.ps1` does not enable it.
+- An item added to a selected `pick` profile after init is reported after every apply until
+  `chezmoi init --prompt` decides it.
 - Tests derive the expected packages from the selection.
