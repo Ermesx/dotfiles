@@ -60,22 +60,22 @@ Describe 'PowerShell profile' {
     BeforeAll {
         $template = Get-Content -Raw (Join-Path $root 'home/readonly_Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl')
 
-        function Get-RenderedProfile([switch]$NoCi) {
-            InModuleScope StaticChecks -Parameters @{ Source = "$root"; Text = $template; NoCi = [bool]$NoCi } {
-                (Invoke-ChezmoiCi -Source $Source -Arguments @('execute-template') -InputText $Text -NoCi:$NoCi).Output
+        function Get-RenderedProfile([hashtable]$Data) {
+            InModuleScope StaticChecks -Parameters @{ Source = "$root"; Text = $template; Data = $Data } {
+                (Invoke-ChezmoiCi -Source $Source -Arguments @('execute-template') -InputText $Text -Data $Data).Output
             }
         }
     }
 
-    It 'imports no module of a profile skipped in CI' {
-        $rendered = Get-RenderedProfile
+    It 'imports no module of a profile that is not selected' {
+        $rendered = Get-RenderedProfile @{ profiles = @('shell') }
 
         $rendered | Should -Not -Contain "Import-Module -Name 'DockerCompletion'"
         $rendered | Should -Contain "Import-Module -Name 'posh-git'"
     }
 
-    It 'imports the containers modules on a real machine' {
-        Get-RenderedProfile -NoCi | Should -Contain "Import-Module -Name 'DockerCompletion'"
+    It 'imports the containers modules when containers is selected' {
+        Get-RenderedProfile @{ profiles = @('containers') } | Should -Contain "Import-Module -Name 'DockerCompletion'"
     }
 }
 
