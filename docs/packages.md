@@ -50,6 +50,7 @@ YAML, names and purposes are kept from the existing rows. Do not edit the table 
 |---|---|
 | `base` | What every machine needs: PowerShell, git, chezmoi, archiver, terminal, font, basic utilities |
 | `shell` | Shell experience: prompt, navigation, fuzzy finding and search tools, git helpers, shell modules, file manager |
-| `sdk` | Development runtimes and tooling: .NET, Node.js, Python, container clients, WSL distro, .NET global tools |
+| `sdk` | Development runtimes and tooling: .NET, Node.js, Python, WSL distro, .NET global tools |
+| `containers` | Container engine and tools: Rancher Desktop (also the only docker CLI, see ADR-0004), lazydocker |
 | `apps` | Optional GUI applications: editors and IDEs, browsers, API clients, VM tooling |
 | `ai` | AI coding assistants and their CLIs |

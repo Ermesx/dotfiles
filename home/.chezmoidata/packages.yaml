@@ -67,13 +67,14 @@ packages:
           - nodejs
           - python
           - uv
-          # containers: clients only, the engine is a separate task
-          - docker
-          - docker-compose
-          - docker-buildx
-          - lazydocker
-        modules: [DockerCompletion, powershell-yaml, Pester]
+        modules: [powershell-yaml, Pester]
         wsl: Ubuntu-24.04
+      containers:
+        scoop:
+          # Linux engine in its own WSL distro; also the only docker, compose and buildx on PATH (ADR-0004)
+          - extras/rancher-desktop
+          - lazydocker
+        modules: [DockerCompletion]
       apps:
         pick: true
         scoop:

@@ -1,0 +1,9 @@
+{
+  "version": 19,
+  "containerEngine": {
+    "name": "moby"
+  },
+  "kubernetes": {
+    "enabled": false
+  }
+}
