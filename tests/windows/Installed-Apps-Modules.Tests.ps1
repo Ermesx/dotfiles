@@ -5,16 +5,11 @@ Describe 'After installing dotfiles' {
     BeforeDiscovery {
         $src = Join-Path $PSScriptRoot '../..'
         $sourceArgs = if (Test-Path (Join-Path $src '.chezmoiroot')) { @('--source', (Resolve-Path $src)) } else { @() }
-        $data = chezmoi @sourceArgs data | ConvertFrom-Json
-        $packages = $data.packages
-        $windows = $packages.windows.profiles.PSObject.Properties.Value
-        $global = $packages.global.profiles.PSObject.Properties.Value
-        # Same rule as the Scoop install script: with CI=true the profiles in ci.skip_scoop_profiles are not installed
-        $skip = if ($env:CI -eq 'true') { @($data.ci.skip_scoop_profiles) } else { @() }
-        $scoopProfiles = $packages.windows.profiles.PSObject.Properties | Where-Object Name -NotIn $skip | ForEach-Object Value
-        $apps = @($scoopProfiles.scoop | Where-Object { $_ } | ForEach-Object { ($_ -split '/')[-1] })
-        $modules = @($windows.modules | Where-Object { $_ })
-        $tools = @($global.dotnet_tools | Where-Object { $_ })
+        # Expectations come from the packages view rendered with the selection stored in the machine's chezmoi config
+        $view = '{{ includeTemplate "packages.tmpl" . }}' | chezmoi @sourceArgs execute-template | ConvertFrom-Json
+        $apps = @($view.scoop | Where-Object { $_ } | ForEach-Object { ($_ -split '/')[-1] })
+        $modules = @($view.modules | Where-Object { $_ })
+        $tools = @($view.dotnet_tools | Where-Object { $_ })
     }
 
     BeforeAll {

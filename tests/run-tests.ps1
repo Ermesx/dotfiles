@@ -1,5 +1,10 @@
+# Profile selection (docs/specs/install-profiles.md), passed to chezmoi init as process-scoped environment variables:
+#   -Profiles shell,sdk,ai          -> DOTFILES_PROFILES (omit it to install every profile; 'base' alone = only base)
+#   -Picks @{ ai = 'claude-code' }  -> DOTFILES_PICKS_AI (a pick profile without an entry takes all its labels)
 param (
-    [string]$BRANCH = 'develop'
+    [string]$BRANCH = 'develop',
+    [string[]]$Profiles,
+    [hashtable]$Picks
 )
 $ErrorActionPreference = "Stop"
 
@@ -18,9 +23,17 @@ if ($env:USERNAME -ne 'vagrant' -and (Test-Path 'C:\dotfiles-src')) {
     Copy-Item 'C:\dotfiles-src' $source -Recurse -Force
 }
 
+# Process scope only: the selection must not leak into the VM's user environment
+if ($Profiles) { $env:DOTFILES_PROFILES = $Profiles -join ',' }
+foreach ($key in $Picks.Keys) { Set-Item "env:DOTFILES_PICKS_$($key.ToUpper())" (@($Picks[$key]) -join ',') }
+
 Write-Host "Install dotfiles:" -ForegroundColor Cyan
 $script = "https://raw.githubusercontent.com/Ermesx/dotfiles/refs/heads/$BRANCH/install.ps1"
 Invoke-Expression (Invoke-RestMethod $script | Out-String)
+
+if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge ([version]'6.0.0'))) {
+    Install-Module Pester -MinimumVersion 6.0.0 -Scope CurrentUser -Force -SkipPublisherCheck
+}
 
 Write-Host "► Running tests" -ForegroundColor Cyan
 pwsh -NoProfile -NoLogo -ExecutionPolicy Bypass -File "C:\vagrant\execute-pester.ps1" 
