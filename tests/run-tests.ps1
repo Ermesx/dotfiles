@@ -31,9 +31,8 @@ Write-Host "Install dotfiles:" -ForegroundColor Cyan
 $script = "https://raw.githubusercontent.com/Ermesx/dotfiles/refs/heads/$BRANCH/install.ps1"
 Invoke-Expression (Invoke-RestMethod $script | Out-String)
 
-if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge ([version]'6.0.0'))) {
-    Install-Module Pester -MinimumVersion 6.0.0 -Scope CurrentUser -Force -SkipPublisherCheck
-}
+# The tests run in pwsh (modules in Documents\PowerShell), but this script may run in Windows PowerShell 5.1: check and install in pwsh
+pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge ([version]'6.0.0'))) { Install-Module Pester -MinimumVersion 6.0.0 -Scope CurrentUser -Force -SkipPublisherCheck }"
 
 Write-Host "► Running tests" -ForegroundColor Cyan
 pwsh -NoProfile -NoLogo -ExecutionPolicy Bypass -File "C:\vagrant\execute-pester.ps1" 
