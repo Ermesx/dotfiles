@@ -3,14 +3,15 @@
 Describe 'admin-setup.ps1' {
 
     BeforeAll {
-        $source = Resolve-Path "$PSScriptRoot/../../../home/dot_config/dotfiles/admin/admin-setup.ps1"
+        . "$PSScriptRoot/AdminSetup.Helpers.ps1"
+        $relative = 'dot_config/dotfiles/admin/admin-setup.ps1.tmpl'
 
         # Copies the aggregate next to stub item scripts and runs it in a child pwsh from another directory.
         # Each stub logs its name; the one named $Failing then writes a non-terminating error.
-        function Invoke-Aggregate([string]$Failing) {
+        function Invoke-Aggregate([string]$Failing, [hashtable]$Data) {
             $dir = Join-Path $TestDrive ([guid]::NewGuid()) 'admin'
             New-Item -ItemType Directory -Path $dir | Out-Null
-            Copy-Item $source $dir
+            Copy-Item (Get-RenderedScript $relative $Data) $dir
             foreach ($name in 'enable-developer-mode', 'enable-ssh-agent', 'enable-wsl') {
                 $body = "Add-Content (Join-Path `$PSScriptRoot 'log.txt') '$name'"
                 if ($name -eq $Failing) { $body += "`nWrite-Error 'denied'" }
@@ -38,6 +39,13 @@ Describe 'admin-setup.ps1' {
         $run = Invoke-Aggregate
 
         $run.Log | Should -Be @('enable-developer-mode', 'enable-ssh-agent', 'enable-wsl')
+        $run.ExitCode | Should -Be 0
+    }
+
+    It 'skips enable-wsl without a need' {
+        $run = Invoke-Aggregate -Data @{ profiles = @('shell') }
+
+        $run.Log | Should -Be @('enable-developer-mode', 'enable-ssh-agent')
         $run.ExitCode | Should -Be 0
     }
 

@@ -37,6 +37,11 @@ readonly_Documents/
 {{- end }}
 {{- end }}
 
+{{- /* The WSL admin step is deployed only where a selected profile declares a distro or Rancher Desktop is selected */}}
+{{- if not (or $v.wsl (has "rancher-desktop" $v.tools)) }}
+.config/dotfiles/admin/enable-wsl.ps1
+{{- end }}
+
 {{- if eq (env "CI") "true" }}
 # CI: needs decryption, which never happens in CI (docs/testing.md).
 # Targets are names without chezmoi prefixes; the source of each script is in its comment.

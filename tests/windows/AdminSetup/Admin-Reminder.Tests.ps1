@@ -3,7 +3,9 @@
 Describe 'admin reminder after apply' {
 
     BeforeAll {
-        $script = Resolve-Path "$PSScriptRoot/../../../home/.chezmoiscripts/windows/run_after_zz-admin-reminder.ps1"
+        . "$PSScriptRoot/AdminSetup.Helpers.ps1"
+        $relative = '.chezmoiscripts/windows/run_after_zz-admin-reminder.ps1.tmpl'
+        $script = Get-RenderedScript $relative
         $expected = Join-Path $HOME '.config\dotfiles\admin\admin-setup.ps1'
 
         # wsl is a native command; Mock needs a command to replace on any host
@@ -39,6 +41,23 @@ Describe 'admin reminder after apply' {
         $out | Should -BeLike '*Administrator step needed*'
         $out | Should -BeLike '*admin-setup.ps1*'
         $out | Should -Not -BeLike '*enable-*'
+    }
+
+    It 'does not mention WSL without a distro or Rancher' {
+        Mock wsl { $global:LASTEXITCODE = 1 }
+
+        $out = & (Get-RenderedScript $relative @{ profiles = @('shell') }) 6>&1 | Out-String
+
+        $out.Trim() | Should -BeNullOrEmpty
+        Should -Invoke wsl -Times 0 -Exactly
+    }
+
+    It 'still asks for WSL with containers only' {
+        Mock wsl { $global:LASTEXITCODE = 1 }
+
+        $out = & (Get-RenderedScript $relative @{ profiles = @('containers') }) 6>&1 | Out-String
+
+        $out | Should -BeLike '*Administrator step needed*'
     }
 
     It "prints an absolute, quoted path under the user's profile" {

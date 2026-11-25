@@ -59,4 +59,13 @@ Describe 'install scripts follow the selection' {
 
         Get-RenderedScript 'run_onchange_before_03-dotnet-tools.ps1.tmpl' -Data $data | Should -Not -Match 'dotnet tool install'
     }
+
+    It 'deploys enable-wsl only where WSL is needed' {
+        function Get-Managed([hashtable]$Data) {
+            InModuleScope StaticChecks -Parameters @{ Source = "$root"; Data = $Data } { Get-ManagedPath -Source $Source -Data $Data }
+        }
+
+        Get-Managed @{ profiles = @('shell') } | Should -Not -Contain '.config/dotfiles/admin/enable-wsl.ps1'
+        Get-Managed @{ profiles = @('containers') } | Should -Contain '.config/dotfiles/admin/enable-wsl.ps1'
+    }
 }

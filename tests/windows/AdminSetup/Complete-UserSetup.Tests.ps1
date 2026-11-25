@@ -3,12 +3,10 @@
 Describe 'Complete-UserSetup' {
 
     BeforeAll {
-        $root = Resolve-Path "$PSScriptRoot/../../.."
-        $distro = (chezmoi --source $root data --format json | ConvertFrom-Json).packages.windows.profiles.sdk.wsl
-        $fragment = Join-Path $TestDrive 'user-setup.ps1'
-        Get-Content -Raw (Join-Path $root 'home/dot_profile/user-setup_profile.ps1.tmpl') |
-            chezmoi --source $root execute-template | Set-Content $fragment
-        . $fragment
+        . "$PSScriptRoot/AdminSetup.Helpers.ps1"
+        # The distro comes from the packages view, as the fragment's own render does
+        $distro = (Invoke-ChezmoiTemplate '{{ includeTemplate "packages.tmpl" . }}' | ConvertFrom-Json).wsl
+        . (Get-RenderedScript 'dot_profile/user-setup_profile.ps1.tmpl')
 
         # wsl and ssh-add are native commands; Mock needs a command to replace on any host
         function global:wsl { }
