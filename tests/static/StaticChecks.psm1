@@ -27,10 +27,14 @@ function Invoke-ChezmoiCi {
         [Parameter(Mandatory)] [string]$Source,
         [Parameter(Mandatory)] [string[]]$Arguments,
         [string]$InputText,
+        [hashtable]$Data,
         [switch]$NoCi
     )
 
-    $chezmoiArgs = @('--config', (Get-NoKeyConfig), '--source', $Source) + $Arguments
+    $chezmoiArgs = @('--config', (Get-NoKeyConfig), '--source', $Source)
+    # The selection a config template would store ([data] profiles, picks, offered)
+    if ($Data) { $chezmoiArgs += @('--override-data', (ConvertTo-Json $Data -Depth 5 -Compress)) }
+    $chezmoiArgs += $Arguments
     $previous = $env:CI
     try {
         # GitHub sets CI for the whole job, so "without CI" has to remove it, not just leave it alone
@@ -138,6 +142,20 @@ function Get-PackagesData {
     ($result.Output -join "`n" | ConvertFrom-Json).packages
 }
 
+# The view every install script and profile fragment reads (home/.chezmoitemplates/packages.tmpl)
+function Get-PackagesView {
+    param(
+        [Parameter(Mandatory)] [string]$Source,
+        [hashtable]$Data,
+        [switch]$NoCi
+    )
+
+    $result = Invoke-ChezmoiCi -Source $Source -Data $Data -NoCi:$NoCi -Arguments @('execute-template') `
+        -InputText '{{ includeTemplate "packages.tmpl" . }}'
+    if ($result.ExitCode -ne 0) { throw "packages view failed: $($result.Error)" }
+    $result.Output -join "`n" | ConvertFrom-Json
+}
+
 # Methods each platform may use (header of home/.chezmoidata/packages.yaml)
 $script:AllowedMethods = @{
     global  = @('dotnet_tools', 'yazi_plugins')
@@ -234,4 +252,4 @@ function Get-BrokenMarkdownLink {
     }
 }
 
-Export-ModuleMember -Function Get-*Violation, Get-CiIgnoredTarget, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem, Get-BrokenMarkdownLink
+Export-ModuleMember -Function Invoke-ChezmoiCi, Get-*Violation, Get-CiIgnoredTarget, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem, Get-BrokenMarkdownLink

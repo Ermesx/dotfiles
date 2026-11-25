@@ -1,0 +1,64 @@
+{{- /*
+  The packages view: includeTemplate "packages.tmpl" . | fromJson
+  Packages of the current platform (global + .chezmoi.os) filtered by the stored selection (.profiles, .picks, .offered).
+  Without .profiles (no init yet) every profile and every pick is selected.
+*/ -}}
+{{- $hasSel := hasKey . "profiles" -}}
+{{- $sel := list -}}
+{{- if $hasSel }}{{ $sel = .profiles | default (list) }}{{ end -}}
+{{- $hasOffered := hasKey . "offered" -}}
+{{- $sources := list (dig "packages" "global" "profiles" (dict) .) (dig "packages" .chezmoi.os "profiles" (dict) .) -}}
+
+{{- /* Every profile name and every list method declared on the platform, selected or not */ -}}
+{{- $names := list -}}
+{{- $out := dict -}}
+{{- range $source := $sources -}}
+{{-   range $name, $def := $source -}}
+{{-     $names = append $names $name -}}
+{{-     range $method, $items := $def -}}
+{{-       if not (has $method (list "pick" "wsl")) }}{{ $out = set $out $method (list) }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- $names = $names | uniq | sortAlpha -}}
+
+{{- $profiles := list -}}
+{{- $wsl := "" -}}
+{{- $pending := dict -}}
+{{- range $name := $names -}}
+{{-   if or (eq $name "base") (not $hasSel) (has $name $sel) -}}
+{{-     $profiles = append $profiles $name -}}
+{{-     $picks := dig "picks" $name (list) $ -}}
+{{-     $offered := dig "offered" $name (list) $ -}}
+{{-     $notOffered := list -}}
+{{-     range $source := $sources -}}
+{{-       $def := dig $name (dict) $source -}}
+{{-       $pick := dig "pick" false $def -}}
+{{-       range $method, $items := $def -}}
+{{-         if eq $method "wsl" -}}
+{{-           $wsl = $items -}}
+{{-         else if ne $method "pick" -}}
+{{-           range $item := $items -}}
+{{-             $label := splitList "/" $item | last -}}
+{{-             if or (not $pick) (not $hasSel) (has $label $picks) }}{{ $out = set $out $method (append (index $out $method) $item) }}{{ end -}}
+{{-             if and $pick $hasOffered (not (has $label $offered)) }}{{ $notOffered = append $notOffered $label }}{{ end -}}
+{{-           end -}}
+{{-         end -}}
+{{-       end -}}
+{{-     end -}}
+{{-     if $notOffered }}{{ $pending = set $pending $name ($notOffered | uniq) }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+
+{{- $tools := list -}}
+{{- range $item := dig "scoop" (list) $out }}{{ $tools = append $tools (splitList "/" $item | last) }}{{ end -}}
+{{- range $method := list "modules" "dotnet_tools" "yazi_plugins" -}}
+{{-   range $item := dig $method (list) $out }}{{ $tools = append $tools $item }}{{ end -}}
+{{- end -}}
+
+{{- range $method := keys $out }}{{ $out = set $out $method (index $out $method | uniq) }}{{ end -}}
+{{- $out = set $out "profiles" $profiles -}}
+{{- $out = set $out "wsl" $wsl -}}
+{{- $out = set $out "tools" ($tools | uniq) -}}
+{{- $out = set $out "pending" $pending -}}
+{{- $out | toJson -}}
