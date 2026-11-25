@@ -1,5 +1,8 @@
+{{- /* The packages view: what is selected (absent .profiles selects everything) */}}
+{{- $v := includeTemplate "packages.tmpl" . | fromJson }}
 {{- if eq .chezmoi.os "windows" }}
 **/*.sh
+{{- if has "claude-code" $v.tools }}
 .claude/*
 !.claude/CLAUDE.md
 !.claude/settings.json
@@ -13,6 +16,12 @@
 !.claude/skills
 .claude/skills/synced
 {{- else }}
+{{- /* No claude-code: the whole Claude config and lazygit's AI commit script stay out */}}
+.claude
+.claude/**
+AppData/Local/lazygit/ai-commit.ps1
+{{- end }}
+{{- else }}
 readonly_AppData/
 scoop/
 readonly_Documents/
@@ -20,8 +29,7 @@ readonly_Documents/
 .claude
 {{- end -}}
 
-{{- /* PowerShell profile fragments of tools that are not selected (the packages view); the profile does not dot-source them either */}}
-{{- $v := includeTemplate "packages.tmpl" . | fromJson }}
+{{- /* PowerShell profile fragments of tools that are not selected; the profile does not dot-source them either */}}
 {{- range (glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*")) }}
 {{- $tool := base . | replace ".tmpl" "" | replace ".ps1" "" }}
 {{- if not (has $tool $v.tools) }}
