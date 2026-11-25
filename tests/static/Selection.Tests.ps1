@@ -5,12 +5,17 @@
 BeforeAll {
     $root = (Resolve-Path "$PSScriptRoot/../..").Path
 
-    # Labels of the ai profile as packages.yaml declares them (item without the bucket)
+    # Labels of a profile as packages.yaml declares them (item without the bucket)
     $data = (& chezmoi --source $root data --format json | ConvertFrom-Json)
-    $aiDefinitions = @($data.packages.global.profiles.ai, $data.packages.($data.chezmoi.os).profiles.ai) | Where-Object { $_ }
-    $aiLabels = @($aiDefinitions | ForEach-Object { $_.PSObject.Properties } | Where-Object { $_.Name -notin 'pick', 'wsl' } |
-        ForEach-Object { $_.Value } | ForEach-Object { ($_ -split '/')[-1] })
-    $aiList = ($aiLabels | ForEach-Object { '"' + $_ + '"' }) -join ', '
+    function Get-Label([string]$Profile) {
+        $definitions = @($data.packages.global.profiles.$Profile, $data.packages.($data.chezmoi.os).profiles.$Profile) | Where-Object { $_ }
+        @($definitions | ForEach-Object { $_.PSObject.Properties } | Where-Object { $_.Name -notin 'pick', 'wsl' } |
+            ForEach-Object { $_.Value } | ForEach-Object { ($_ -split '/')[-1] })
+    }
+    function ConvertTo-TomlList([string[]]$Labels) { ($Labels | ForEach-Object { '"' + $_ + '"' }) -join ',' }
+    $aiLabels = Get-Label 'ai'
+    $aiList = ConvertTo-TomlList $aiLabels
+    $appsLabels = Get-Label 'apps'
 
     # $Existing is the config already on the machine; Output is the config init wrote
     function Invoke-InitTemplate([hashtable]$Env = @{}, [string[]]$Flags = @(), [string]$Existing = '') {
@@ -29,11 +34,28 @@ BeforeAll {
         }
         $isError = { $_ -is [System.Management.Automation.ErrorRecord] }
         [pscustomobject]@{
+            Config   = $config
             Output   = (Get-Content -Raw $config)
             Error    = ($all | Where-Object $isError | ForEach-Object { "$_" }) -join "`n"
             ExitCode = $exitCode
         }
     }
+
+    # The view's pending items as the written config makes them
+    function Get-Pending([string]$Config) {
+        $template = '{{ (includeTemplate "packages.tmpl" . | fromJson).pending | toJson }}'
+        & chezmoi --source $root --config $Config execute-template $template | ConvertFrom-Json
+    }
+
+    # A machine that chose rider out of apps when only rider existed: the other apps items are new since
+    $narrowOffer = @'
+[data]
+profiles = ["apps"]
+[data.picks]
+apps = ["rider"]
+[data.offered]
+apps = ["rider"]
+'@
 }
 
 Describe 'selection at init' {
@@ -136,6 +158,72 @@ apps = ["rider", "googlechrome", "vscode"]
 
         $result.ExitCode | Should -Be 0
         $result.Output | Should -Match 'profiles = \[\]'
+    }
+
+    It 'drops a stored profile that no longer exists, under --prompt' {
+        $result = Invoke-InitTemplate -Existing "[data]`nprofiles = [`"shell`", `"gone`"]" -Flags '--prompt', '--promptDefaults'
+
+        $result.ExitCode | Should -Be 0 -Because $result.Error
+        $result.Output | Should -Match 'profiles = \["shell"\]'
+    }
+
+    It 'drops a stored profile that no longer exists, on a plain init' {
+        $result = Invoke-InitTemplate -Existing "[data]`nprofiles = [`"shell`", `"gone`"]"
+
+        $result.ExitCode | Should -Be 0 -Because $result.Error
+        $result.Output | Should -Match 'profiles = \["shell"\]'
+    }
+
+    It 'drops a stored pick that no longer exists, under --prompt' {
+        $existing = @"
+[data]
+profiles = ["apps"]
+[data.picks]
+apps = ["rider", "removed"]
+[data.offered]
+apps = [$(ConvertTo-TomlList ($appsLabels + 'removed'))]
+"@
+        $result = Invoke-InitTemplate -Existing $existing -Flags '--prompt', '--promptDefaults'
+
+        $result.ExitCode | Should -Be 0 -Because $result.Error
+        $result.Output | Should -Match '(?s)\[data\.picks\]\s+apps = \["rider"\]'
+        $result.Output | Should -Not -Match 'removed'
+    }
+
+    It 'drops a stored pick that no longer exists, on a plain init' {
+        $existing = "[data]`nprofiles = [`"apps`"]`n[data.picks]`napps = [`"rider`", `"removed`"]"
+        $result = Invoke-InitTemplate -Existing $existing
+
+        $result.ExitCode | Should -Be 0 -Because $result.Error
+        $result.Output | Should -Match '(?s)\[data\.picks\]\s+apps = \["rider"\]'
+    }
+
+    It 'keeps offered and the pending items on an init without --prompt' -ForEach @(
+        @{ Flags = @() }
+        @{ Flags = @('--promptDefaults') }
+    ) {
+        $result = Invoke-InitTemplate -Existing $narrowOffer -Flags $Flags
+
+        $result.ExitCode | Should -Be 0 -Because $result.Error
+        $result.Output | Should -Match '(?s)\[data\.picks\]\s+apps = \["rider"\]'
+        $result.Output | Should -Match '(?s)\[data\.offered\].*apps = \["rider"\]'
+        $pending = Get-Pending $result.Config
+        $pending.apps | Should -Be @($appsLabels | Where-Object { $_ -ne 'rider' })
+    }
+
+    It 'refreshes offered to every item under --prompt' {
+        $result = Invoke-InitTemplate -Existing $narrowOffer -Flags '--prompt', '--promptDefaults'
+
+        $result.ExitCode | Should -Be 0 -Because $result.Error
+        $result.Output | Should -Match "(?s)\[data\.offered\].*apps = \[$([regex]::Escape((ConvertTo-TomlList $appsLabels)))\]"
+        (Get-Pending $result.Config).PSObject.Properties | Should -BeNullOrEmpty
+    }
+
+    It 'refreshes offered to every item in environment mode' {
+        $result = Invoke-InitTemplate -Existing $narrowOffer -Env @{ DOTFILES_PROFILES = 'apps' }
+
+        $result.ExitCode | Should -Be 0 -Because $result.Error
+        $result.Output | Should -Match "(?s)\[data\.offered\].*apps = \[$([regex]::Escape((ConvertTo-TomlList $appsLabels)))\]"
     }
 
     It 'keeps the stored answer without --prompt' {

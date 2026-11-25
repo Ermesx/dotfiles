@@ -10,7 +10,14 @@
 {{- range $source := $sources }}{{ range $name, $def := $source }}{{ $names = append $names $name }}{{ end }}{{ end -}}
 {{- $choices := without ($names | uniq | sortAlpha) "base" -}}
 
-{{- /* Profiles: env var, else prompt (default: the stored answer, otherwise every profile) */ -}}
+{{- /* Asked: this init was run with --prompt (promptMultichoiceOnce asks only then); exact match, --promptDefaults alone is not it */ -}}
+{{- $asked := false -}}
+{{- range $arg := .chezmoi.args -}}
+{{-   if or (eq $arg "--prompt") (and (hasPrefix "--prompt=" $arg) (not (has (lower (trimPrefix "--prompt=" $arg)) (list "false" "f" "0")))) }}{{ $asked = true }}{{ end -}}
+{{- end -}}
+
+{{- /* Profiles: env var, else prompt (default: the stored answer, otherwise every profile).
+  A stored name no longer in packages.yaml is dropped: as a default it would fail the prompt, and it is never written back. */ -}}
 {{- $selected := list -}}
 {{- if env "DOTFILES_PROFILES" -}}
 {{-   range $name := splitList "," (env "DOTFILES_PROFILES") -}}
@@ -22,12 +29,17 @@
 {{-   end -}}
 {{- else -}}
 {{-   $default := $choices -}}
-{{-   if hasKey . "profiles" }}{{ $default = .profiles }}{{ end -}}
-{{-   range $name := promptMultichoiceOnce . "profiles" "Profiles" $choices $default }}{{ $selected = append $selected $name }}{{ end -}}
+{{-   if hasKey . "profiles" -}}
+{{-     $default = list -}}
+{{-     range $name := .profiles }}{{ if has $name $choices }}{{ $default = append $default $name }}{{ end }}{{ end -}}
+{{-   end -}}
+{{-   range $name := promptMultichoiceOnce . "profiles" "Profiles" $choices $default }}{{ if has $name $choices }}{{ $selected = append $selected $name }}{{ end }}{{ end -}}
 {{- end -}}
 {{- $selected = $selected | uniq -}}
 
-{{- /* Picks: one prompt per selected pick profile; offered is written for every pick profile */ -}}
+{{- /* Picks: one prompt per selected pick profile; offered is written for every pick profile.
+  offered is the full label list, except for a selected pick profile with a stored answer on an init without --prompt:
+  nothing was asked, so its stored offered stays and the new-picks notice keeps running (D11, R35). */ -}}
 {{- $picks := dict -}}
 {{- $offered := dict -}}
 {{- range $profile := $names | uniq | sortAlpha -}}
@@ -61,10 +73,16 @@
 {{-         $storedPicks := dig "picks" (dict) $ -}}
 {{-         if hasKey $storedPicks $profile -}}
 {{-           $previous := dig "offered" (dict) $ | dig $profile (list) -}}
-{{-           $default = index $storedPicks $profile -}}
+{{-           $default = list -}}
+{{-           range $label := index $storedPicks $profile }}{{ if has $label $labels }}{{ $default = append $default $label }}{{ end }}{{ end -}}
 {{-           range $label := $labels }}{{ if not (has $label $previous) }}{{ $default = append $default $label }}{{ end }}{{ end -}}
+{{-           if not $asked -}}
+{{-             $kept := list -}}
+{{-             range $label := $previous }}{{ if has $label $labels }}{{ $kept = append $kept $label }}{{ end }}{{ end -}}
+{{-             $offered = set $offered $profile $kept -}}
+{{-           end -}}
 {{-         end -}}
-{{-         range $label := promptMultichoiceOnce $ (printf "picks.%s" $profile) (printf "%s items" $profile) $labels $default }}{{ $chosen = append $chosen $label }}{{ end -}}
+{{-         range $label := promptMultichoiceOnce $ (printf "picks.%s" $profile) (printf "%s items" $profile) $labels $default }}{{ if has $label $labels }}{{ $chosen = append $chosen $label }}{{ end }}{{ end -}}
 {{-       end -}}
 {{-       $picks = set $picks $profile ($chosen | uniq) -}}
 {{-     end -}}
