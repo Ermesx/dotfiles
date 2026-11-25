@@ -2,7 +2,7 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- $wslNeeded := or $v.wsl (has "rancher-desktop" $v.tools) -}}
 # Runs every admin-only setup script in this folder. Run as administrator (PowerShell 7).
-# Review the three scripts it runs: they sit in a user-writable folder.
+# Review the scripts it runs (two, or three with WSL): they sit in a user-writable folder.
 $ErrorActionPreference = 'Stop'
 
 # Dot-sourced from this script's folder: works from any current directory, and Stop applies to them directly

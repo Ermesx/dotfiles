@@ -1,5 +1,6 @@
 # Profile selection (docs/specs/install-profiles.md), passed to chezmoi init as process-scoped environment variables:
-#   -Profiles shell,sdk,ai          -> DOTFILES_PROFILES (omit it to install every profile; 'base' alone = only base)
+#   -Profiles shell,sdk,ai          -> DOTFILES_PROFILES ('base' alone = only base; omitted: every profile on a
+#                                      fresh VM, the selection stored by the previous run on a re-run)
 #   -Picks @{ ai = 'claude-code' }  -> DOTFILES_PICKS_AI (a pick profile without an entry takes all its labels)
 param (
     [string]$BRANCH = 'develop',

@@ -39,7 +39,12 @@ showed (marked **[added]**).
     `global`, labelled by its name without the bucket (`rider` for `extras/rider`, D13). A profile that is not
     selected stores no picks.
   - `offered.<profile>`: written (not asked) for every profile with `pick: true` on the platform, whether selected or
-    not: the labels of all its items at this init (D11).
+    not: the labels of all its items at this init (D11). **[changed in the final review]** Exception: for a selected
+    profile with stored picks, an init without `--prompt` (exact argument `--prompt` or `--prompt=<true>` in
+    `.chezmoi.args`) asks nothing, so it writes the stored `offered` back (current labels only); otherwise a re-run of
+    `install.ps1` would decline new items silently and clear the R35 notice.
+  - Stored profiles and picks that `packages.yaml` no longer declares are dropped from the prompt defaults and from
+    the written answer **[changed in the final review]**: as a default they fail `promptMultichoiceOnce`.
 - **R2** **[added]** The default of every prompt is the stored answer when there is one, otherwise everything (D8).
   For a picks prompt the default is the stored picks plus every item not in `offered` (new items preselected, D11).
   Verified: with a hard-coded default, `chezmoi init --prompt --promptDefaults` replaced a stored pick of

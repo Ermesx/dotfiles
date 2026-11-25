@@ -64,11 +64,16 @@ YAML, names and purposes are kept from the existing rows. Do not edit the table 
 |---|---|
 | `profiles` | Selected profiles |
 | `picks.<profile>` | Selected items of a `pick` profile; an item is identified by its label: the name after the last `/` |
-| `offered.<profile>` | Labels offered at the last init, for every `pick` profile on the platform, selected or not |
+| `offered.<profile>` | Labels already decided on, for every `pick` profile on the platform, selected or not; an item not in it is new |
 
 - Plain `chezmoi apply` never asks. Change the selection with `chezmoi init --prompt`: the defaults are the stored
-  answers, and items new since the last init (not in `offered`) are preselected. An apply that finds such items
-  ends with a notice from `run_after_zz-new-picks.ps1.tmpl`.
+  answers, and items not yet in `offered` are preselected. An apply that finds such items ends with a notice from
+  `run_after_zz-new-picks.ps1.tmpl`.
+- `offered.<profile>` becomes every current label when the items were actually decided: on an init with `--prompt`,
+  on the first init, in environment mode, and for a profile that is not selected. An init without `--prompt` (for
+  example `install.ps1` run again) asks nothing, so a selected profile keeps its stored `offered` and the notice
+  stays until `chezmoi init --prompt`.
+- A stored profile or item that `packages.yaml` no longer declares is dropped at the next init.
 - Non-interactive (CI, scripts): `DOTFILES_PROFILES` (comma-separated; `base` alone means only base) and
   `DOTFILES_PICKS_<PROFILE>` (comma-separated labels). Env mode never prompts; a missing picks variable selects all
   items of that profile; an unknown profile or item name fails init.
@@ -99,7 +104,9 @@ cannot. `base` config must not rely on tools outside `base`; that is why `vscode
 ### Add a profile or an item
 
 - A profile: add `<name>:` under its platform in `packages.yaml`, a row to the glossary above, and its name to the
-  profile order in `.claude/agents/docs-sync.md`. The init prompt lists it by itself.
+  profile order in `.claude/agents/docs-sync.md`. The init prompt lists it by itself, but an existing machine gets
+  it only through `chezmoi init --prompt`, and nothing announces it (the new-picks notice covers items, not
+  profiles).
 - An item: add it to the method list. In a `pick` profile it is offered at the next `chezmoi init --prompt` and
   announced by the new-picks notice on apply.
 - Tool-specific profile code: `home/dot_profile/tools/<tool>.ps1`, named exactly like the label in `tools`, plus
