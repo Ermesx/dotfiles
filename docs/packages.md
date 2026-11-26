@@ -111,5 +111,5 @@ cannot. `base` config must not rely on tools outside `base`; that is why `vscode
 - An item: add it to the method list. In a `pick` profile it is offered at the next `chezmoi init --prompt` and
   announced by the new-picks notice on apply.
 - Tool-specific profile code: `home/dot_profile/tools/<tool>.ps1`, named exactly like the label in `tools`, plus
-  that name in the load order of the profile template. `.chezmoiignore` deploys the file only when the tool is
-  selected.
+  nothing else: the profile template finds it in the folder (only a fragment that must load after the others goes
+  into its `$last` list). `.chezmoiignore` deploys the file only when the tool is selected.

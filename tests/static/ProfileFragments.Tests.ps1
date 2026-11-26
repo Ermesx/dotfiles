@@ -37,7 +37,7 @@ Describe 'profile template' {
     }
 
     It 'dot-sources every tool fragment in the full view' {
-        # The load order is a fixed list in the template: a fragment missing from it is deployed but never loaded
+        # The template builds the list from the folder: every deployed fragment must also be loaded
         $sourced = @(Get-SourcedTool (Get-RenderedTemplate -Source $root -Path $profileTemplate))
         $fragments = Get-ChildItem $toolsDir -File | ForEach-Object { $_.Name -replace '\.ps1(\.tmpl)?$', '' }
 

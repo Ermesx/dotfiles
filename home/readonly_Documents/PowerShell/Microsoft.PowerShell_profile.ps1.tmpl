@@ -23,9 +23,21 @@ Import-Module -Name 'Write-Pretty' -Force
 . {{ replace $base $target . | replace ".tmpl" "" | squote -}}
 {{ end }}
 
-# Tool fragments: only the selected tools; starship before zoxide, zoxide last (both hook the prompt)
-{{- range (list "bat" "fd" "ripgrep" "delta" "chezmoi" "dotnet-sdk" "Terminal-Icons" "yazi" "PSfzf" "onefetch" "starship" "zoxide") }}
-{{- if has . $v.tools }}
-. {{ print $target "tools/" . ".ps1" | squote }}
+# Tool fragments of the selected tools
+{{- /* Every fragment in dot_profile/tools (name as in the view's tools), alphabetical: a new tool needs no edit here.
+  $last are loaded at the end in this order: both hook the prompt, and zoxide must be the last one */}}
+{{- $last := list "starship" "zoxide" }}
+{{- $fragments := list }}
+{{- range (glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*")) }}
+{{-   $fragments = append $fragments (base . | replace ".tmpl" "" | replace ".ps1" "") }}
 {{- end }}
+{{- $order := list }}
+{{- range $name := sortAlpha $fragments }}
+{{-   if not (has $name $last) }}{{ $order = append $order $name }}{{ end }}
+{{- end }}
+{{- range $name := $last }}{{ $order = append $order $name }}{{ end }}
+{{- range $name := $order }}
+{{-   if has $name $v.tools }}
+. {{ print $target "tools/" $name ".ps1" | squote }}
+{{-   end }}
 {{- end }}

@@ -32,7 +32,8 @@ then dot-sources every `~/.profile/*.ps1` by glob at apply time. A new general f
 needs no profile edit.
 
 Code that belongs to one tool lives in `home/dot_profile/tools/<tool>.ps1`, named like the tool's label in the
-view's `tools`. The profile template loads those fragments in a fixed order (`starship` before `zoxide`, `zoxide`
-last, as both hook the prompt), only for selected tools, and `.chezmoiignore` deploys only those files. A new tool
-fragment needs its name added to the order list in the template. Fragments carry no `Get-Command` guard: the
-selection guarantees the tool.
+view's `tools`. The profile template finds the fragments by globbing that folder and loads them alphabetically,
+only for selected tools, with `starship` and `zoxide` at the end in that order (both hook the prompt, `zoxide` must
+be last); `.chezmoiignore` deploys only those files. A new tool fragment needs no template edit, unless it must
+load after the others (the `$last` list in the template). Fragments carry no `Get-Command` guard: the selection
+guarantees the tool.
