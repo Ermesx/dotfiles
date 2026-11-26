@@ -9,6 +9,6 @@ Write-Host "► New items to choose from (not installed):" -ForegroundColor Yell
 {{- range $name, $labels := $v.pending }}
 Write-Host '{{ printf $format (printf "%s:" $name) (join ", " $labels) }}'
 {{- end }}
-Write-Host '  Choose with: chezmoi init --prompt; chezmoi apply'
+Write-Host '  Choose with: chezmoi init --apply --prompt'
 exit 0
 {{ end -}}

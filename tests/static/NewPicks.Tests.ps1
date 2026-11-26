@@ -37,7 +37,7 @@ Describe 'new picks notice' {
         $out | Should -Match '► New items to choose from \(not installed\):'
         $out | Should -Match "(?m)^Write-Host '    ai:   claude-code'\s*$"
         $out | Should -Match "(?m)^Write-Host '    apps: vagrant'\s*$"
-        $out | Should -Match "(?m)^Write-Host '  Choose with: chezmoi init --prompt; chezmoi apply'\s*$"
+        $out | Should -Match "(?m)^Write-Host '  Choose with: chezmoi init --apply --prompt'\s*$"
     }
 
     It 'ignores unselected profiles' {

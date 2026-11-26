@@ -66,7 +66,8 @@ YAML, names and purposes are kept from the existing rows. Do not edit the table 
 | `picks.<profile>` | Selected items of a `pick` profile; an item is identified by its label: the name after the last `/` |
 | `offered.<profile>` | Labels already decided on, for every `pick` profile on the platform, selected or not; an item not in it is new |
 
-- Plain `chezmoi apply` never asks. Change the selection with `chezmoi init --prompt`: the defaults are the stored
+- Plain `chezmoi apply` never asks. Change the selection with `chezmoi init --apply --prompt` (or `chezmoi init
+  --prompt`, then `chezmoi apply`): the defaults are the stored
   answers, and items not yet in `offered` are preselected. An apply that finds such items ends with a notice from
   `run_after_zz-new-picks.ps1.tmpl`.
 - `offered.<profile>` becomes every current label when the items were actually decided: on an init with `--prompt`,

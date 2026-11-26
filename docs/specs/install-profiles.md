@@ -179,7 +179,7 @@ showed (marked **[added]**).
   ► New items to choose from (not installed):
       apps: obsidian
       ai:   github-copilot
-    Choose with: chezmoi init --prompt; chezmoi apply
+    Choose with: chezmoi init --apply --prompt
   ```
 
   It keeps printing on every apply until `chezmoi init --prompt` stores the new `offered`.
