@@ -7,22 +7,6 @@ BeforeAll {
     $toolsDir = Join-Path $root 'home/dot_profile/tools'
     $profileTemplate = 'home/readonly_Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl'
 
-    function Get-Rendered([string]$RelativePath, [hashtable]$Data) {
-        InModuleScope StaticChecks -Parameters @{
-            Source = "$root"; Text = (Get-Content -Raw (Join-Path $root $RelativePath)); Data = $Data
-        } {
-            $arguments = @{ Source = $Source; Arguments = @('execute-template'); InputText = $Text }
-            if ($Data) { $arguments.Data = $Data }
-            (Invoke-ChezmoiCi @arguments).Output
-        }
-    }
-
-    function Get-Managed([hashtable]$Data) {
-        InModuleScope StaticChecks -Parameters @{ Source = "$root"; Data = $Data } {
-            if ($Data) { Get-ManagedPath -Source $Source -Data $Data } else { Get-ManagedPath -Source $Source }
-        }
-    }
-
     # Names of the tool fragments a rendered profile dot-sources, in order
     function Get-SourcedTool([string[]]$Rendered) {
         $Rendered | Where-Object { $_ -match "^\. '.*[\\/]tools[\\/]" } |
@@ -44,24 +28,24 @@ Describe 'tool fragments' {
 Describe 'profile template' {
 
     It 'dot-sources only selected tools' {
-        $rendered = Get-Rendered $profileTemplate @{ profiles = @() }
+        $rendered = Get-RenderedTemplate -Source $root -Path $profileTemplate -Data @{ profiles = @() }
 
         Get-SourcedTool $rendered | Should -Contain 'chezmoi'
         Get-SourcedTool $rendered | Should -Contain 'delta'
         Get-SourcedTool $rendered | Should -Not -Contain 'bat'
         Get-SourcedTool $rendered | Should -Not -Contain 'PSfzf'
-    }
+    } 
 
     It 'dot-sources every tool fragment in the full view' {
         # The load order is a fixed list in the template: a fragment missing from it is deployed but never loaded
-        $sourced = @(Get-SourcedTool (Get-Rendered $profileTemplate))
+        $sourced = @(Get-SourcedTool (Get-RenderedTemplate -Source $root -Path $profileTemplate))
         $fragments = Get-ChildItem $toolsDir -File | ForEach-Object { $_.Name -replace '\.ps1(\.tmpl)?$', '' }
 
         foreach ($fragment in $fragments) { $sourced | Should -Contain $fragment }
     }
 
     It 'loads zoxide last and starship before it' {
-        $names = @(Get-SourcedTool (Get-Rendered $profileTemplate))
+        $names = @(Get-SourcedTool (Get-RenderedTemplate -Source $root -Path $profileTemplate))
 
         $names[-1] | Should -Be 'zoxide'
         $names.IndexOf('starship') | Should -BeGreaterThan -1
@@ -73,32 +57,32 @@ Describe 'profile template' {
         # chezmoi's include reads the file as it is on disk
         $hash = (Get-FileHash $bat -Algorithm SHA256).Hash.ToLower()
 
-        Get-Rendered $profileTemplate | Should -Contain "# $hash"
+        Get-RenderedTemplate -Source $root -Path $profileTemplate | Should -Contain "# $hash"
     }
 }
 
 Describe 'deployed fragments' {
 
     It 'ignores fragments of unselected tools' {
-        $none = Get-Managed @{ profiles = @() }
+        $none = Get-ManagedPath -Source $root -Data @{ profiles = @() }
 
         $none | Should -Not -Contain '.profile/tools/bat.ps1'
         $none | Should -Contain '.profile/tools/chezmoi.ps1'
-        Get-Managed | Should -Contain '.profile/tools/bat.ps1'
+        Get-ManagedPath -Source $root | Should -Contain '.profile/tools/bat.ps1'
     }
 }
 
 Describe 'update check and user setup' {
 
     It 'declares only selected apps for Check-Updates' {
-        $rendered = (Get-Rendered 'home/dot_profile/check-updates.ps1.tmpl' @{ profiles = @('shell') }) -join "`n"
+        $rendered = (Get-RenderedTemplate -Source $root -Path 'home/dot_profile/check-updates.ps1.tmpl' -Data @{ profiles = @('shell') }) -join "`n"
 
         $rendered | Should -Match "'starship'"
         $rendered | Should -Not -Match "'dotnet-sdk'"
     }
 
     It 'skips the WSL part of Complete-UserSetup without a distro' {
-        $rendered = (Get-Rendered 'home/dot_profile/user-setup_profile.ps1.tmpl' @{ profiles = @('shell') }) -join "`n"
+        $rendered = (Get-RenderedTemplate -Source $root -Path 'home/dot_profile/user-setup_profile.ps1.tmpl' -Data @{ profiles = @('shell') }) -join "`n"
 
         $rendered | Should -Not -Match 'wsl --install'
         $rendered | Should -Match 'ssh-add'

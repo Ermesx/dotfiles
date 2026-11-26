@@ -4,13 +4,10 @@
 BeforeAll {
     Import-Module "$PSScriptRoot/StaticChecks.psm1" -Force
     $root = Resolve-Path "$PSScriptRoot/../.."
-    $scripts = Join-Path $root 'home/.chezmoiscripts/windows'
 
     function Get-RenderedScript([string]$Name, [hashtable]$Data = @{}, [switch]$NoCi) {
-        $text = Get-Content -Raw (Join-Path $scripts $Name)
-        $result = Invoke-ChezmoiCi -Source $root -Arguments @('execute-template') -InputText $text -Data $Data -NoCi:$NoCi
-        $result.ExitCode | Should -Be 0 -Because ($result.Error -join "`n")
-        $result.Output -join "`n"
+        # Joined: the assertions match multi-line text
+        (Get-RenderedTemplate -Source $root -Path "home/.chezmoiscripts/windows/$Name" -Data $Data -NoCi:$NoCi) -join "`n"
     }
 }
 
@@ -61,11 +58,7 @@ Describe 'install scripts follow the selection' {
     }
 
     It 'deploys enable-wsl only where WSL is needed' {
-        function Get-Managed([hashtable]$Data) {
-            InModuleScope StaticChecks -Parameters @{ Source = "$root"; Data = $Data } { Get-ManagedPath -Source $Source -Data $Data }
-        }
-
-        Get-Managed @{ profiles = @('shell') } | Should -Not -Contain '.config/dotfiles/admin/enable-wsl.ps1'
-        Get-Managed @{ profiles = @('containers') } | Should -Contain '.config/dotfiles/admin/enable-wsl.ps1'
+        Get-ManagedPath -Source $root -Data @{ profiles = @('shell') } | Should -Not -Contain '.config/dotfiles/admin/enable-wsl.ps1'
+        Get-ManagedPath -Source $root -Data @{ profiles = @('containers') } | Should -Contain '.config/dotfiles/admin/enable-wsl.ps1'
     }
 }

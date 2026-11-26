@@ -71,6 +71,21 @@ function Get-ManagedPath([string]$Source, [switch]$NoCi, [switch]$SourceRelative
     $result.Output
 }
 
+# Lines of a template from the repo (Path relative to Source), rendered with an optional stored selection
+function Get-RenderedTemplate {
+    param(
+        [Parameter(Mandatory)] [string]$Source,
+        [Parameter(Mandatory)] [string]$Path,
+        [hashtable]$Data,
+        [switch]$NoCi
+    )
+
+    $text = [string](Get-Content -Raw (Join-Path $Source $Path))
+    $result = Invoke-ChezmoiCi -Source $Source -Arguments @('execute-template') -InputText $text -Data $Data -NoCi:$NoCi
+    if ($result.ExitCode -ne 0) { throw "render of $Path failed: $($result.Error)" }
+    $result.Output
+}
+
 # A decrypt call: the template function inside {{ … }}, or the CLI (`chezmoi age decrypt`) in a script.
 # The bare word is not enough: file names and comments mention decrypt scripts without decrypting anything.
 $script:TemplateDecrypt = '\{\{[^}]*\bdecrypt\b'
@@ -252,4 +267,4 @@ function Get-BrokenMarkdownLink {
     }
 }
 
-Export-ModuleMember -Function Invoke-ChezmoiCi, Get-*Violation, Get-CiIgnoredTarget, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem, Get-BrokenMarkdownLink
+Export-ModuleMember -Function Invoke-ChezmoiCi, Get-ManagedPath, Get-*Violation, Get-CiIgnoredTarget, Get-RenderedTemplate, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem, Get-BrokenMarkdownLink
