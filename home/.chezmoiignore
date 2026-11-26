@@ -30,14 +30,14 @@ readonly_Documents/
 {{- end -}}
 
 {{- /* PowerShell profile fragments of tools that are not selected; the profile does not dot-source them either */}}
-{{- range (glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*")) }}
-{{- $tool := base . | replace ".tmpl" "" | replace ".ps1" "" }}
-{{- if not (has $tool $v.tools) }}
+{{- range $fragment := glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*") }}
+{{-   $tool := base $fragment | replace ".tmpl" "" | replace ".ps1" "" }}
+{{-   if not (has $tool $v.tools) }}
 .profile/tools/{{ $tool }}.ps1
-{{- end }}
+{{-   end }}
 {{- end }}
 
-{{- /* The WSL admin step is deployed only where a selected profile declares a distro or Rancher Desktop is selected */}}
+{{- /* The WSL admin step is deployed only where the WSL platform is needed: a selected profile declares a distro, or Rancher Desktop is selected */}}
 {{- if not $v.wsl_platform }}
 .config/dotfiles/admin/enable-wsl.ps1
 {{- end }}

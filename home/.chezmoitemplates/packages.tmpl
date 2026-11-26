@@ -3,63 +3,86 @@
   Packages of the current platform (global + .chezmoi.os) filtered by the stored selection (.profiles, .picks, .offered).
   Without .profiles (no init yet) every profile and every pick is selected.
 */ -}}
-{{- $hasSel := hasKey . "profiles" -}}
-{{- $sel := list -}}
-{{- if $hasSel }}{{ $sel = .profiles | default (list) }}{{ end -}}
+{{- $hasSelection := hasKey . "profiles" -}}
+{{- $selected := list -}}
+{{- if $hasSelection -}}
+{{-   $selected = .profiles | default (list) -}}
+{{- end -}}
 {{- $hasOffered := hasKey . "offered" -}}
 {{- $sources := list (dig "packages" "global" "profiles" (dict) .) (dig "packages" .chezmoi.os "profiles" (dict) .) -}}
 
-{{- /* Every profile name and every list method declared on the platform, selected or not */ -}}
+{{- /* Every profile name and every list method declared on the platform, selected or not;
+  $view starts with an empty list per method so that a method nobody selects still reads as empty */ -}}
 {{- $names := list -}}
-{{- $out := dict -}}
+{{- $view := dict -}}
 {{- range $source := $sources -}}
-{{-   range $name, $def := $source -}}
+{{-   range $name, $definition := $source -}}
 {{-     $names = append $names $name -}}
-{{-     range $method, $items := $def -}}
-{{-       if not (has $method (list "pick" "wsl")) }}{{ $out = set $out $method (list) }}{{ end -}}
+{{-     range $method, $items := $definition -}}
+{{-       if not (has $method (list "pick" "wsl")) -}}
+{{-         $view = set $view $method (list) -}}
+{{-       end -}}
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
 {{- $names = $names | uniq | sortAlpha -}}
 
+{{- /* Collect the items of the selected profiles (base is always selected).
+  A pick profile contributes only its picked items; with no stored selection it contributes all of them.
+  $pending: per pick profile, the items that were not offered at the last init. */ -}}
 {{- $profiles := list -}}
-{{- $wsl := "" -}}
+{{- $wslDistro := "" -}}
 {{- $pending := dict -}}
 {{- range $name := $names -}}
-{{-   if or (eq $name "base") (not $hasSel) (has $name $sel) -}}
+{{-   if or (eq $name "base") (not $hasSelection) (has $name $selected) -}}
 {{-     $profiles = append $profiles $name -}}
 {{-     $picks := dig "picks" $name (list) $ -}}
 {{-     $offered := dig "offered" $name (list) $ -}}
 {{-     $notOffered := list -}}
 {{-     range $source := $sources -}}
-{{-       $def := dig $name (dict) $source -}}
-{{-       $pick := dig "pick" false $def -}}
-{{-       range $method, $items := $def -}}
+{{-       $definition := dig $name (dict) $source -}}
+{{-       $isPick := dig "pick" false $definition -}}
+{{-       range $method, $items := $definition -}}
 {{-         if eq $method "wsl" -}}
-{{-           $wsl = $items -}}
+{{-           $wslDistro = $items -}}
 {{-         else if ne $method "pick" -}}
 {{-           range $item := $items -}}
 {{-             $label := splitList "/" $item | last -}}
-{{-             if or (not $pick) (not $hasSel) (has $label $picks) }}{{ $out = set $out $method (append (index $out $method) $item) }}{{ end -}}
-{{-             if and $pick $hasOffered (not (has $label $offered)) }}{{ $notOffered = append $notOffered $label }}{{ end -}}
+{{-             if or (not $isPick) (not $hasSelection) (has $label $picks) -}}
+{{-               $view = set $view $method (append (index $view $method) $item) -}}
+{{-             end -}}
+{{-             if and $isPick $hasOffered (not (has $label $offered)) -}}
+{{-               $notOffered = append $notOffered $label -}}
+{{-             end -}}
 {{-           end -}}
 {{-         end -}}
 {{-       end -}}
 {{-     end -}}
-{{-     if $notOffered }}{{ $pending = set $pending $name ($notOffered | uniq) }}{{ end -}}
+{{-     if $notOffered -}}
+{{-       $pending = set $pending $name ($notOffered | uniq) -}}
+{{-     end -}}
 {{-   end -}}
 {{- end -}}
 
+{{- /* tools: the label of every selected item (Scoop app without its bucket, module, dotnet tool, yazi plugin) */ -}}
 {{- $tools := list -}}
-{{- range $item := dig "scoop" (list) $out }}{{ $tools = append $tools (splitList "/" $item | last) }}{{ end -}}
+{{- range $item := dig "scoop" (list) $view -}}
+{{-   $tools = append $tools (splitList "/" $item | last) -}}
+{{- end -}}
 {{- range $method := list "modules" "dotnet_tools" "yazi_plugins" -}}
-{{-   range $item := dig $method (list) $out }}{{ $tools = append $tools $item }}{{ end -}}
+{{-   range $item := dig $method (list) $view -}}
+{{-     $tools = append $tools $item -}}
+{{-   end -}}
 {{- end -}}
 
-{{- range $method := keys $out }}{{ $out = set $out $method (index $out $method | uniq) }}{{ end -}}
-{{- $out = set $out "profiles" $profiles -}}
-{{- $out = set $out "wsl" $wsl -}}
-{{- $out = set $out "wsl_platform" (or (ne $wsl "") (has "rancher-desktop" $tools)) -}}
-{{- $out = set $out "tools" ($tools | uniq) -}}
-{{- $out = set $out "pending" $pending -}}
-{{- $out | toJson -}}
+{{- /* Each item once, then the keys that are not item lists */ -}}
+{{- range $method := keys $view -}}
+{{-   $view = set $view $method (index $view $method | uniq) -}}
+{{- end -}}
+{{- $view = set $view "profiles" $profiles -}}
+{{- $view = set $view "wsl" $wslDistro -}}
+{{- /* The Windows WSL platform (admin step) is needed by a distro or by Rancher Desktop; the distro itself comes with sdk */ -}}
+{{- $view = set $view "wsl_platform" (or (ne $wslDistro "") (has "rancher-desktop" $tools)) -}}
+{{- $view = set $view "tools" ($tools | uniq) -}}
+{{- $view = set $view "pending" $pending -}}
+{{- $view | toJson -}}
