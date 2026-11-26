@@ -59,6 +59,7 @@
 {{- range $method := keys $out }}{{ $out = set $out $method (index $out $method | uniq) }}{{ end -}}
 {{- $out = set $out "profiles" $profiles -}}
 {{- $out = set $out "wsl" $wsl -}}
+{{- $out = set $out "wsl_needed" (or (ne $wsl "") (has "rancher-desktop" $tools)) -}}
 {{- $out = set $out "tools" ($tools | uniq) -}}
 {{- $out = set $out "pending" $pending -}}
 {{- $out | toJson -}}

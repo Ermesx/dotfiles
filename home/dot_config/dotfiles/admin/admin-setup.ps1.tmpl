@@ -1,6 +1,6 @@
 {{- /* enable-wsl is deployed and run only where a selected profile declares a distro or Rancher Desktop is selected */ -}}
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
-{{- $wslNeeded := or $v.wsl (has "rancher-desktop" $v.tools) -}}
+{{- $wslNeeded := $v.wsl_needed -}}
 # Runs every admin-only setup script in this folder. Run as administrator (PowerShell 7).
 # Review the scripts it runs (two, or three with WSL): they sit in a user-writable folder.
 $ErrorActionPreference = 'Stop'

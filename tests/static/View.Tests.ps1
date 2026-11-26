@@ -77,6 +77,12 @@ Describe 'packages view' {
         $full.wsl | Should -BeExactly 'Ubuntu-24.04'
     }
 
+    It 'needs WSL for a distro or Rancher Desktop' {
+        (Get-PackagesView -Source $root -Data @{ profiles = @('shell') }).wsl_needed | Should -BeFalse
+        (Get-PackagesView -Source $root -Data @{ profiles = @('sdk') }).wsl_needed | Should -BeTrue
+        (Get-PackagesView -Source $root -Data @{ profiles = @('containers') }).wsl_needed | Should -BeTrue
+    }
+
     It 'lists items not offered yet as pending' {
         # vscode is in the offered list so the expectation holds while it moves from apps to base (#20)
         $view = Get-PackagesView -Source $root -Data @{

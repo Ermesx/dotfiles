@@ -38,7 +38,7 @@ readonly_Documents/
 {{- end }}
 
 {{- /* The WSL admin step is deployed only where a selected profile declares a distro or Rancher Desktop is selected */}}
-{{- if not (or $v.wsl (has "rancher-desktop" $v.tools)) }}
+{{- if not $v.wsl_needed }}
 .config/dotfiles/admin/enable-wsl.ps1
 {{- end }}
 

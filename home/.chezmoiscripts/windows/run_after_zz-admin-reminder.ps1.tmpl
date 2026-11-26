@@ -1,6 +1,6 @@
 {{- /* WSL is asked for only where a selected profile declares a distro or Rancher Desktop is selected */ -}}
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
-{{- $wslNeeded := or $v.wsl (has "rancher-desktop" $v.tools) -}}
+{{- $wslNeeded := $v.wsl_needed -}}
 # Reminds that the admin-only setup is missing; never runs it and never fails apply.
 # The probes match the ones the user-side scripts use to skip, so the two never disagree.
 
