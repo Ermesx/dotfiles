@@ -1,3 +1,122 @@
+{{- /*
+  Install profiles (#20, ADR-0005): the selection is asked once and stored under [data], then read by the packages view.
+  DOTFILES_PROFILES and DOTFILES_PICKS_<PROFILE> (CI, VM) replace the prompts; the answer is stored the same way.
+  Profile names and pick flags are read from packages.yaml with include: the config template gets no .packages data,
+  and the view needs the selection, so it cannot be used here.
+*/ -}}
+
+{{- /* Profiles declared on this platform (global + current OS); base is always installed and never asked */ -}}
+{{- $packages := (include ".chezmoidata/packages.yaml" | fromYaml).packages -}}
+{{- $sources := list (dig "global" "profiles" (dict) $packages) (dig .chezmoi.os "profiles" (dict) $packages) -}}
+{{- $names := list -}}
+{{- range $sources }}{{ $names = concat $names (keys .) }}{{ end -}}
+{{- $names = $names | uniq | sortAlpha -}}
+{{- $choices := without $names "base" -}}
+
+{{- /* Asked: this init was run with --prompt (promptMultichoiceOnce asks only then); exact match, --promptDefaults alone is not it */ -}}
+{{- $asked := false -}}
+{{- range .chezmoi.args -}}
+{{-   if or (eq . "--prompt") (and (hasPrefix "--prompt=" .) (not (has (lower (trimPrefix "--prompt=" .)) (list "false" "f" "0")))) -}}
+{{-     $asked = true -}}
+{{-   end -}}
+{{- end -}}
+
+{{- /* Profiles: env var, else prompt (default: the stored answer, otherwise every profile).
+  A stored name no longer in packages.yaml is dropped: as a default it would fail the prompt, and it is never written back. */ -}}
+{{- $selected := list -}}
+{{- if env "DOTFILES_PROFILES" -}}
+{{-   range splitList "," (env "DOTFILES_PROFILES") -}}
+{{-     $name := trim . -}}
+{{-     if not (has $name (list "" "base")) -}}
+{{-       if not (has $name $choices) -}}
+{{-         fail (printf "DOTFILES_PROFILES: unknown profile %q; choose from %s" $name (join ", " $choices)) -}}
+{{-       end -}}
+{{-       $selected = append $selected $name -}}
+{{-     end -}}
+{{-   end -}}
+{{- else -}}
+{{-   $default := $choices -}}
+{{-   if hasKey . "profiles" -}}
+{{-     $default = list -}}
+{{-     range .profiles -}}
+{{-       if has . $choices }}{{ $default = append $default . }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{-   range promptMultichoiceOnce . "profiles" "Profiles" $choices $default -}}
+{{-     if has . $choices }}{{ $selected = append $selected . }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+{{- $selected = $selected | uniq -}}
+
+{{- /* Picks: one prompt per selected pick profile (a profile whose items are chosen one by one).
+  $picks is what was chosen; $offered is written for every pick profile and is the full label list, except for a
+  selected pick profile with a stored answer on an init without --prompt: nothing was asked, so its stored offered
+  stays and the new-picks notice keeps running. */ -}}
+{{- $picks := dict -}}
+{{- $offered := dict -}}
+{{- range $profile := $names -}}
+
+{{- /* The profile's item labels (the item without its bucket) and whether it is a pick profile */ -}}
+{{-   $labels := list -}}
+{{-   $isPick := false -}}
+{{-   range $sources -}}
+{{-     $definition := dig $profile (dict) . -}}
+{{-     if dig "pick" false $definition }}{{ $isPick = true }}{{ end -}}
+{{-     range $method, $items := $definition -}}
+{{-       if not (has $method (list "pick" "wsl")) -}}
+{{-         range $items }}{{ $labels = append $labels (splitList "/" . | last) }}{{ end -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+
+{{-   if $isPick }}{{ $offered = set $offered $profile $labels }}{{ end -}}
+{{-   if and $isPick (has $profile $selected) -}}
+{{-     $chosen := list -}}
+{{-     $picksVar := printf "DOTFILES_PICKS_%s" ($profile | upper) -}}
+{{-     if env $picksVar -}}
+{{- /* Items named in DOTFILES_PICKS_<PROFILE> */ -}}
+{{-       range splitList "," (env $picksVar) -}}
+{{-         $label := trim . -}}
+{{-         if $label -}}
+{{-           if not (has $label $labels) -}}
+{{-             fail (printf "%s: unknown item %q; choose from %s" $picksVar $label (join ", " $labels)) -}}
+{{-           end -}}
+{{-           $chosen = append $chosen $label -}}
+{{-         end -}}
+{{-       end -}}
+{{-     else if env "DOTFILES_PROFILES" -}}
+{{- /* Non-interactive run: never prompt, take every item */ -}}
+{{-       $chosen = $labels -}}
+{{-     else -}}
+{{- /* Prompt. Default: the stored picks plus the items not offered at the previous init; every item on a first init */ -}}
+{{-       $default := $labels -}}
+{{-       $storedPicks := dig "picks" (dict) $ -}}
+{{-       if hasKey $storedPicks $profile -}}
+{{-         $previouslyOffered := dig "offered" (dict) $ | dig $profile (list) -}}
+{{-         $default = list -}}
+{{-         range index $storedPicks $profile -}}
+{{-           if has . $labels }}{{ $default = append $default . }}{{ end -}}
+{{-         end -}}
+{{-         range $labels -}}
+{{-           if not (has . $previouslyOffered) }}{{ $default = append $default . }}{{ end -}}
+{{-         end -}}
+{{- /* Nothing is asked without --prompt: keep the stored offered (minus items that no longer exist) */ -}}
+{{-         if not $asked -}}
+{{-           $stillOffered := list -}}
+{{-           range $previouslyOffered -}}
+{{-             if has . $labels }}{{ $stillOffered = append $stillOffered . }}{{ end -}}
+{{-           end -}}
+{{-           $offered = set $offered $profile $stillOffered -}}
+{{-         end -}}
+{{-       end -}}
+{{-       range promptMultichoiceOnce $ (printf "picks.%s" $profile) (printf "%s items" $profile) $labels $default -}}
+{{-         if has . $labels }}{{ $chosen = append $chosen . }}{{ end -}}
+{{-       end -}}
+{{-     end -}}
+{{-     $picks = set $picks $profile ($chosen | uniq) -}}
+{{-   end -}}
+{{- end -}}
+
 progress = true
 encryption = "age"
 
@@ -21,3 +140,13 @@ args = ["--wait"]
 [interpreters.ps1]
 command = "pwsh"
 args = ["-NoLogo", "-NoProfile"]
+
+[data]
+profiles = {{ $selected | toJson }}
+
+[data.picks]
+{{ range $profile, $labels := $picks }}{{ $profile }} = {{ $labels | toJson }}
+{{ end }}
+[data.offered]
+{{ range $profile, $labels := $offered }}{{ $profile }} = {{ $labels | toJson }}
+{{ end -}}

@@ -1,4 +1,6 @@
-$distro = {{ .packages.windows.profiles.sdk.wsl | squote }}
+{{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
+{{- if $v.wsl }}
+$distro = {{ $v.wsl | squote }}
 
 # wsl prints UTF-16 unless WSL_UTF8 is set; without it -contains never matches
 $env:WSL_UTF8 = '1'
@@ -13,3 +15,4 @@ if (-not ((wsl -l -q) -contains $distro)) {
     Write-Host "► Installing WSL $distro" -ForegroundColor Cyan
     wsl --install -d $distro --web-download --no-launch
 }
+{{ end }}

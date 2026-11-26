@@ -1,17 +1,7 @@
-{{- /* With CI=true, skip the profiles in .ci.skip_scoop_profiles (home/.chezmoidata/ci.yaml) */ -}}
-{{- $skip := list -}}
-{{- if eq (env "CI") "true" }}{{ $skip = .ci.skip_scoop_profiles }}{{ end -}}
-{{- $profiles := list -}}
-{{- range $name, $profile := .packages.windows.profiles -}}
-{{-   if not (has $name $skip) }}{{ $profiles = append $profiles $profile }}{{ end -}}
-{{- end -}}
+{{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- $buckets := list -}}
-{{- range $profiles -}}
-{{-   range (get . "scoop" | default list) -}}
-{{-     if contains "/" . -}}
-{{-       $buckets = append $buckets (index (splitList "/" .) 0) -}}
-{{-     end -}}
-{{-   end -}}
+{{- range $v.scoop -}}
+{{-   if contains "/" . }}{{ $buckets = append $buckets (splitList "/" . | first) }}{{ end -}}
 {{- end -}}
 Write-Host "► Adding Scoop buckets" -ForegroundColor Cyan
 {{- range $buckets | uniq }}
@@ -19,6 +9,6 @@ scoop bucket add {{ . }}
 {{- end }}
 
 Write-Host "► Installing Scoop apps" -ForegroundColor Cyan
-{{- range $profiles }}{{ range (get . "scoop" | default list) }}
+{{- range $v.scoop }}
 scoop install {{ . }}
-{{- end }}{{ end }}
+{{- end }}

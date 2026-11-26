@@ -1,0 +1,77 @@
+# chezmoi:template:left-delimiter="[[" right-delimiter="]]"
+[[- $v := includeTemplate "packages.tmpl" . | fromJson -]]
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
+gui:
+  nerdFontsVersion: "3"
+  theme:
+    selectedLineBgColor:
+      - reverse
+    inactiveBorderColor:
+      - '#AAAAAA'
+git:
+  diffRenderers:
+    - colorArg: always
+      # It doesn't work on windows => https://github.com/creack/pty/pull/155
+      command: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+  branchLogCmd: git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=format:"%C(blue)%ad %C(yellow)%d %C(auto)%h %C(reset)%<(50,trunc)%s %C(green)(%an)" {{branchName}} --
+  ignoreWhitespaceInDiffView: true
+os:
+  editPreset: 'vscode'
+disableStartupPopups: true
+[[- if has "claude-code" $v.tools ]]
+customCommands:
+  - key: <c-a>
+    description: AI-powered conventional commit
+    context: global
+    prompts:
+      - type: "menu"
+        key: "Type"
+        title: "Type of change"
+        options:
+          - name: "AI defined"
+            description: "Let AI analyze and determine the best commit type"
+            value: "ai-defined"
+          - name: "build"
+            description: "Changes that affect the build system or external dependencies"
+            value: "build"
+          - name: "feat"
+            description: "A new feature"
+            value: "feat"
+          - name: "fix"
+            description: "A bug fix"
+            value: "fix"
+          - name: "chore"
+            description: "Other changes that don't modify src or test files"
+            value: "chore"
+          - name: "ci"
+            description: "Changes to CI configuration files and scripts"
+            value: "ci"
+          - name: "docs"
+            description: "Documentation only changes"
+            value: "docs"
+          - name: "perf"
+            description: "A code change that improves performance"
+            value: "perf"
+          - name: "refactor"
+            description: "A code change that neither fixes a bug nor adds a feature"
+            value: "refactor"
+          - name: "revert"
+            description: "Reverts a previous commit"
+            value: "revert"
+          - name: "style"
+            description: "Changes that do not affect the meaning of the code"
+            value: "style"
+          - name: "test"
+            description: "Adding missing tests or correcting existing tests"
+            value: "test"
+      - type: menuFromCommand
+        title: "AI Generated Commit Messages"
+        key: CommitMsg
+        # Logic lives in ai-commit.ps1 (deployed next to this file); run it from a terminal to debug.
+        # lazygit does not expand %VAR% (cmd syntax), so let pwsh resolve the path via $env:.
+        command: pwsh -NoProfile -NoLogo -Command "& (Join-Path $env:LOCALAPPDATA 'lazygit/ai-commit.ps1') -Type {{.Form.Type}}"
+    # -e opens the editor on the picked subject, so a body can be added before the commit is made.
+    command: git commit -e -m {{.Form.CommitMsg | quote}}
+    output: terminal
+    loadingText: "Generating commit messages..."
+[[- end ]]

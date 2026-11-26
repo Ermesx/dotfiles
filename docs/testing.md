@@ -57,9 +57,9 @@ Speed:
 - A newer push to a PR cancels that PR's run still in progress (`concurrency`); pushes to `develop` all finish.
 - No download cache: measured with a warm `~/scoop/cache` (1.3 GB), apply took as long as without it (4m10s vs
   4m03s), as extraction, not download, takes the time.
-- With `CI=true` the Scoop install skips the profiles in `ci.skip_scoop_profiles` (`home/.chezmoidata/ci.yaml`,
-  today `apps`: the heavy GUI apps, ~8 min). The static layer still checks their manifests, and the VM installs
-  them.
+- The apply step selects `DOTFILES_PROFILES=shell,sdk,ai` and `DOTFILES_PICKS_AI=claude-code`, so the heavy
+  profiles (`apps` alone was ~8 min) are not installed. The static layer still checks their manifests, and the VM
+  installs them. The post-apply tests read the view with the stored selection and check only what was selected.
 
 The runner is elevated, so CI does **not** prove that apply works without admin; the VM does.
 
@@ -71,6 +71,11 @@ The runner is elevated, so CI does **not** prove that apply works without admin;
   points to a host path.
 - Log in to the VM window as `dotfiles` and run
   `powershell -ExecutionPolicy Bypass -File C:\vagrant\run-tests.ps1 -BRANCH <branch>`; answer the key passphrase.
+  Select profiles with `-Profiles shell,sdk,ai -Picks 'ai=claude-code'` (passed to `chezmoi init` as
+  `DOTFILES_PROFILES` / `DOTFILES_PICKS_<PROFILE>`); without them init prompts. Under `-File` every argument is one string, so
+  profiles are separated by `,` (a console array works too), picks as `profile=label,label` parts separated by `;`
+  (`-Picks 'ai=claude-code;apps=rider,postman'`). The runner clears `DOTFILES_*` from the session first, then sets the
+  ones of this run, and also installs Pester for `pwsh`.
   `run-tests.ps1` replaces `~\.local\share\chezmoi` with a fresh copy of `C:\dotfiles-src` on every run (uncommitted
   changes included), so `chezmoi init` skips the clone; for the `vagrant` account the share in its profile is used as before.
 - `run-tests.ps1` downloads only `install.ps1` from GitHub (`.../refs/heads/<branch>/install.ps1`), so push changes

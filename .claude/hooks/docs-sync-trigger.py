@@ -1,6 +1,7 @@
 """PostToolUse hook: ask the session to run the docs-sync agent after a source-of-truth file was edited.
 
-Prints an additionalContext reminder for home/.chezmoidata/packages.yaml and home/dot_profile/*.ps1,
+Prints an additionalContext reminder for home/.chezmoidata/packages.yaml, home/dot_profile/*.ps1 and
+home/dot_profile/tools/*.ps1 (PSfzf key bindings),
 and nothing for any other path or malformed input. Never fails the tool call (always exits 0).
 """
 import json
@@ -9,7 +10,7 @@ import sys
 
 SYNC_SOURCES = (
     re.compile(r"(^|/)home/\.chezmoidata/packages\.yaml$"),
-    re.compile(r"(^|/)home/dot_profile/[^/]+\.ps1$"),
+    re.compile(r"(^|/)home/dot_profile/(tools/)?[^/]+\.ps1$"),
 )
 
 

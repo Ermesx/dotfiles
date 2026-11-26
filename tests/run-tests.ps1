@@ -1,7 +1,45 @@
+# Profile selection (docs/specs/install-profiles.md), passed to chezmoi init as process-scoped environment variables.
+# -Picks is a string and -Profiles a string array: under `powershell -File` every argument is one string (`shell,sdk,ai`
+# arrives as a single element), in the console it is an array; both give the same selection:
+#   -Profiles shell,sdk,ai              -> DOTFILES_PROFILES ('base' alone = only base; omitted: chezmoi init prompts,
+#                                          the default being every profile, or the stored selection on a re-run)
+#   -Picks 'ai=claude-code;apps=rider,postman'
+#                                       -> DOTFILES_PICKS_AI, DOTFILES_PICKS_APPS: profiles separated by ';', then
+#                                          profile=labels with labels separated by ','. A pick profile without an
+#                                          entry takes all its labels.
+# DOTFILES_* variables already in the session are removed first, so a run never inherits an earlier one.
 param (
-    [string]$BRANCH = 'develop'
+    [string]$BRANCH = 'develop',
+    [string[]]$Profiles,
+    [string]$Picks
 )
+
+# @('shell,sdk,ai') or @('shell','sdk','ai') -> 'shell,sdk,ai'
+function ConvertTo-ProfileList([string[]]$Profiles) {
+    ($Profiles -join ',' -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -join ','
+}
+
+# 'ai=claude-code;apps=rider,postman' -> @{ DOTFILES_PICKS_AI = 'claude-code'; DOTFILES_PICKS_APPS = 'rider,postman' }
+function ConvertTo-PickEnvironment([string]$Picks) {
+    $environment = @{}
+    foreach ($part in $Picks -split ';' | Where-Object { $_.Trim() }) {
+        $name, $labels = $part -split '=', 2
+        if ($null -eq $labels -or -not $name.Trim() -or -not $labels.Trim()) {
+            throw "Invalid -Picks part '$($part.Trim())': expected profile=label[,label] (parts separated by ';')"
+        }
+        $environment["DOTFILES_PICKS_$($name.Trim().ToUpper())"] = (($labels -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -join ',')
+    }
+    $environment
+}
+
 $ErrorActionPreference = "Stop"
+
+# Process scope only: the selection must not leak into the VM's user environment, nor a previous run's into this one
+Remove-Item env:DOTFILES_PROFILES -ErrorAction Ignore
+Get-ChildItem env: | Where-Object Name -like 'DOTFILES_PICKS_*' | ForEach-Object { Remove-Item "env:$($_.Name)" }
+$pickEnvironment = ConvertTo-PickEnvironment $Picks
+if ($Profiles) { $env:DOTFILES_PROFILES = ConvertTo-ProfileList $Profiles }
+foreach ($name in $pickEnvironment.Keys) { Set-Item "env:$name" $pickEnvironment[$name] }
 
 # Set environment variable to indicate we are in a Vagrant environment
 [System.Environment]::SetEnvironmentVariable("VAGRANT", "1", "User")
@@ -21,6 +59,9 @@ if ($env:USERNAME -ne 'vagrant' -and (Test-Path 'C:\dotfiles-src')) {
 Write-Host "Install dotfiles:" -ForegroundColor Cyan
 $script = "https://raw.githubusercontent.com/Ermesx/dotfiles/refs/heads/$BRANCH/install.ps1"
 Invoke-Expression (Invoke-RestMethod $script | Out-String)
+
+# The tests run in pwsh (modules in Documents\PowerShell), but this script may run in Windows PowerShell 5.1: check and install in pwsh
+pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge ([version]'6.0.0'))) { Install-Module Pester -MinimumVersion 6.0.0 -Scope CurrentUser -Force -SkipPublisherCheck }"
 
 Write-Host "► Running tests" -ForegroundColor Cyan
 pwsh -NoProfile -NoLogo -ExecutionPolicy Bypass -File "C:\vagrant\execute-pester.ps1" 

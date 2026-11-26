@@ -1,13 +1,14 @@
 # Scoop apps and modules declared in packages.yaml; Check-Updates and Update-* (module PackageUpdates)
 # touch only these. .NET tools are not listed: every installed global tool is checked and updated.
 $Global:PackageUpdatesDeclared = @{
+{{- $v := includeTemplate "packages.tmpl" . | fromJson }}
     Apps = @(
-{{- range .packages.windows.profiles }}{{ range (get . "scoop" | default list) }}
-        {{ splitList "/" . | last | squote }}{{ end }}{{ end }}
+{{- range $v.scoop }}
+        {{ splitList "/" . | last | squote }}{{ end }}
     )
     Modules = @(
-{{- range .packages.windows.profiles }}{{ range (get . "modules" | default list) }}
-        {{ . | squote }}{{ end }}{{ end }}
+{{- range $v.modules }}
+        {{ . | squote }}{{ end }}
     )
 }
 

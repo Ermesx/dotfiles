@@ -1,5 +1,7 @@
+{{- $v := includeTemplate "packages.tmpl" . | fromJson }}
 # Per-user part of the admin setup: run as yourself after the administrator step and a restart
 function Complete-UserSetup {
+{{- if $v.wsl }}
     # WSL distros are per user, so the administrator's script only enables the platform.
     # Same probe as run_once_before_install-wsl: without the platform, wsl --install would ask for elevation
     wsl --status *> $null
@@ -7,7 +9,7 @@ function Complete-UserSetup {
         Write-Host "► Skipping WSL distro: WSL is not enabled (run the administrator step, then restart)" -ForegroundColor Yellow
     }
     else {
-        $distro = {{ .packages.windows.profiles.sdk.wsl | squote }}
+        $distro = {{ $v.wsl | squote }}
         # wsl prints UTF-16 unless WSL_UTF8 is set; without it -contains never matches. Restored after, as this runs in the session
         $utf8 = $env:WSL_UTF8
         $env:WSL_UTF8 = '1'
@@ -21,6 +23,7 @@ function Complete-UserSetup {
             $env:WSL_UTF8 = $utf8
         }
     }
+{{- end }}
 
     # The agent keeps keys per user. Same probe as run_once_after_add-ssh-key
     if ((Get-Service ssh-agent -ErrorAction SilentlyContinue).Status -ne 'Running') {

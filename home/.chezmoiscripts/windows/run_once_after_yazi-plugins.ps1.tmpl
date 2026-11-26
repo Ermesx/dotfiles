@@ -1,9 +1,12 @@
+{{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
+{{- if $v.yazi_plugins }}
 # Install yazi plugins
 $installedPlugins = ya pkg list
 
 Write-Host "► Installing yazi plugins" -ForegroundColor Cyan
-{{ range .packages.global.profiles.shell.yazi_plugins }}
+{{ range $v.yazi_plugins }}
 if (-not ($installedPlugins -like {{ print "*" . "*" | squote }})) {
     ya pkg add {{ . | squote }} | Out-Null
 }
+{{ end }}
 {{ end }}

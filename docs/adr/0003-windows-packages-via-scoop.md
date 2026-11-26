@@ -1,6 +1,6 @@
 # ADR-0003: Install Windows software in user scope with Scoop
 
-- **Status:** Accepted
+- **Status:** Accepted; "each consumer reads the list directly" amended by [ADR-0005](0005-composable-install-profiles.md)
 - **Date:** 2026-11-19
 - **Decider:** repository owner
 - **Supersedes:** [ADR-0001](0001-windows-packages-via-dsc-v3.md)

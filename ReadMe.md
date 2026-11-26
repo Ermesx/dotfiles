@@ -79,8 +79,11 @@ Things that bite:
 | PowerToys (extras/powertoys)                               | base       | App          | Power utilities for Windows           |
 | Caffeine (extras/caffeine)                                 | base       | App          | Keep the screen awake                 |
 | Hasklig Nerd Font (nerd-fonts/Hasklig-NF)                  | base       | App          | Programming font with ligatures       |
+| Visual Studio Code (extras/vscode)                         | base       | App          | Code editor                           |
+| delta (delta)                                              | base       | App          | Syntax-highlighted diffs              |
+| less (less)                                                | base       | App          | Pager utility                         |
+| jq (jq)                                                    | base       | App          | JSON processor                        |
 | Starship (starship)                                        | shell      | App          | Cross-shell prompt                    |
-| jq (jq)                                                    | shell      | App          | JSON processor                        |
 | zoxide (zoxide)                                            | shell      | App          | Smart directory navigation            |
 | yazi (yazi)                                                | shell      | App          | TUI file manager                      |
 | fzf (fzf)                                                  | shell      | App          | Fuzzy finder                          |
@@ -89,8 +92,6 @@ Things that bite:
 | eza (eza)                                                  | shell      | App          | Modern ls replacement                 |
 | bat (bat)                                                  | shell      | App          | Syntax-highlighting cat               |
 | onefetch (extras/onefetch)                                 | shell      | App          | Repo summary in terminal              |
-| delta (delta)                                              | shell      | App          | Syntax-highlighted diffs              |
-| less (less)                                                | shell      | App          | Pager utility                         |
 | lazygit (extras/lazygit)                                   | shell      | App          | TUI for Git                           |
 | gitql (gitql)                                              | shell      | App          | Query Git repos with SQL-like syntax  |
 | GitHub CLI (gh)                                            | shell      | App          | GitHub from the terminal              |
@@ -121,7 +122,6 @@ Things that bite:
 | Rancher Desktop (extras/rancher-desktop)                   | containers | App          | Container engine (WSL) and docker CLI |
 | lazydocker (lazydocker)                                    | containers | App          | TUI for Docker                        |
 | DockerCompletion                                           | containers | Module       | Docker command completion             |
-| Visual Studio Code (extras/vscode)                         | apps       | App          | Code editor                           |
 | JetBrains Rider (extras/rider)                             | apps       | App          | .NET IDE                              |
 | Google Chrome (extras/googlechrome)                        | apps       | App          | Web browser                           |
 | Postman (extras/postman)                                   | apps       | App          | API client                            |

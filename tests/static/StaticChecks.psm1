@@ -27,10 +27,14 @@ function Invoke-ChezmoiCi {
         [Parameter(Mandatory)] [string]$Source,
         [Parameter(Mandatory)] [string[]]$Arguments,
         [string]$InputText,
+        [hashtable]$Data,
         [switch]$NoCi
     )
 
-    $chezmoiArgs = @('--config', (Get-NoKeyConfig), '--source', $Source) + $Arguments
+    $chezmoiArgs = @('--config', (Get-NoKeyConfig), '--source', $Source)
+    # The selection a config template would store ([data] profiles, picks, offered)
+    if ($Data) { $chezmoiArgs += @('--override-data', (ConvertTo-Json $Data -Depth 5 -Compress)) }
+    $chezmoiArgs += $Arguments
     $previous = $env:CI
     try {
         # GitHub sets CI for the whole job, so "without CI" has to remove it, not just leave it alone
@@ -59,11 +63,26 @@ function Get-SourceRoot([string]$Source) {
     if (Test-Path $marker) { Join-Path $Source (Get-Content -Raw $marker).Trim() } else { $Source }
 }
 
-function Get-ManagedPath([string]$Source, [switch]$NoCi, [switch]$SourceRelative) {
+function Get-ManagedPath([string]$Source, [switch]$NoCi, [switch]$SourceRelative, [hashtable]$Data) {
     $arguments = @('managed', '--include=files,scripts,symlinks')
     if ($SourceRelative) { $arguments += @('--path-style', 'source-relative') }
-    $result = Invoke-ChezmoiCi -Source $Source -Arguments $arguments -NoCi:$NoCi
+    $result = Invoke-ChezmoiCi -Source $Source -Arguments $arguments -NoCi:$NoCi -Data $Data
     if ($result.ExitCode -ne 0) { throw "chezmoi managed failed: $($result.Error)" }
+    $result.Output
+}
+
+# Lines of a template from the repo (Path relative to Source), rendered with an optional stored selection
+function Get-RenderedTemplate {
+    param(
+        [Parameter(Mandatory)] [string]$Source,
+        [Parameter(Mandatory)] [string]$Path,
+        [hashtable]$Data,
+        [switch]$NoCi
+    )
+
+    $text = [string](Get-Content -Raw (Join-Path $Source $Path))
+    $result = Invoke-ChezmoiCi -Source $Source -Arguments @('execute-template') -InputText $text -Data $Data -NoCi:$NoCi
+    if ($result.ExitCode -ne 0) { throw "render of $Path failed: $($result.Error)" }
     $result.Output
 }
 
@@ -136,6 +155,20 @@ function Get-PackagesData {
     $result = Invoke-ChezmoiCi -Source $Source -Arguments @('data', '--format', 'json')
     if ($result.ExitCode -ne 0) { throw "chezmoi data failed: $($result.Error)" }
     ($result.Output -join "`n" | ConvertFrom-Json).packages
+}
+
+# The view every install script and profile fragment reads (home/.chezmoitemplates/packages.tmpl)
+function Get-PackagesView {
+    param(
+        [Parameter(Mandatory)] [string]$Source,
+        [hashtable]$Data,
+        [switch]$NoCi
+    )
+
+    $result = Invoke-ChezmoiCi -Source $Source -Data $Data -NoCi:$NoCi -Arguments @('execute-template') `
+        -InputText '{{ includeTemplate "packages.tmpl" . }}'
+    if ($result.ExitCode -ne 0) { throw "packages view failed: $($result.Error)" }
+    $result.Output -join "`n" | ConvertFrom-Json
 }
 
 # Methods each platform may use (header of home/.chezmoidata/packages.yaml)
@@ -234,4 +267,4 @@ function Get-BrokenMarkdownLink {
     }
 }
 
-Export-ModuleMember -Function Get-*Violation, Get-CiIgnoredTarget, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem, Get-BrokenMarkdownLink
+Export-ModuleMember -Function Invoke-ChezmoiCi, Get-ManagedPath, Get-*Violation, Get-CiIgnoredTarget, Get-RenderedTemplate, Get-TemplateRenderFailure, Get-Packages*, Get-ScoopItemProblem, Get-BrokenMarkdownLink

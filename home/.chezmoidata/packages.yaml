@@ -1,6 +1,7 @@
 # packages.<platform>.profiles.<name>.<method>: [items]
 #   platform   global (added to every platform) | windows | linux
-#   profile    chosen at `chezmoi init` (#20); base is always on; same names on every platform,
+#   profile    chosen at `chezmoi init` (#20); base is always on and holds what every
+#              setup needs (the configs rely on git, delta, less, jq and vscode); same names on every platform,
 #              content per platform; a profile may be missing on a platform
 #   pick: true each item is offered separately at init (default: whole profile)
 #   method     how the items are installed (listed per platform below)
@@ -39,11 +40,15 @@ packages:
           - extras/powertoys
           - extras/caffeine
           - nerd-fonts/Hasklig-NF
+          # what the shipped configs rely on in every setup: the editor, the git pager (delta, less) and jq
+          - extras/vscode
+          - delta
+          - less
+          - jq
       shell:
         scoop:
           # shell
           - starship
-          - jq
           - zoxide
           - yazi
           # fzf
@@ -54,8 +59,6 @@ packages:
           - bat
           # git
           - extras/onefetch
-          - delta
-          - less
           - extras/lazygit
           - gitql
           - gh
@@ -78,7 +81,6 @@ packages:
       apps:
         pick: true
         scoop:
-          - extras/vscode
           - extras/rider
           - extras/googlechrome
           - extras/postman

@@ -1,6 +1,6 @@
 ---
 name: docs-sync
-description: Regenerates the package table in ReadMe.md and the key bindings list in docs/terminal-bindings.md from their sources. Run it once after edits to home/.chezmoidata/packages.yaml or home/dot_profile/*.ps1 (the PostToolUse hook reminds you). Edits only the marker-delimited regions of those two Markdown files.
+description: Regenerates the package table in ReadMe.md and the key bindings list in docs/terminal-bindings.md from their sources. Run it once after edits to home/.chezmoidata/packages.yaml, home/dot_profile/*.ps1 or home/dot_profile/tools/*.ps1 (the PostToolUse hook reminds you). Edits only the marker-delimited regions of those two Markdown files.
 tools: Read, Edit, Grep, Glob, WebFetch
 model: sonnet
 ---
@@ -17,7 +17,7 @@ Read all of these before editing:
 - `docs/packages.md`, section *Profiles* — the glossary of profile names (for reference).
 - `ReadMe.md` — the current table between the packages markers (source of existing names and purposes).
 - `docs/terminal-bindings.md` — the current list between the bindings markers (source of existing action texts).
-- `home/dot_profile/PSReadLine_profile.ps1` and `home/dot_profile/psfzf_profile.ps1` — source of truth for bindings.
+- `home/dot_profile/PSReadLine_profile.ps1` and `home/dot_profile/tools/PSfzf.ps1` — source of truth for bindings.
 
 ## 2. Marker contract
 

@@ -23,8 +23,15 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
 - Branch on `.chezmoi.os` (`"windows"` / `"linux"`) inside templates; exclude whole files per OS in the
   `.chezmoiignore` files.
 - `env "VAGRANT"` gates test-only behavior in templates.
+- The profile selection is stored in the chezmoi config (`profiles`, `picks`, `offered`) and asked only by
+  `chezmoi init`. Change it with `chezmoi init --prompt` (stored answers are the defaults); plain `apply` never
+  asks. Templates read it through `packages.tmpl`, see [packages.md](packages.md).
+- `.chezmoi.toml.tmpl` gets no `.packages` data: it reads profile names and `pick` flags from `packages.yaml` with
+  `include`.
 - `.ps1` scripts run through `pwsh -NoLogo -NoProfile` (`[interpreters.ps1]` in `home/.chezmoi.toml.tmpl`), so they
   cannot rely on the PowerShell profile.
+- `home/.chezmoiversion` sets the minimum chezmoi version (2.60.0, where promptMultichoiceOnce appeared);
+  an older chezmoi stops with a clear message instead of a template parse error.
 
 ## Encryption
 
