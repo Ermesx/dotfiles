@@ -24,20 +24,11 @@ Import-Module -Name 'Write-Pretty' -Force
 {{ end }}
 
 # Tool fragments of the selected tools
-{{- /* Every fragment in dot_profile/tools (name as in the view's tools), alphabetical: a new tool needs no edit here.
-  $last are loaded at the end in this order: both hook the prompt, and zoxide must be the last one */}}
-{{- $last := list "starship" "zoxide" }}
-{{- $fragments := list }}
-{{- range (glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*")) }}
-{{-   $fragments = append $fragments (base . | replace ".tmpl" "" | replace ".ps1" "") }}
-{{- end }}
-{{- $order := list }}
-{{- range $name := sortAlpha $fragments }}
-{{-   if not (has $name $last) }}{{ $order = append $order $name }}{{ end }}
-{{- end }}
-{{- range $name := $last }}{{ $order = append $order $name }}{{ end }}
-{{- range $name := $order }}
-{{-   if has $name $v.tools }}
-. {{ print $target "tools/" $name ".ps1" | squote }}
+{{- /* Every fragment in dot_profile/tools, in file-name order: a zz- prefix loads it after the others, a new tool needs no edit here.
+  The tool is the file name without .tmpl, .ps1 and zz-, as in the view's tools */}}
+{{- range sortAlpha (glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*")) }}
+{{-   $file := base . | trimSuffix ".tmpl" }}
+{{-   if has ($file | trimSuffix ".ps1" | trimPrefix "zz-") $v.tools }}
+. {{ print $target "tools/" $file | squote }}
 {{-   end }}
 {{- end }}

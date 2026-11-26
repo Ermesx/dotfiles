@@ -29,11 +29,11 @@ readonly_Documents/
 .claude
 {{- end -}}
 
-{{- /* PowerShell profile fragments of tools that are not selected; the profile does not dot-source them either */}}
+{{- /* PowerShell profile fragments of tools that are not selected (tool: the file name without .tmpl, .ps1 and zz-); the profile does not dot-source them either */}}
 {{- range $fragment := glob (joinPath .chezmoi.sourceDir "dot_profile/tools/*") }}
-{{-   $tool := base $fragment | replace ".tmpl" "" | replace ".ps1" "" }}
-{{-   if not (has $tool $v.tools) }}
-.profile/tools/{{ $tool }}.ps1
+{{-   $file := base $fragment | trimSuffix ".tmpl" }}
+{{-   if not (has ($file | trimSuffix ".ps1" | trimPrefix "zz-") $v.tools) }}
+.profile/tools/{{ $file }}
 {{-   end }}
 {{- end }}
 

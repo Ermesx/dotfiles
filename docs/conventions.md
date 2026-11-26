@@ -31,9 +31,9 @@ The profile imports the modules of the selected profiles (`modules` in the view,
 then dot-sources every `~/.profile/*.ps1` by glob at apply time. A new general fragment in `home/dot_profile/`
 needs no profile edit.
 
-Code that belongs to one tool lives in `home/dot_profile/tools/<tool>.ps1`, named like the tool's label in the
-view's `tools`. The profile template finds the fragments by globbing that folder and loads them alphabetically,
-only for selected tools, with `starship` and `zoxide` at the end in that order (both hook the prompt, `zoxide` must
-be last); `.chezmoiignore` deploys only those files. A new tool fragment needs no template edit, unless it must
-load after the others (the `$last` list in the template). Fragments carry no `Get-Command` guard: the selection
-guarantees the tool.
+Code that belongs to one tool lives in `home/dot_profile/tools/[zz-]<tool>.ps1[.tmpl]`, where `<tool>` is the tool's
+label in the view's `tools`. The profile template finds the fragments by globbing that folder and loads them in
+file-name order, only for selected tools; `.chezmoiignore` deploys only those files. The `zz-` prefix loads a
+fragment after the others and is not part of the tool name: `zz-starship.ps1` and `zz-zoxide.ps1` come last, in that
+order (both hook the prompt, `zoxide` must be last). A new tool fragment needs no template edit. Fragments carry no
+`Get-Command` guard: the selection guarantees the tool.

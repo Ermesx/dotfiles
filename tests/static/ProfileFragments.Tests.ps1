@@ -7,21 +7,27 @@ BeforeAll {
     $toolsDir = Join-Path $root 'home/dot_profile/tools'
     $profileTemplate = 'home/readonly_Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl'
 
-    # Names of the tool fragments a rendered profile dot-sources, in order
-    function Get-SourcedTool([string[]]$Rendered) {
+    # File names of the tool fragments a rendered profile dot-sources, in order
+    function Get-SourcedFragment([string[]]$Rendered) {
         $Rendered | Where-Object { $_ -match "^\. '.*[\\/]tools[\\/]" } |
-            ForEach-Object { ($_ -replace "^.*[\\/]tools[\\/]", '') -replace "\.ps1'$", '' }
+            ForEach-Object { ($_ -replace "^.*[\\/]tools[\\/]", '') -replace "'$", '' }
     }
+
+    # The tool a fragment file belongs to: the file name without .tmpl, .ps1 and a leading zz-
+    function Get-FragmentTool([string]$FileName) { $FileName -replace '\.tmpl$', '' -replace '\.ps1$', '' -replace '^zz-', '' }
+
+    # Fragment files as they are deployed (without .tmpl)
+    function Get-FragmentFile { Get-ChildItem $toolsDir -File | ForEach-Object { $_.Name -replace '\.tmpl$', '' } }
 }
 
 Describe 'tool fragments' {
 
     It 'has a tool in the full view for every fragment' {
         $tools = (Get-PackagesView -Source $root).tools
-        $fragments = Get-ChildItem $toolsDir -File | ForEach-Object { $_.Name -replace '\.ps1(\.tmpl)?$', '' }
+        $fragments = Get-FragmentFile
 
         $fragments | Should -Not -BeNullOrEmpty
-        foreach ($fragment in $fragments) { $tools | Should -Contain $fragment }
+        foreach ($fragment in $fragments) { $tools | Should -Contain (Get-FragmentTool $fragment) }
     }
 }
 
@@ -30,26 +36,31 @@ Describe 'profile template' {
     It 'dot-sources only selected tools' {
         $rendered = Get-RenderedTemplate -Source $root -Path $profileTemplate -Data @{ profiles = @() }
 
-        Get-SourcedTool $rendered | Should -Contain 'chezmoi'
-        Get-SourcedTool $rendered | Should -Contain 'delta'
-        Get-SourcedTool $rendered | Should -Not -Contain 'bat'
-        Get-SourcedTool $rendered | Should -Not -Contain 'PSfzf'
+        Get-SourcedFragment $rendered | Should -Contain 'chezmoi.ps1'
+        Get-SourcedFragment $rendered | Should -Contain 'delta.ps1'
+        Get-SourcedFragment $rendered | Should -Not -Contain 'bat.ps1'
+        Get-SourcedFragment $rendered | Should -Not -Contain 'PSfzf.ps1'
+        Get-SourcedFragment $rendered | Should -Not -Contain 'zz-starship.ps1'
     }
 
     It 'dot-sources every tool fragment in the full view' {
         # The template builds the list from the folder: every deployed fragment must also be loaded
-        $sourced = @(Get-SourcedTool (Get-RenderedTemplate -Source $root -Path $profileTemplate))
-        $fragments = Get-ChildItem $toolsDir -File | ForEach-Object { $_.Name -replace '\.ps1(\.tmpl)?$', '' }
+        $sourced = @(Get-SourcedFragment (Get-RenderedTemplate -Source $root -Path $profileTemplate))
 
-        foreach ($fragment in $fragments) { $sourced | Should -Contain $fragment }
+        foreach ($fragment in Get-FragmentFile) { $sourced | Should -Contain $fragment }
     }
 
-    It 'loads zoxide last and starship before it' {
-        $names = @(Get-SourcedTool (Get-RenderedTemplate -Source $root -Path $profileTemplate))
+    It 'loads the fragments in file-name order, zz- ones last, zoxide the last' {
+        $names = @(Get-SourcedFragment (Get-RenderedTemplate -Source $root -Path $profileTemplate))
 
-        $names[-1] | Should -Be 'zoxide'
-        $names.IndexOf('starship') | Should -BeGreaterThan -1
-        $names.IndexOf('starship') | Should -BeLessThan $names.IndexOf('zoxide')
+        $sorted = [string[]]$names
+        [Array]::Sort($sorted, [StringComparer]::Ordinal)
+        $names | Should -Be $sorted
+        $names[-1] | Should -Be 'zz-zoxide.ps1'
+        $names.IndexOf('zz-starship.ps1') | Should -BeGreaterThan -1
+        $names.IndexOf('zz-starship.ps1') | Should -BeLessThan $names.IndexOf('zz-zoxide.ps1')
+        # Every other fragment loads before the first zz- one
+        $names.IndexOf('yazi.ps1') | Should -BeLessThan $names.IndexOf('zz-starship.ps1')
     }
 
     It 'hashes the tool fragments too' {
@@ -67,8 +78,10 @@ Describe 'deployed fragments' {
         $none = Get-ManagedPath -Source $root -Data @{ profiles = @() }
 
         $none | Should -Not -Contain '.profile/tools/bat.ps1'
+        $none | Should -Not -Contain '.profile/tools/zz-starship.ps1'
         $none | Should -Contain '.profile/tools/chezmoi.ps1'
         Get-ManagedPath -Source $root | Should -Contain '.profile/tools/bat.ps1'
+        Get-ManagedPath -Source $root | Should -Contain '.profile/tools/zz-starship.ps1'
     }
 }
 

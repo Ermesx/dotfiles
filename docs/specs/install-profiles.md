@@ -133,9 +133,10 @@ showed (marked **[added]**).
   excludes `.profile/tools/<tool>.ps1` otherwise, and the profile template dot-sources only the fragments of selected
   tools. **[added]** The profile today dot-sources by a glob over the *source* folder, so an ignore rule alone would
   leave a dot-source of a file that was never deployed.
-- **R20** Load order is kept: general fragments first, then tool fragments, `starship` before `zoxide`, `zoxide` last
-  (both hook the prompt; zoxide's docs ask to be initialized last). The "Pofiles hashes" block covers the tool
-  fragments too, so `$PROFILE` changes when a fragment changes.
+- **R20** Load order is kept: general fragments first, then tool fragments in file-name order, `starship` before
+  `zoxide`, `zoxide` last (both hook the prompt; zoxide's docs ask to be initialized last). The files are named
+  `zz-starship.ps1` and `zz-zoxide.ps1`: the `zz-` prefix sorts them after the others and is not part of the tool
+  name. The "Pofiles hashes" block covers the tool fragments too, so `$PROFILE` changes when a fragment changes.
 - **R21** `check-updates.ps1.tmpl` renders `Apps` and `Modules` from the view (`tools` of `scoop` items, `modules`).
 - **R22** `Complete-UserSetup` renders its WSL part only when the view's `wsl` is not empty; the SSH part is unchanged.
 
