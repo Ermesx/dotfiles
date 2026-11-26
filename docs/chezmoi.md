@@ -30,6 +30,8 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
   `include`.
 - `.ps1` scripts run through `pwsh -NoLogo -NoProfile` (`[interpreters.ps1]` in `home/.chezmoi.toml.tmpl`), so they
   cannot rely on the PowerShell profile.
+- `home/.chezmoiversion` sets the minimum chezmoi version (2.60.0, where promptMultichoiceOnce appeared);
+  an older chezmoi stops with a clear message instead of a template parse error.
 
 ## Encryption
 
