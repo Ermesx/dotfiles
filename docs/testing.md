@@ -71,9 +71,11 @@ The runner is elevated, so CI does **not** prove that apply works without admin;
   points to a host path.
 - Log in to the VM window as `dotfiles` and run
   `powershell -ExecutionPolicy Bypass -File C:\vagrant\run-tests.ps1 -BRANCH <branch>`; answer the key passphrase.
-  Select profiles with `-Profiles shell,sdk -Picks @{ ai = 'claude-code' }` (passed to `chezmoi init` as
-  `DOTFILES_PROFILES` / `DOTFILES_PICKS_<PROFILE>`); without them init prompts. The runner also installs Pester for
-  `pwsh`.
+  Select profiles with `-Profiles shell,sdk,ai -Picks 'ai=claude-code'` (passed to `chezmoi init` as
+  `DOTFILES_PROFILES` / `DOTFILES_PICKS_<PROFILE>`); without them init prompts. Both are plain strings, as `-File`
+  passes every argument as one: profiles separated by `,`, picks as `profile=label,label` parts separated by `;`
+  (`-Picks 'ai=claude-code;apps=rider,postman'`). The runner clears `DOTFILES_*` from the session first, then sets the
+  ones of this run, and also installs Pester for `pwsh`.
   `run-tests.ps1` replaces `~\.local\share\chezmoi` with a fresh copy of `C:\dotfiles-src` on every run (uncommitted
   changes included), so `chezmoi init` skips the clone; for the `vagrant` account the share in its profile is used as before.
 - `run-tests.ps1` downloads only `install.ps1` from GitHub (`.../refs/heads/<branch>/install.ps1`), so push changes
