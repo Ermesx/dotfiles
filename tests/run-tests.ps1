@@ -1,13 +1,39 @@
-# Profile selection (docs/specs/install-profiles.md), passed to chezmoi init as process-scoped environment variables:
-#   -Profiles shell,sdk,ai          -> DOTFILES_PROFILES ('base' alone = only base; omitted: every profile on a
-#                                      fresh VM, the selection stored by the previous run on a re-run)
-#   -Picks @{ ai = 'claude-code' }  -> DOTFILES_PICKS_AI (a pick profile without an entry takes all its labels)
+# Profile selection (docs/specs/install-profiles.md), passed to chezmoi init as process-scoped environment variables.
+# Both parameters are strings, as every argument is one under `powershell -File`:
+#   -Profiles shell,sdk,ai              -> DOTFILES_PROFILES ('base' alone = only base; omitted: chezmoi init prompts,
+#                                          the default being every profile, or the stored selection on a re-run)
+#   -Picks 'ai=claude-code;apps=rider,postman'
+#                                       -> DOTFILES_PICKS_AI, DOTFILES_PICKS_APPS: profiles separated by ';', then
+#                                          profile=labels with labels separated by ','. A pick profile without an
+#                                          entry takes all its labels.
+# DOTFILES_* variables already in the session are removed first, so a run never inherits an earlier one.
 param (
     [string]$BRANCH = 'develop',
-    [string[]]$Profiles,
-    [hashtable]$Picks
+    [string]$Profiles,
+    [string]$Picks
 )
+
+# 'ai=claude-code;apps=rider,postman' -> @{ DOTFILES_PICKS_AI = 'claude-code'; DOTFILES_PICKS_APPS = 'rider,postman' }
+function ConvertTo-PickEnvironment([string]$Picks) {
+    $environment = @{}
+    foreach ($part in $Picks -split ';' | Where-Object { $_.Trim() }) {
+        $name, $labels = $part -split '=', 2
+        if ($null -eq $labels -or -not $name.Trim() -or -not $labels.Trim()) {
+            throw "Invalid -Picks part '$($part.Trim())': expected profile=label[,label] (parts separated by ';')"
+        }
+        $environment["DOTFILES_PICKS_$($name.Trim().ToUpper())"] = (($labels -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -join ',')
+    }
+    $environment
+}
+
 $ErrorActionPreference = "Stop"
+
+# Process scope only: the selection must not leak into the VM's user environment, nor a previous run's into this one
+Remove-Item env:DOTFILES_PROFILES -ErrorAction Ignore
+Get-ChildItem env: | Where-Object Name -like 'DOTFILES_PICKS_*' | ForEach-Object { Remove-Item "env:$($_.Name)" }
+$pickEnvironment = ConvertTo-PickEnvironment $Picks
+if ($Profiles) { $env:DOTFILES_PROFILES = ($Profiles -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -join ',' }
+foreach ($name in $pickEnvironment.Keys) { Set-Item "env:$name" $pickEnvironment[$name] }
 
 # Set environment variable to indicate we are in a Vagrant environment
 [System.Environment]::SetEnvironmentVariable("VAGRANT", "1", "User")
@@ -23,10 +49,6 @@ if ($env:USERNAME -ne 'vagrant' -and (Test-Path 'C:\dotfiles-src')) {
     New-Item -ItemType Directory -Force (Split-Path $source) | Out-Null
     Copy-Item 'C:\dotfiles-src' $source -Recurse -Force
 }
-
-# Process scope only: the selection must not leak into the VM's user environment
-if ($Profiles) { $env:DOTFILES_PROFILES = $Profiles -join ',' }
-foreach ($key in $Picks.Keys) { Set-Item "env:DOTFILES_PICKS_$($key.ToUpper())" (@($Picks[$key]) -join ',') }
 
 Write-Host "Install dotfiles:" -ForegroundColor Cyan
 $script = "https://raw.githubusercontent.com/Ermesx/dotfiles/refs/heads/$BRANCH/install.ps1"
