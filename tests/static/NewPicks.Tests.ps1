@@ -1,6 +1,6 @@
 #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '6.0.0' }
 
-# The after-apply notice lists items added to a pick profile since the last init (R35); it renders empty when there are none
+# The after-apply notice lists items added to a pick profile since the last init; it renders empty when there are none
 BeforeAll {
     Import-Module "$PSScriptRoot/StaticChecks.psm1" -Force
     $root = Resolve-Path "$PSScriptRoot/../.."

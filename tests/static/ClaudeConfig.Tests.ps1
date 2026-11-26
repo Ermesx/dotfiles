@@ -1,6 +1,6 @@
 #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '6.0.0' }
 
-# install-profiles R23-R24: Claude configuration and lazygit's AI commit command only with claude-code
+# Claude configuration and lazygit's AI commit command only with claude-code
 BeforeAll {
     Import-Module "$PSScriptRoot/StaticChecks.psm1" -Force
     $root = Resolve-Path "$PSScriptRoot/../.."

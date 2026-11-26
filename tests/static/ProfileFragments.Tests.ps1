@@ -1,6 +1,6 @@
 #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '6.0.0' }
 
-# install-profiles R17-R22: one PowerShell profile fragment per tool, loaded only for selected tools
+# One PowerShell profile fragment per tool, loaded only for selected tools
 BeforeAll {
     Import-Module "$PSScriptRoot/StaticChecks.psm1" -Force
     $root = Resolve-Path "$PSScriptRoot/../.."
