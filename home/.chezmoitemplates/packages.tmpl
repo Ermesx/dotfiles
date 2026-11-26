@@ -15,8 +15,8 @@
   $view starts with an empty list per method so that a method nobody selects still reads as empty */ -}}
 {{- $names := list -}}
 {{- $view := dict -}}
-{{- range $source := $sources -}}
-{{-   range $name, $definition := $source -}}
+{{- range $sources -}}
+{{-   range $name, $definition := . -}}
 {{-     $names = append $names $name -}}
 {{-     range $method, $items := $definition -}}
 {{-       if not (has $method (list "pick" "wsl")) -}}
@@ -39,8 +39,8 @@
 {{-     $picks := dig "picks" $name (list) $ -}}
 {{-     $offered := dig "offered" $name (list) $ -}}
 {{-     $notOffered := list -}}
-{{-     range $source := $sources -}}
-{{-       $definition := dig $name (dict) $source -}}
+{{-     range $sources -}}
+{{-       $definition := dig $name (dict) . -}}
 {{-       $isPick := dig "pick" false $definition -}}
 {{-       range $method, $items := $definition -}}
 {{-         if eq $method "wsl" -}}
@@ -51,34 +51,22 @@
 {{-             if or (not $isPick) (not $hasSelection) (has $label $picks) -}}
 {{-               $view = set $view $method (append (index $view $method) $item) -}}
 {{-             end -}}
-{{-             if and $isPick $hasOffered (not (has $label $offered)) -}}
-{{-               $notOffered = append $notOffered $label -}}
-{{-             end -}}
+{{-             if and $isPick $hasOffered (not (has $label $offered)) }}{{ $notOffered = append $notOffered $label }}{{ end -}}
 {{-           end -}}
 {{-         end -}}
 {{-       end -}}
 {{-     end -}}
-{{-     if $notOffered -}}
-{{-       $pending = set $pending $name ($notOffered | uniq) -}}
-{{-     end -}}
+{{-     if $notOffered }}{{ $pending = set $pending $name ($notOffered | uniq) }}{{ end -}}
 {{-   end -}}
 {{- end -}}
 
 {{- /* tools: the label of every selected item (Scoop app without its bucket, module, dotnet tool, yazi plugin) */ -}}
 {{- $tools := list -}}
-{{- range $item := dig "scoop" (list) $view -}}
-{{-   $tools = append $tools (splitList "/" $item | last) -}}
-{{- end -}}
-{{- range $method := list "modules" "dotnet_tools" "yazi_plugins" -}}
-{{-   range $item := dig $method (list) $view -}}
-{{-     $tools = append $tools $item -}}
-{{-   end -}}
-{{- end -}}
+{{- range dig "scoop" (list) $view }}{{ $tools = append $tools (splitList "/" . | last) }}{{ end -}}
+{{- range list "modules" "dotnet_tools" "yazi_plugins" }}{{ $tools = concat $tools (dig . (list) $view) }}{{ end -}}
 
 {{- /* Each item once, then the keys that are not item lists */ -}}
-{{- range $method := keys $view -}}
-{{-   $view = set $view $method (index $view $method | uniq) -}}
-{{- end -}}
+{{- range $method := keys $view }}{{ $view = set $view $method (index $view $method | uniq) }}{{ end -}}
 {{- $view = set $view "profiles" $profiles -}}
 {{- $view = set $view "wsl" $wslDistro -}}
 {{- /* The Windows WSL platform (admin step) is needed by a distro or by Rancher Desktop; the distro itself comes with sdk */ -}}

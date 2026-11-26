@@ -2,7 +2,7 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- if $v.pending -}}
 {{-   $width := 0 -}}
-{{-   range $name, $labels := $v.pending }}{{ if gt (len $name) $width }}{{ $width = len $name }}{{ end }}{{ end -}}
+{{-   range keys $v.pending }}{{ $width = max $width (len .) }}{{ end -}}
 {{-   $format := printf "    %%-%ds %%s" (add1 $width) }}
 # Lists what a pick profile gained since the choice was made; never installs and never fails apply.
 Write-Host "► New items to choose from (not installed):" -ForegroundColor Yellow

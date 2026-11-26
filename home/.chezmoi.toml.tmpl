@@ -9,20 +9,14 @@
 {{- $packages := (include ".chezmoidata/packages.yaml" | fromYaml).packages -}}
 {{- $sources := list (dig "global" "profiles" (dict) $packages) (dig .chezmoi.os "profiles" (dict) $packages) -}}
 {{- $names := list -}}
-{{- range $source := $sources -}}
-{{-   range $name, $definition := $source -}}
-{{-     $names = append $names $name -}}
-{{-   end -}}
-{{- end -}}
+{{- range $sources }}{{ $names = concat $names (keys .) }}{{ end -}}
 {{- $names = $names | uniq | sortAlpha -}}
 {{- $choices := without $names "base" -}}
 
 {{- /* Asked: this init was run with --prompt (promptMultichoiceOnce asks only then); exact match, --promptDefaults alone is not it */ -}}
 {{- $asked := false -}}
-{{- range $arg := .chezmoi.args -}}
-{{-   if eq $arg "--prompt" -}}
-{{-     $asked = true -}}
-{{-   else if and (hasPrefix "--prompt=" $arg) (not (has (lower (trimPrefix "--prompt=" $arg)) (list "false" "f" "0"))) -}}
+{{- range .chezmoi.args -}}
+{{-   if or (eq . "--prompt") (and (hasPrefix "--prompt=" .) (not (has (lower (trimPrefix "--prompt=" .)) (list "false" "f" "0")))) -}}
 {{-     $asked = true -}}
 {{-   end -}}
 {{- end -}}
@@ -31,8 +25,8 @@
   A stored name no longer in packages.yaml is dropped: as a default it would fail the prompt, and it is never written back. */ -}}
 {{- $selected := list -}}
 {{- if env "DOTFILES_PROFILES" -}}
-{{-   range $name := splitList "," (env "DOTFILES_PROFILES") -}}
-{{-     $name = trim $name -}}
+{{-   range splitList "," (env "DOTFILES_PROFILES") -}}
+{{-     $name := trim . -}}
 {{-     if not (has $name (list "" "base")) -}}
 {{-       if not (has $name $choices) -}}
 {{-         fail (printf "DOTFILES_PROFILES: unknown profile %q; choose from %s" $name (join ", " $choices)) -}}
@@ -44,16 +38,12 @@
 {{-   $default := $choices -}}
 {{-   if hasKey . "profiles" -}}
 {{-     $default = list -}}
-{{-     range $name := .profiles -}}
-{{-       if has $name $choices -}}
-{{-         $default = append $default $name -}}
-{{-       end -}}
+{{-     range .profiles -}}
+{{-       if has . $choices }}{{ $default = append $default . }}{{ end -}}
 {{-     end -}}
 {{-   end -}}
-{{-   range $name := promptMultichoiceOnce . "profiles" "Profiles" $choices $default -}}
-{{-     if has $name $choices -}}
-{{-       $selected = append $selected $name -}}
-{{-     end -}}
+{{-   range promptMultichoiceOnce . "profiles" "Profiles" $choices $default -}}
+{{-     if has . $choices }}{{ $selected = append $selected . }}{{ end -}}
 {{-   end -}}
 {{- end -}}
 {{- $selected = $selected | uniq -}}
@@ -69,77 +59,64 @@
 {{- /* The profile's item labels (the item without its bucket) and whether it is a pick profile */ -}}
 {{-   $labels := list -}}
 {{-   $isPick := false -}}
-{{-   range $source := $sources -}}
-{{-     $definition := dig $profile (dict) $source -}}
-{{-     if dig "pick" false $definition -}}
-{{-       $isPick = true -}}
-{{-     end -}}
+{{-   range $sources -}}
+{{-     $definition := dig $profile (dict) . -}}
+{{-     if dig "pick" false $definition }}{{ $isPick = true }}{{ end -}}
 {{-     range $method, $items := $definition -}}
 {{-       if not (has $method (list "pick" "wsl")) -}}
-{{-         range $item := $items -}}
-{{-           $labels = append $labels (splitList "/" $item | last) -}}
-{{-         end -}}
+{{-         range $items }}{{ $labels = append $labels (splitList "/" . | last) }}{{ end -}}
 {{-       end -}}
 {{-     end -}}
 {{-   end -}}
 
-{{-   if $isPick -}}
-{{-     $offered = set $offered $profile $labels -}}
-{{-     if has $profile $selected -}}
-{{-       $chosen := list -}}
-{{-       $picksVar := printf "DOTFILES_PICKS_%s" ($profile | upper) -}}
-{{-       if env $picksVar -}}
+{{-   if $isPick }}{{ $offered = set $offered $profile $labels }}{{ end -}}
+{{-   if and $isPick (has $profile $selected) -}}
+{{-     $chosen := list -}}
+{{-     $picksVar := printf "DOTFILES_PICKS_%s" ($profile | upper) -}}
+{{-     if env $picksVar -}}
 {{- /* Items named in DOTFILES_PICKS_<PROFILE> */ -}}
-{{-         range $label := splitList "," (env $picksVar) -}}
-{{-           $label = trim $label -}}
-{{-           if $label -}}
-{{-             if not (has $label $labels) -}}
-{{-               fail (printf "%s: unknown item %q; choose from %s" $picksVar $label (join ", " $labels)) -}}
-{{-             end -}}
-{{-             $chosen = append $chosen $label -}}
+{{-       range splitList "," (env $picksVar) -}}
+{{-         $label := trim . -}}
+{{-         if $label -}}
+{{-           if not (has $label $labels) -}}
+{{-             fail (printf "%s: unknown item %q; choose from %s" $picksVar $label (join ", " $labels)) -}}
 {{-           end -}}
-{{-         end -}}
-{{-       else if env "DOTFILES_PROFILES" -}}
-{{- /* Non-interactive run: never prompt, take every item */ -}}
-{{-         $chosen = $labels -}}
-{{-       else -}}
-{{- /* Prompt. Default: the stored picks plus the items not offered at the previous init; every item on a first init */ -}}
-{{-         $default := $labels -}}
-{{-         $storedPicks := dig "picks" (dict) $ -}}
-{{-         if hasKey $storedPicks $profile -}}
-{{-           $previouslyOffered := dig "offered" (dict) $ | dig $profile (list) -}}
-{{-           $default = list -}}
-{{-           range $label := index $storedPicks $profile -}}
-{{-             if has $label $labels -}}
-{{-               $default = append $default $label -}}
-{{-             end -}}
-{{-           end -}}
-{{-           range $label := $labels -}}
-{{-             if not (has $label $previouslyOffered) -}}
-{{-               $default = append $default $label -}}
-{{-             end -}}
-{{-           end -}}
-{{- /* Nothing is asked without --prompt: keep the stored offered (minus items that no longer exist) */ -}}
-{{-           if not $asked -}}
-{{-             $stillOffered := list -}}
-{{-             range $label := $previouslyOffered -}}
-{{-               if has $label $labels -}}
-{{-                 $stillOffered = append $stillOffered $label -}}
-{{-               end -}}
-{{-             end -}}
-{{-             $offered = set $offered $profile $stillOffered -}}
-{{-           end -}}
-{{-         end -}}
-{{-         range $label := promptMultichoiceOnce $ (printf "picks.%s" $profile) (printf "%s items" $profile) $labels $default -}}
-{{-           if has $label $labels -}}
-{{-             $chosen = append $chosen $label -}}
-{{-           end -}}
+{{-           $chosen = append $chosen $label -}}
 {{-         end -}}
 {{-       end -}}
-{{-       $picks = set $picks $profile ($chosen | uniq) -}}
+{{-     else if env "DOTFILES_PROFILES" -}}
+{{- /* Non-interactive run: never prompt, take every item */ -}}
+{{-       $chosen = $labels -}}
+{{-     else -}}
+{{- /* Prompt. Default: the stored picks plus the items not offered at the previous init; every item on a first init */ -}}
+{{-       $default := $labels -}}
+{{-       $storedPicks := dig "picks" (dict) $ -}}
+{{-       if hasKey $storedPicks $profile -}}
+{{-         $previouslyOffered := dig "offered" (dict) $ | dig $profile (list) -}}
+{{-         $default = list -}}
+{{-         range index $storedPicks $profile -}}
+{{-           if has . $labels }}{{ $default = append $default . }}{{ end -}}
+{{-         end -}}
+{{-         range $labels -}}
+{{-           if not (has . $previouslyOffered) }}{{ $default = append $default . }}{{ end -}}
+{{-         end -}}
+{{- /* Nothing is asked without --prompt: keep the stored offered (minus items that no longer exist) */ -}}
+{{-         if not $asked -}}
+{{-           $stillOffered := list -}}
+{{-           range $previouslyOffered -}}
+{{-             if has . $labels }}{{ $stillOffered = append $stillOffered . }}{{ end -}}
+{{-           end -}}
+{{-           $offered = set $offered $profile $stillOffered -}}
+{{-         end -}}
+{{-       end -}}
+{{-       range promptMultichoiceOnce $ (printf "picks.%s" $profile) (printf "%s items" $profile) $labels $default -}}
+{{-         if has . $labels }}{{ $chosen = append $chosen . }}{{ end -}}
+{{-       end -}}
 {{-     end -}}
+{{-     $picks = set $picks $profile ($chosen | uniq) -}}
 {{-   end -}}
 {{- end -}}
+
 progress = true
 encryption = "age"
 

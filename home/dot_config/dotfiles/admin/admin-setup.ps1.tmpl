@@ -1,6 +1,5 @@
 {{- /* enable-wsl is deployed and run only where a selected profile declares a distro or Rancher Desktop is selected */ -}}
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
-{{- $wslPlatform := $v.wsl_platform -}}
 # Runs every admin-only setup script in this folder. Run as administrator (PowerShell 7).
 # Review the scripts it runs (two, or three with WSL): they sit in a user-writable folder.
 $ErrorActionPreference = 'Stop'
@@ -8,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 # Dot-sourced from this script's folder: works from any current directory, and Stop applies to them directly
 . "$PSScriptRoot\enable-developer-mode.ps1"
 . "$PSScriptRoot\enable-ssh-agent.ps1"
-{{- if $wslPlatform }}
+{{- if $v.wsl_platform }}
 . "$PSScriptRoot\enable-wsl.ps1"
 {{- end }}
 

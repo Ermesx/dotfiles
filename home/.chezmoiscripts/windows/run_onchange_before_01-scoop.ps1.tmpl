@@ -1,9 +1,7 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- $buckets := list -}}
 {{- range $v.scoop -}}
-{{-   if contains "/" . -}}
-{{-     $buckets = append $buckets (index (splitList "/" .) 0) -}}
-{{-   end -}}
+{{-   if contains "/" . }}{{ $buckets = append $buckets (splitList "/" . | first) }}{{ end -}}
 {{- end -}}
 Write-Host "► Adding Scoop buckets" -ForegroundColor Cyan
 {{- range $buckets | uniq }}
