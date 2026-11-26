@@ -1,6 +1,6 @@
 {{- /* WSL is asked for only where a selected profile declares a distro or Rancher Desktop is selected */ -}}
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
-{{- $wslNeeded := $v.wsl_needed -}}
+{{- $wslPlatform := $v.wsl_platform -}}
 # Reminds that the admin-only setup is missing; never runs it and never fails apply.
 # The probes match the ones the user-side scripts use to skip, so the two never disagree.
 
@@ -8,7 +8,7 @@
 $devMode = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' `
     -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue).AllowDevelopmentWithoutDevLicense -eq 1
 
-{{ if $wslNeeded -}}
+{{ if $wslPlatform -}}
 # WSL platform: same check as run_once_before_install-wsl
 wsl --status *> $null
 $wsl = $LASTEXITCODE -eq 0

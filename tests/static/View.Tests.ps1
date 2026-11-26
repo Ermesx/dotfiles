@@ -77,10 +77,10 @@ Describe 'packages view' {
         $full.wsl | Should -BeExactly 'Ubuntu-24.04'
     }
 
-    It 'needs WSL for a distro or Rancher Desktop' {
-        (Get-PackagesView -Source $root -Data @{ profiles = @('shell') }).wsl_needed | Should -BeFalse
-        (Get-PackagesView -Source $root -Data @{ profiles = @('sdk') }).wsl_needed | Should -BeTrue
-        (Get-PackagesView -Source $root -Data @{ profiles = @('containers') }).wsl_needed | Should -BeTrue
+    It 'needs the WSL platform for a distro or Rancher Desktop' {
+        (Get-PackagesView -Source $root -Data @{ profiles = @('shell') }).wsl_platform | Should -BeFalse
+        (Get-PackagesView -Source $root -Data @{ profiles = @('sdk') }).wsl_platform | Should -BeTrue
+        (Get-PackagesView -Source $root -Data @{ profiles = @('containers') }).wsl_platform | Should -BeTrue
     }
 
     It 'lists items not offered yet as pending' {

@@ -91,7 +91,7 @@ Every consumer (install scripts, profile template, tests, the admin step) reads
 | `profiles` | Selected profile names, `base` included |
 | `scoop`, `modules`, `dotnet_tools`, `yazi_plugins` | Items of the selected profiles and picks, global and the current OS merged |
 | `wsl` | The WSL distro, or an empty string |
-| `wsl_needed` | `true` when WSL is needed: a distro is set or `rancher-desktop` is selected |
+| `wsl_platform` | `true` when the Windows WSL platform (the admin step) is needed: a distro is set or `rancher-desktop` is selected. The Ubuntu distro itself still comes only with `sdk` |
 | `tools` | Labels of every selected item: Scoop app name (no bucket), module, dotnet tool and yazi plugin |
 | `pending` | Per `pick` profile, the items not yet in `offered` |
 
