@@ -1,5 +1,6 @@
 # Profile selection (docs/specs/install-profiles.md), passed to chezmoi init as process-scoped environment variables.
-# Both parameters are strings, as every argument is one under `powershell -File`:
+# -Picks is a string and -Profiles a string array: under `powershell -File` every argument is one string (`shell,sdk,ai`
+# arrives as a single element), in the console it is an array; both give the same selection:
 #   -Profiles shell,sdk,ai              -> DOTFILES_PROFILES ('base' alone = only base; omitted: chezmoi init prompts,
 #                                          the default being every profile, or the stored selection on a re-run)
 #   -Picks 'ai=claude-code;apps=rider,postman'
@@ -9,9 +10,14 @@
 # DOTFILES_* variables already in the session are removed first, so a run never inherits an earlier one.
 param (
     [string]$BRANCH = 'develop',
-    [string]$Profiles,
+    [string[]]$Profiles,
     [string]$Picks
 )
+
+# @('shell,sdk,ai') or @('shell','sdk','ai') -> 'shell,sdk,ai'
+function ConvertTo-ProfileList([string[]]$Profiles) {
+    ($Profiles -join ',' -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -join ','
+}
 
 # 'ai=claude-code;apps=rider,postman' -> @{ DOTFILES_PICKS_AI = 'claude-code'; DOTFILES_PICKS_APPS = 'rider,postman' }
 function ConvertTo-PickEnvironment([string]$Picks) {
@@ -32,7 +38,7 @@ $ErrorActionPreference = "Stop"
 Remove-Item env:DOTFILES_PROFILES -ErrorAction Ignore
 Get-ChildItem env: | Where-Object Name -like 'DOTFILES_PICKS_*' | ForEach-Object { Remove-Item "env:$($_.Name)" }
 $pickEnvironment = ConvertTo-PickEnvironment $Picks
-if ($Profiles) { $env:DOTFILES_PROFILES = ($Profiles -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -join ',' }
+if ($Profiles) { $env:DOTFILES_PROFILES = ConvertTo-ProfileList $Profiles }
 foreach ($name in $pickEnvironment.Keys) { Set-Item "env:$name" $pickEnvironment[$name] }
 
 # Set environment variable to indicate we are in a Vagrant environment

@@ -34,7 +34,7 @@ Describe 'profile template' {
         Get-SourcedTool $rendered | Should -Contain 'delta'
         Get-SourcedTool $rendered | Should -Not -Contain 'bat'
         Get-SourcedTool $rendered | Should -Not -Contain 'PSfzf'
-    } 
+    }
 
     It 'dot-sources every tool fragment in the full view' {
         # The load order is a fixed list in the template: a fragment missing from it is deployed but never loaded

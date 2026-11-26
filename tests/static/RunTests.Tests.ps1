@@ -6,17 +6,25 @@ BeforeAll {
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$null, [ref]$null)
     $function = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'ConvertTo-PickEnvironment' }, $true)
     . ([scriptblock]::Create($function.Extent.Text))
+    $function = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'ConvertTo-ProfileList' }, $true)
+    . ([scriptblock]::Create($function.Extent.Text))
 }
 
 Describe 'run-tests.ps1 parameters' {
 
-    It 'takes -Profiles and -Picks as strings, the only type -File passes' {
-        $types = $ast.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -in 'Profiles', 'Picks' } |
-            ForEach-Object { $_.StaticType.Name }
+    It 'types -Profiles as String[] (console) and -Picks as String (-File passes strings)' {
+        $types = @{}
+        $ast.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -in 'Profiles', 'Picks' } |
+            ForEach-Object { $types[$_.Name.VariablePath.UserPath] = $_.StaticType.Name }
 
-        $types | Should -HaveCount 2
-        $types | Should -Not -Contain 'Hashtable'
-        $types | Should -Not -Contain 'String[]'
+        $types['Profiles'] | Should -Be 'String[]'
+        $types['Picks'] | Should -Be 'String'
+    }
+
+    It 'gives the same profile list for -File (one element) and the console (an array)' {
+        ConvertTo-ProfileList @('shell,sdk,ai') | Should -BeExactly 'shell,sdk,ai'
+        ConvertTo-ProfileList @('shell', 'sdk', 'ai') | Should -BeExactly 'shell,sdk,ai'
+        ConvertTo-ProfileList @('shell, sdk', 'ai') | Should -BeExactly 'shell,sdk,ai'
     }
 
     It 'turns profile=labels parts into one picks variable per profile' {
