@@ -88,3 +88,14 @@ Describe 'update check and user setup' {
         $rendered | Should -Match 'ssh-add'
     }
 }
+
+Describe 'Git location' {
+
+    It 'has no path into C:\Program Files\Git under home/ (Git comes from Scoop)' {
+        $hits = Get-ChildItem (Join-Path $root 'home') -Recurse -File |
+            Select-String -SimpleMatch 'Program Files\Git' -List |
+            ForEach-Object { $_.Path }
+
+        $hits | Should -BeNullOrEmpty
+    }
+}

@@ -1,6 +1,6 @@
 # Aliases
 Set-Alias gi gitignore -Force
-Set-Alias file 'C:\Program Files\Git\usr\bin\file.exe'
+Set-Alias file (Join-Path $gitRoot 'usr\bin\file.exe')
 
 # winget
 Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
