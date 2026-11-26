@@ -48,13 +48,14 @@ BeforeAll {
     }
 
     # A machine that chose rider out of apps when only rider existed: the other apps items are new since
+    # (TOML allows indented keys; only the closing '@ of a here-string must stay at column 0)
     $narrowOffer = @'
-[data]
-profiles = ["apps"]
-[data.picks]
-apps = ["rider"]
-[data.offered]
-apps = ["rider"]
+    [data]
+    profiles = ["apps"]
+    [data.picks]
+    apps = ["rider"]
+    [data.offered]
+    apps = ["rider"]
 '@
 }
 
@@ -93,12 +94,12 @@ Describe 'selection at init' {
     It 'takes every pick when DOTFILES_PROFILES is set without DOTFILES_PICKS' {
         # A stored answer makes the test discriminating: a prompt would return it, the environment mode must not
         $existing = @'
-[data]
-profiles = ["apps"]
-[data.picks]
-apps = ["rider"]
-[data.offered]
-apps = ["vscode", "rider", "googlechrome", "postman", "vagrant"]
+        [data]
+        profiles = ["apps"]
+        [data.picks]
+        apps = ["rider"]
+        [data.offered]
+        apps = ["vscode", "rider", "googlechrome", "postman", "vagrant"]
 '@
         $result = Invoke-InitTemplate -Env @{ DOTFILES_PROFILES = 'apps' } -Existing $existing
 
@@ -139,12 +140,12 @@ apps = ["vscode", "rider", "googlechrome", "postman", "vagrant"]
 
     It 'keeps stored picks and preselects new items with --promptDefaults' {
         $existing = @'
-[data]
-profiles = ["apps"]
-[data.picks]
-apps = ["rider"]
-[data.offered]
-apps = ["rider", "googlechrome", "vscode"]
+        [data]
+        profiles = ["apps"]
+        [data.picks]
+        apps = ["rider"]
+        [data.offered]
+        apps = ["rider", "googlechrome", "vscode"]
 '@
         $result = Invoke-InitTemplate -Existing $existing -Flags '--prompt', '--promptDefaults'
 
@@ -176,12 +177,12 @@ apps = ["rider", "googlechrome", "vscode"]
 
     It 'drops a stored pick that no longer exists, under --prompt' {
         $existing = @"
-[data]
-profiles = ["apps"]
-[data.picks]
-apps = ["rider", "removed"]
-[data.offered]
-apps = [$(ConvertTo-TomlList ($appsLabels + 'removed'))]
+        [data]
+        profiles = ["apps"]
+        [data.picks]
+        apps = ["rider", "removed"]
+        [data.offered]
+        apps = [$(ConvertTo-TomlList ($appsLabels + 'removed'))]
 "@
         $result = Invoke-InitTemplate -Existing $existing -Flags '--prompt', '--promptDefaults'
 
