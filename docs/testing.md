@@ -38,19 +38,24 @@ value keeps them managed, so a stray `CI=1` on a real machine cannot silently dr
 decrypt (`{{ … decrypt … }}` or `chezmoi age decrypt`), when one of chezmoi's own files (config template, data,
 externals, ignore files, shared templates) does, or when the set of targets the block drops differs from this table. **Adding a decryption point** (e.g. a new
 encrypted file or a template that decrypts): add its target to the block and to the test's expected list, then to this table. The workflow also fails if
-an age identity, `~/.ssh/id_ed25519`, `~/.config/git/user.gitconfig`, or a git `user.email` / `user.signingkey`
-(read with `--includes`) exists on the runner.
+an age identity, `~/.ssh/id_ed25519`, `~/.config/git/user.gitconfig`, `~/.config/git/allowed_signers`, a git
+`user.signingkey` or a git `user.email` (read with `--includes`) exists on the runner. The one `user.email` it allows
+is the test work email the apply step passes (`ci-work@example.invalid`, not a secret): a decrypted real email
+differs from it and still fails the step.
 
 ## CI
 
 One job on `windows-latest`, no secrets, `contents: read`. Order: assert no identity → Scoop (`irm | iex`; its
 installer allows the elevated runner when `CI` is set) → chezmoi and Pester 6 → static and unit tests → apply with
-`install.ps1` → post-apply tests (`Installed-Apps-Modules.Tests.ps1`, `Profile.Tests.ps1`) → assert nothing was
-decrypted. The static step runs first so the no-decryption guard stops a bad change before anything is applied.
+`install.ps1` → post-apply tests (`Installed-Apps-Modules.Tests.ps1`, `Profile.Tests.ps1`,
+`GitIdentityApplied.Tests.ps1`) → assert nothing was decrypted. The static step runs first so the no-decryption guard stops a bad change before anything is applied.
 
 Apply works like the VM: the checkout is copied to `~/.local/share/chezmoi`, then `install.ps1` runs. `chezmoi init`
 finds a git repo there and skips the clone, so the PR's commit is applied, not the default branch. Scoop is already
-installed, so `install.ps1` skips that part; with `CI=true` it passes `--no-tty` to `chezmoi init` (no TTY on a runner).
+installed, so `install.ps1` skips that part; with `CI=true` it passes `--no-tty` to `chezmoi init` (no TTY on a runner;
+answers are read from stdin, so a prompt there would fail with EOF). The apply step sets
+`DOTFILES_GIT_WORK_EMAIL=ci-work@example.invalid`, so the runner is a work machine and the work-email path runs end to
+end.
 
 Speed:
 - Every step runs with `pwsh -NoProfile`, as the built-in `pwsh` shell loads the profile, which apply installs.
@@ -74,14 +79,18 @@ The runner is elevated, so CI does **not** prove that apply works without admin;
   Select profiles with `-Profiles shell,sdk,ai -Picks 'ai=claude-code'` (passed to `chezmoi init` as
   `DOTFILES_PROFILES` / `DOTFILES_PICKS_<PROFILE>`); without them init prompts. Under `-File` every argument is one string, so
   profiles are separated by `,` (a console array works too), picks as `profile=label,label` parts separated by `;`
-  (`-Picks 'ai=claude-code;apps=rider,postman'`). The runner clears `DOTFILES_*` from the session first, then sets the
-  ones of this run, and also installs Pester for `pwsh`.
+  (`-Picks 'ai=claude-code;apps=rider,postman'`). `-WorkEmail <email>` makes the VM a work machine
+  (`DOTFILES_GIT_WORK_EMAIL`); without it the VM is private, or keeps the stored answer. The runner clears `DOTFILES_*`
+  from the session first, then sets the ones of this run, and also installs Pester for `pwsh`.
   `run-tests.ps1` replaces `~\.local\share\chezmoi` with a fresh copy of `C:\dotfiles-src` on every run (uncommitted
   changes included), so `chezmoi init` skips the clone; for the `vagrant` account the share in its profile is used as before.
 - `run-tests.ps1` downloads only `install.ps1` from GitHub (`.../refs/heads/<branch>/install.ps1`), so push changes
   to `install.ps1` before testing them.
 - After the run, check: all Pester tests pass, no UAC prompt, `git config user.name` / `user.email` are set and a
   signed commit verifies (never print `user.signingkey`), the apply output ends with the administrator reminder.
+  With `-WorkEmail`, also: in a scratch repo `user.email` is the work email for a non-github.com remote and for no
+  remote, and the personal email for `https://github.com/…`, `git@github.com:…` and `ssh://git@github.com/…`; a
+  signed commit under each email passes `git verify-commit`.
 - Run the admin scripts from a second, administrator account, as an IT administrator would.
 
 Tests under `tests/windows/` that check a completed install (`Installed-Apps-Modules.Tests.ps1`,

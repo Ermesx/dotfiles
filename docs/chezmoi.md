@@ -40,6 +40,13 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
 - The git identity and signing key live in `home/dot_config/git/user.gitconfig.tmpl` (decrypted), which
   `.gitconfig` pulls in with `[include]`; `.gitconfig` itself never decrypts. Commits are signed with the SSH key;
   `home/dot_config/git/allowed_signers.tmpl` (decrypted) lists it so git can verify signatures locally.
+- The work email is not repo data. `chezmoi init` asks for it once on a work machine; an empty answer, an accidental
+  Enter included, marks a private machine, where nothing work-related is written. It is stored only in that
+  machine's chezmoi config (`[data.git] work_email`) and read by `home/dot_gitconfig.tmpl`, which then makes it the
+  default `user.email` and gives any github.com remote the personal identity back. To change the answer:
+  `chezmoi init --prompt`. A non-interactive run (CI, the VM, an unattended install) passes it in
+  `DOTFILES_GIT_WORK_EMAIL`; with `DOTFILES_PROFILES` set and no variable the prompt is skipped and the stored value
+  is kept.
 - With `CI=true` (what GitHub sets; any other value, e.g. a stray `CI=1`, keeps everything managed), the
   `{{ if eq (env "CI") "true" }}` block in `home/.chezmoiignore` drops every target that needs decryption. A
   new decryption point needs an entry there; `tests/static/NoDecryptInCi.Tests.ps1` fails until it has one
