@@ -36,7 +36,8 @@
 
 **Files:**
 - Modify: `home/.chezmoi.toml.tmpl` (compute before `[data]`, write `[data.git]` after it)
-- Create: `tests/static/GitIdentity.Tests.ps1`
+- Modify: `tests/static/Selection.Tests.ps1` (its helper stores an empty work email: otherwise every init without `DOTFILES_PROFILES` hits the new prompt and fails with EOF under `--no-tty`)
+- Create: `tests/static/GitIdentity.Tests.ps1` (its helper stores `profiles` for the same reason, and pipes one Enter to stdin)
 
 **Interfaces:**
 - Produces: `.git.work_email` (string, `""` on a private machine) in chezmoi data; test helper `Invoke-Init([hashtable]$Env = @{}, [string]$Existing = '') -> [pscustomobject]@{ Output; ExitCode }`.
@@ -48,7 +49,7 @@
   | `takes the email from the variable` | `DOTFILES_GIT_WORK_EMAIL=first.last+work@corp.example` | `"first.last+work@corp.example"` |
   | `trims the variable` | `'  w@x  '` | `"w@x"` |
   | `treats spaces as a private machine` | `'   '` | `""` |
-  | `defaults to empty without any variable` | none | `""` |
+  | `defaults to empty when the prompt is answered with Enter` | none; stdin is one Enter (`--no-tty` reads answers from stdin, EOF fails) | `""` |
   | `skips the prompt under DOTFILES_PROFILES` | `DOTFILES_PROFILES=shell` | `""` |
   | `keeps a stored email under DOTFILES_PROFILES` | stored `w@x`, `DOTFILES_PROFILES=shell` | `"w@x"` |
   | `lets the variable override a stored email` | stored `w@x`, variable `v@x` | `"v@x"` |

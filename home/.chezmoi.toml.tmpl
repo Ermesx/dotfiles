@@ -117,6 +117,18 @@
 {{-   end -}}
 {{- end -}}
 
+{{- /* Work email (#60): the machine type. Empty = private machine, nothing work-related in the git config.
+  DOTFILES_GIT_WORK_EMAIL (CI, VM, unattended install) wins; otherwise a run with DOTFILES_PROFILES is non-interactive,
+  like the picks above, and keeps the stored value instead of asking: a real `chezmoi init` without --no-tty waits on
+  a prompt even with stdin closed. Anything else asks, once (promptStringOnce). */ -}}
+{{- $workEmail := dig "git" "work_email" "" . -}}
+{{- if env "DOTFILES_GIT_WORK_EMAIL" -}}
+{{-   $workEmail = env "DOTFILES_GIT_WORK_EMAIL" -}}
+{{- else if not (env "DOTFILES_PROFILES") -}}
+{{-   $workEmail = promptStringOnce . "git.work_email" "Work email (empty on a private machine)" "" -}}
+{{- end -}}
+{{- $workEmail = trim $workEmail -}}
+
 progress = true
 encryption = "age"
 
@@ -149,4 +161,6 @@ profiles = {{ $selected | toJson }}
 {{ end }}
 [data.offered]
 {{ range $profile, $labels := $offered }}{{ $profile }} = {{ $labels | toJson }}
-{{ end -}}
+{{ end }}
+[data.git]
+work_email = {{ $workEmail | quote }}

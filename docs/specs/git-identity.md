@@ -27,7 +27,7 @@ Plan: [`git-identity.plan.md`](git-identity.plan.md)
 | F2 | Any remote counts, not only `origin` | same probe |
 | F3 | Later wins. `[include]` of the personal file, then `[user] email = <work>`, then the `includeIf` blocks re-including the personal file: work by default, personal on github.com. An `includeIf` placed before a later `[user] email` is overridden by it | probe |
 | F4 | `git verify-commit` finds the principal by **key**, not by the committer email, and reports the first matching line: a commit by either email is `G`; the label is the first principal. Without `allowedSignersFile`: `U`, exit 1 | probe with a throwaway key, both line orders |
-| F5 | A real `chezmoi init` **waits on a prompt even with stdin closed**; `init --no-tty` returns the default. `execute-template --init` also returns the default, so it proves nothing about `init`. `install.ps1` passes `--no-tty` only when `CI=true` (`install.ps1:29`); the VM runner and a manual run do not, so a prompt there must be skipped when the run is non-interactive | probes into a temp config and destination; `install.ps1:29-30` |
+| F5 | A real `chezmoi init` **waits on a prompt even with stdin closed**; `init --no-tty` reads the answers from stdin (an Enter accepts the default, a closed stdin is an `EOF` error, for `promptStringOnce` and `promptMultichoiceOnce` alike). `execute-template --init` returns the default without asking, so it proves nothing about `init`. `install.ps1` passes `--no-tty` only when `CI=true` (`install.ps1:29`); the VM runner and a manual run do not. So any run that must not ask has to skip the prompt, which is what `DOTFILES_PROFILES` and `DOTFILES_GIT_WORK_EMAIL` do | probes into a temp config and destination; `install.ps1:29-30` |
 | F6 | Rule of R1 on a real `init`: `DOTFILES_PROFILES` set, no email variable → `work_email = ""`, exit 0; `DOTFILES_GIT_WORK_EMAIL=w@x` → `"w@x"`; a later init with only `DOTFILES_PROFILES` keeps `"w@x"` | same probes |
 | F7 | `promptStringOnce . "git.work_email" …` stores under `[data.git]` and returns the stored answer on later inits | probe |
 | F8 | `Selection.Tests.ps1` and `NewPicks.Tests.ps1` assert exit codes and single fields of the written config, not the whole file | `grep` of `tests/static` |
@@ -104,6 +104,8 @@ Untouched: `user.gitconfig.tmpl`, `allowed_signers.tmpl`, `install.ps1`, `.encry
   is created on github.com, so nothing reaches it.
 - A repo with any github.com remote gets the personal email (F2).
 - Remote URL forms outside F1 fall back to the work email. GitHub offers only the three matched forms.
+- A machine initialised before this change is asked once, at its next `chezmoi init` without `DOTFILES_PROFILES`.
+  `Selection.Tests.ps1` stores an empty answer in its helper for the same reason.
 - The work email is plain text in the work machine's `~/.config/chezmoi/chezmoi.toml` and `~/.gitconfig`.
 - On a work machine `git verify-commit` labels every commit with the personal email (F4); the check passes.
 - The one SSH key is also on the private machine.
