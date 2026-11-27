@@ -75,14 +75,19 @@ jobs:
           Invoke-Pester -Path tests/windows/Installed-Apps-Modules.Tests.ps1, tests/windows/Profile.Tests.ps1 -Output Detailed -CI
 
       # The git identity and signing key come from encrypted data and never reach CI. --includes: ~/.gitconfig
-      # pulls the identity in through [include], which --global alone does not follow
+      # pulls the identity in through [include], which --global alone does not follow.
+      # The one email allowed on the runner is the test address of the apply step (#60): it is the work email the
+      # template writes. A decrypted real email differs from it and trips the guard. The value is repeated here
+      # because step variables are not inherited between steps
       - name: Assert nothing was decrypted
         if: always()
+        env:
+          DOTFILES_GIT_WORK_EMAIL: ci-work@example.invalid
         run: |
-          foreach ($path in "$HOME/.config/chezmoi/key.txt", "$HOME/.ssh/id_ed25519", "$HOME/.config/git/user.gitconfig") {
+          foreach ($path in "$HOME/.config/chezmoi/key.txt", "$HOME/.ssh/id_ed25519", "$HOME/.config/git/user.gitconfig", "$HOME/.config/git/allowed_signers") {
               if (Test-Path $path) { throw "$path exists on the runner" }
           }
-          foreach ($key in 'user.signingkey', 'user.email') {
-              if (git config --global --includes --get $key) { throw "git $key is set on the runner" }
-          }
+          if (git config --global --includes --get user.signingkey) { throw 'git user.signingkey is set on the runner' }
+          $email = git config --global --includes --get user.email
+          if ($email -and $email -ne $env:DOTFILES_GIT_WORK_EMAIL) { throw 'git user.email on the runner is not the injected work email' }
           exit 0
