@@ -7,11 +7,14 @@
 #                                       -> DOTFILES_PICKS_AI, DOTFILES_PICKS_APPS: profiles separated by ';', then
 #                                          profile=labels with labels separated by ','. A pick profile without an
 #                                          entry takes all its labels.
+#   -WorkEmail work@corp.example        -> DOTFILES_GIT_WORK_EMAIL: this VM is a work machine (docs/specs/git-identity.md);
+#                                          omitted: a private machine, or the stored answer on a re-run
 # DOTFILES_* variables already in the session are removed first, so a run never inherits an earlier one.
 param (
     [string]$BRANCH = 'develop',
     [string[]]$Profiles,
-    [string]$Picks
+    [string]$Picks,
+    [string]$WorkEmail
 )
 
 # @('shell,sdk,ai') or @('shell','sdk','ai') -> 'shell,sdk,ai'
@@ -36,9 +39,11 @@ $ErrorActionPreference = "Stop"
 
 # Process scope only: the selection must not leak into the VM's user environment, nor a previous run's into this one
 Remove-Item env:DOTFILES_PROFILES -ErrorAction Ignore
+Remove-Item env:DOTFILES_GIT_WORK_EMAIL -ErrorAction Ignore
 Get-ChildItem env: | Where-Object Name -like 'DOTFILES_PICKS_*' | ForEach-Object { Remove-Item "env:$($_.Name)" }
 $pickEnvironment = ConvertTo-PickEnvironment $Picks
 if ($Profiles) { $env:DOTFILES_PROFILES = ConvertTo-ProfileList $Profiles }
+if ($WorkEmail) { $env:DOTFILES_GIT_WORK_EMAIL = $WorkEmail.Trim() }
 foreach ($name in $pickEnvironment.Keys) { Set-Item "env:$name" $pickEnvironment[$name] }
 
 # Set environment variable to indicate we are in a Vagrant environment

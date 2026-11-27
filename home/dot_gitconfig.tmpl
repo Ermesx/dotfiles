@@ -1,6 +1,18 @@
 # Identity and signing key come from encrypted data; CI skips that file and git skips a missing include
 [include]
 path = ~/.config/git/user.gitconfig
+{{- with dig "git" "work_email" "" . }}
+# Work machine: the work email is the default, from the chezmoi config. Any github.com remote re-includes the
+# personal identity; the blocks must stay after [user], a later email wins
+[user]
+email = {{ . }}
+[includeIf "hasconfig:remote.*.url:https://github.com/**"]
+path = ~/.config/git/user.gitconfig
+[includeIf "hasconfig:remote.*.url:git@github.com:*/**"]
+path = ~/.config/git/user.gitconfig
+[includeIf "hasconfig:remote.*.url:ssh://git@github.com/**"]
+path = ~/.config/git/user.gitconfig
+{{- end }}
 
 [gpg]
 format = ssh

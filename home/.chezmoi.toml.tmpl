@@ -117,6 +117,23 @@
 {{-   end -}}
 {{- end -}}
 
+{{- /* Work email: the machine type. Empty = private machine, nothing work-related in the git config.
+  DOTFILES_GIT_WORK_EMAIL (CI, VM, unattended install) wins; otherwise a run with DOTFILES_PROFILES is non-interactive,
+  like the picks above, and keeps the stored value instead of asking: a real `chezmoi init` without --no-tty waits on
+  a prompt even with stdin closed. Anything else asks, once (promptStringOnce). */ -}}
+{{- $workEmail := dig "git" "work_email" "" . -}}
+{{- if env "DOTFILES_GIT_WORK_EMAIL" -}}
+{{-   $workEmail = env "DOTFILES_GIT_WORK_EMAIL" -}}
+{{- else if not (env "DOTFILES_PROFILES") -}}
+{{-   $workEmail = promptStringOnce . "git.work_email" "Work email (empty on a private machine)" "" -}}
+{{- end -}}
+{{- $workEmail = trim $workEmail -}}
+{{- /* The value is written unescaped into ~/.gitconfig: a newline would add settings, # and ; would cut the line.
+  Only a plain address passes, whatever its source (variable, prompt, stored value). */ -}}
+{{- if and $workEmail (not (regexMatch `^[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+$` $workEmail)) -}}
+{{-   fail "git work email must be a plain address (letters, digits and . _ % + ' - before and after one @); leave it empty on a private machine" -}}
+{{- end -}}
+
 progress = true
 encryption = "age"
 
@@ -149,4 +166,6 @@ profiles = {{ $selected | toJson }}
 {{ end }}
 [data.offered]
 {{ range $profile, $labels := $offered }}{{ $profile }} = {{ $labels | toJson }}
-{{ end -}}
+{{ end }}
+[data.git]
+work_email = {{ $workEmail | quote }}
