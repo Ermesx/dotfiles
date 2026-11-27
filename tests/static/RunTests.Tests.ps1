@@ -21,6 +21,19 @@ Describe 'run-tests.ps1 parameters' {
         $types['Picks'] | Should -Be 'String'
     }
 
+    It 'types -WorkEmail as String' {
+        $parameter = $ast.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -eq 'WorkEmail' }
+
+        $parameter.StaticType.Name | Should -Be 'String'
+    }
+
+    It 'removes a leaked DOTFILES_GIT_WORK_EMAIL before it sets its own' {
+        $text = Get-Content -Raw $path
+
+        $text | Should -Match 'Remove-Item env:DOTFILES_GIT_WORK_EMAIL'
+        $text | Should -Match '\$env:DOTFILES_GIT_WORK_EMAIL = \$WorkEmail'
+    }
+
     It 'gives the same profile list for -File (one element) and the console (an array)' {
         ConvertTo-ProfileList @('shell,sdk,ai') | Should -BeExactly 'shell,sdk,ai'
         ConvertTo-ProfileList @('shell', 'sdk', 'ai') | Should -BeExactly 'shell,sdk,ai'
