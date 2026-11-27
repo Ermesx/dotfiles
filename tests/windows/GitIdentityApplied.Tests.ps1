@@ -12,6 +12,10 @@ BeforeDiscovery {
 BeforeAll {
     $workEmail = [string](chezmoi data --format json | ConvertFrom-Json).git.work_email
 
+    # The identity a github.com repo must get back: the one in the decrypted personal file (the VM only)
+    $personalFile = Join-Path $HOME '.config/git/user.gitconfig'
+    $personalEmail = if (Test-Path $personalFile) { [string](git config --file $personalFile user.email) } else { '' }
+
     # user.email git reports in a new repo with these remotes (the first is origin), under the real global config
     function Get-RepoEmail([string[]]$Remotes) {
         $repo = Join-Path $TestDrive "repo-$([guid]::NewGuid())"
@@ -58,7 +62,9 @@ Describe 'git identity after apply' {
             @{ Remote = 'git@github.com:o/r.git' }
             @{ Remote = 'ssh://git@github.com/o/r.git' }
         ) {
-            Get-RepoEmail @($Remote) | Should -Not -BeExactly $workEmail
+            $personalEmail | Should -Not -BeNullOrEmpty -Because 'the personal file must define an email, or this check proves nothing'
+            $personalEmail | Should -Not -BeExactly $workEmail
+            Get-RepoEmail @($Remote) | Should -BeExactly $personalEmail
         }
     }
 }

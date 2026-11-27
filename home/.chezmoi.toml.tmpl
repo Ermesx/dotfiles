@@ -128,6 +128,11 @@
 {{-   $workEmail = promptStringOnce . "git.work_email" "Work email (empty on a private machine)" "" -}}
 {{- end -}}
 {{- $workEmail = trim $workEmail -}}
+{{- /* The value is written unescaped into ~/.gitconfig: a newline would add settings, # and ; would cut the line.
+  Only a plain address passes, whatever its source (variable, prompt, stored value). */ -}}
+{{- if and $workEmail (not (regexMatch `^[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+$` $workEmail)) -}}
+{{-   fail "git work email must be a plain address (letters, digits and . _ % + ' - before and after one @); leave it empty on a private machine" -}}
+{{- end -}}
 
 progress = true
 encryption = "age"

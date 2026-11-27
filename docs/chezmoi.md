@@ -41,7 +41,8 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
   `.gitconfig` pulls in with `[include]`; `.gitconfig` itself never decrypts. Commits are signed with the SSH key;
   `home/dot_config/git/allowed_signers.tmpl` (decrypted) lists it so git can verify signatures locally.
 - The work email is not repo data. `chezmoi init` asks for it once on a work machine; an empty answer, an accidental
-  Enter included, marks a private machine, where nothing work-related is written. It is stored only in that
+  Enter included, marks a private machine, where nothing work-related is written. Only a plain address is accepted
+  (it is written unescaped into `~/.gitconfig`); anything else fails the init. It is stored only in that
   machine's chezmoi config (`[data.git] work_email`) and read by `home/dot_gitconfig.tmpl`, which then makes it the
   default `user.email` and gives any github.com remote the personal identity back. To change the answer:
   `chezmoi init --prompt`. A non-interactive run (CI, the VM, an unattended install) passes it in

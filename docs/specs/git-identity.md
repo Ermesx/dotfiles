@@ -41,7 +41,10 @@ Plan: [`git-identity.plan.md`](git-identity.plan.md)
   3. else `promptStringOnce . "git.work_email"`, prompt text naming the empty answer as "private machine",
      default `""`.
 
-  The value is trimmed, so an answer of spaces means a private machine. CI, the VM and an unattended install all pass
+  The value is trimmed, so an answer of spaces means a private machine. A non-empty value must be a plain address
+  (`[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+`) or init fails: it is written unescaped into `~/.gitconfig`, where a newline
+  would add settings and `#`, `;`, `"` or `\` would break the line. The check covers every source, the stored value
+  included. CI, the VM and an unattended install all pass
   the email in the variable; `--no-tty` is not a second mechanism. Passing the email in CI must work: with `CI=true`,
   `DOTFILES_PROFILES` and `DOTFILES_GIT_WORK_EMAIL` set, `chezmoi init --no-tty` stores that email (test
   `reads the email under the CI conditions`).

@@ -126,6 +126,40 @@ Describe 'work email at init' {
         $result.Output | Should -Match 'work_email = "w@x"'
     }
 
+    It 'accepts the plain address <Email>' -ForEach @(
+        @{ Email = "o'brien@corp.example" }
+        @{ Email = 'first.last+work@corp.example' }
+        @{ Email = 'w@x' }
+    ) {
+        $result = Invoke-Init -Env @{ DOTFILES_GIT_WORK_EMAIL = $Email }
+
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match ('work_email = "' + [regex]::Escape($Email) + '"')
+    }
+
+    # The value ends up unescaped in ~/.gitconfig: a newline would add settings, # and ; would cut the line
+    It 'rejects <Case> and writes nothing' -ForEach @(
+        @{ Case = 'a newline that adds a section'; Email = "w@x`n[core]`nsshCommand = evil" }
+        @{ Case = 'a space'; Email = 'a b@corp.example' }
+        @{ Case = 'a missing @'; Email = 'no-at-sign' }
+        @{ Case = 'a semicolon'; Email = 'a@corp;example' }
+        @{ Case = 'a hash'; Email = 'a@corp#example' }
+        @{ Case = 'a double quote'; Email = 'a"b@corp.example' }
+        @{ Case = 'a backslash'; Email = 'a\b@corp.example' }
+    ) {
+        $result = Invoke-Init -Env @{ DOTFILES_GIT_WORK_EMAIL = $Email }
+
+        $result.ExitCode | Should -Not -Be 0
+        $result.Output | Should -Not -Match 'sshCommand'
+        $result.Output | Should -Not -Match 'work_email'
+    }
+
+    It 'rejects an invalid stored email' {
+        $result = Invoke-Init -Env @{ DOTFILES_PROFILES = 'shell' } -Existing "[data.git]`nwork_email = `"not an email`""
+
+        $result.ExitCode | Should -Not -Be 0
+    }
+
     It 'reads the email under the CI conditions' {
         $result = Invoke-Init -Env @{ CI = 'true'; DOTFILES_PROFILES = 'shell'; DOTFILES_GIT_WORK_EMAIL = 'ci-work@example.invalid' }
 
