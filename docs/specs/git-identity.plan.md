@@ -113,6 +113,9 @@
 - [ ] **Step 4: Run** the same file. Expected: PASS.
 - [ ] **Step 5: Commit** `feat(tests): -WorkEmail for the VM runner`
 
+> **Order as executed:** Task 5 (the guard) was committed before Task 4, so every commit is green in CI: the guard
+> accepts the injected email only when the variable is set, and behaves as before without it.
+
 ### Task 4: Post-apply test and the email in the CI apply step
 
 **Files:**

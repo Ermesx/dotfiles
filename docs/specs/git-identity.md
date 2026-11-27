@@ -1,6 +1,6 @@
 # Spec: Work email on the work machine, personal email on github.com
 
-Issue: [#60](https://github.com/Ermesx/dotfiles/issues/60) · Status: Draft · Date: 2026-11-27 ·
+Issue: [#60](https://github.com/Ermesx/dotfiles/issues/60) · Status: Approved · Date: 2026-11-27 ·
 Plan: [`git-identity.plan.md`](git-identity.plan.md)
 
 ## Goal
