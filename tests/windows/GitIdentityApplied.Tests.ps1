@@ -32,8 +32,9 @@ Describe 'git identity after apply' {
 
     Context 'a private machine' -Skip:$configured {
 
-        It 'sets no email and no includeIf' {
-            git config --global --includes --get user.email | Should -BeNullOrEmpty
+        It 'sets no email and no includeIf in ~/.gitconfig' {
+            # No --includes: on the VM the decrypted personal file exists and is included, which is not what this checks
+            git config --global --get user.email | Should -BeNullOrEmpty
             @(git config --global --get-regexp '^includeif\.') | Should -BeNullOrEmpty
         }
     }
