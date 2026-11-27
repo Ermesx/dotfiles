@@ -117,7 +117,7 @@
 {{-   end -}}
 {{- end -}}
 
-{{- /* Work email (#60): the machine type. Empty = private machine, nothing work-related in the git config.
+{{- /* Work email: the machine type. Empty = private machine, nothing work-related in the git config.
   DOTFILES_GIT_WORK_EMAIL (CI, VM, unattended install) wins; otherwise a run with DOTFILES_PROFILES is non-interactive,
   like the picks above, and keeps the stored value instead of asking: a real `chezmoi init` without --no-tty waits on
   a prompt even with stdin closed. Anything else asks, once (promptStringOnce). */ -}}

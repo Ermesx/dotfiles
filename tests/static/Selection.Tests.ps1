@@ -18,7 +18,7 @@ BeforeAll {
     $appsLabels = Get-Label 'apps'
 
     # $Existing is the config already on the machine; Output is the config init wrote.
-    # The work email (#60) is always answered, as private: these tests are about profiles, and under --no-tty its
+    # The work email is always answered, as private: these tests are about profiles, and under --no-tty its
     # prompt would fail with EOF on every init that has no DOTFILES_PROFILES
     function Invoke-InitTemplate([hashtable]$Env = @{}, [string[]]$Flags = @(), [string]$Existing = '') {
         $config = Join-Path $TestDrive "$([guid]::NewGuid()).toml"

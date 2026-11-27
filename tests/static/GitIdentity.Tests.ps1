@@ -33,7 +33,7 @@ BeforeAll {
     Set-Content -Path $stub -Value "[user]`n  email = personal@example.com"
 
     # dot_gitconfig.tmpl as a machine with this work email renders it ($null: no [data.git] at all, a config from
-    # before #60), with its include of ~/.config/git/user.gitconfig pointed at the stub
+    # before the work email existed), with its include of ~/.config/git/user.gitconfig pointed at the stub
     function Get-RenderedGitConfig([AllowNull()][string]$WorkEmail) {
         $config = Join-Path $TestDrive "$([guid]::NewGuid()).toml"
         Set-Content -Path $config -Value $(if ($null -eq $WorkEmail) { '' } else { "[data.git]`nwork_email = `"$WorkEmail`"" })

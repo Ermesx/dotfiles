@@ -58,7 +58,7 @@ Describe 'install scripts follow the selection' {
     }
 
     It 'passes --no-tty to chezmoi init only when CI is true' {
-        # A runner has no TTY, so chezmoi reads prompt answers from stdin there; the work email (#60) reaches CI
+        # A runner has no TTY, so chezmoi reads prompt answers from stdin there; the work email reaches CI
         # through DOTFILES_GIT_WORK_EMAIL because of this
         $text = Get-Content -Raw (Join-Path $root 'install.ps1')
 

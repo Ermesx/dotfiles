@@ -2,7 +2,7 @@
 [include]
 path = ~/.config/git/user.gitconfig
 {{- with dig "git" "work_email" "" . }}
-# Work machine (#60): the work email is the default, from the chezmoi config. Any github.com remote re-includes the
+# Work machine: the work email is the default, from the chezmoi config. Any github.com remote re-includes the
 # personal identity; the blocks must stay after [user], a later email wins
 [user]
 email = {{ . }}
