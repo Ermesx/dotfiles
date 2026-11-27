@@ -58,11 +58,14 @@ jobs:
           Invoke-Pester -Path tests/static, tests/windows/Write-Pretty, tests/windows/PackageUpdates, tests/windows/AdminSetup -Output Detailed -CI
 
       # Same path as the VM: install.ps1 on a copy of this checkout. chezmoi init finds a git repo in its source
-      # folder and skips the clone, so the PR's commit is applied, not the default branch
+      # folder and skips the clone, so the PR's commit is applied, not the default branch.
+      # DOTFILES_GIT_WORK_EMAIL: the runner is a work machine with a test address (not a secret), so the work-email
+      # path of install.ps1 (init --no-tty, #60) runs here; the decryption guard below allows exactly this value
       - name: Apply dotfiles with install.ps1
         env:
           DOTFILES_PROFILES: shell,sdk,ai
           DOTFILES_PICKS_AI: claude-code
+          DOTFILES_GIT_WORK_EMAIL: ci-work@example.invalid
         run: |
           New-Item -ItemType Directory -Force "$HOME\.local\share" | Out-Null
           Copy-Item $env:GITHUB_WORKSPACE "$HOME\.local\share\chezmoi" -Recurse -Force
@@ -72,7 +75,7 @@ jobs:
       - name: Post-apply tests
         run: |
           $env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'User') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'Machine') + ";$env:PATH"
-          Invoke-Pester -Path tests/windows/Installed-Apps-Modules.Tests.ps1, tests/windows/Profile.Tests.ps1 -Output Detailed -CI
+          Invoke-Pester -Path tests/windows/Installed-Apps-Modules.Tests.ps1, tests/windows/Profile.Tests.ps1, tests/windows/GitIdentityApplied.Tests.ps1 -Output Detailed -CI
 
       # The git identity and signing key come from encrypted data and never reach CI. --includes: ~/.gitconfig
       # pulls the identity in through [include], which --global alone does not follow.
