@@ -124,6 +124,7 @@ Describe 'install scripts use StepProgress' {
             Invoke-ScriptEnds -SourceDir "$root/home" -Stub '$result = [pscustomobject]@{ Failed = @() }' | Should -Be 0
         }
     }
+
     It 'bakes no absolute path into <_>' -ForEach @(
         'run_onchange_before_01-scoop.ps1.tmpl', 'run_onchange_before_02-modules.ps1.tmpl',
         'run_onchange_before_03-dotnet-tools.ps1.tmpl', 'run_once_after_yazi-plugins.ps1.tmpl') {

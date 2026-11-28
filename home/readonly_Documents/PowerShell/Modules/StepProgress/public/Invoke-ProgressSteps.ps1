@@ -102,7 +102,7 @@ function Invoke-ProgressSteps {
                 $parts = [string[]]($text -split '\r?\n')
                 if ($open) {
                     $lines[$lines.Count - 1] += $parts[0]
-                    if ($parts.Count -gt 1) { $lines.AddRange($parts[1..($parts.Count - 1)]) }
+                    if ($parts.Count -gt 1) { $lines.AddRange([string[]]$parts[1..($parts.Count - 1)]) }
                 }
                 else {
                     $lines.AddRange($parts)

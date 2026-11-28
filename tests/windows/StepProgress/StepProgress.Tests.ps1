@@ -128,6 +128,41 @@ Describe 'Invoke-ProgressSteps (plain mode)' {
         $r.Result.Failed[0].Output | Should -Match 'Checking hash of app\.zip \.\.\. ERROR Hash check failed!'
     }
 
+    It 'folds multi-line text that follows a no-newline piece in a failed item' {
+        $r = Invoke-Captured {
+            Invoke-ProgressSteps -Title 'T' -Items 'a' -Mode Plain -Action {
+                param($i)
+                Write-Host 'a' -NoNewline
+                Write-Host "b`nc" -NoNewline
+                Write-Host 'd'
+                throw 'x'
+            }
+        }
+
+        $idx = [array]::IndexOf($r.Lines, '✗ a')
+        $idx | Should -BeGreaterOrEqual 0
+        $r.Lines[$idx + 1] | Should -BeExactly '    ab'
+        $r.Lines[$idx + 2] | Should -BeExactly '    cd'
+        $r.Lines[$idx + 3] | Should -BeExactly '    x'
+        $r.Result.Failed[0].Output | Should -BeExactly "ab`ncd`nx"
+    }
+
+    It 'folds multi-line text that follows a no-newline piece in a successful item' {
+        $r = Invoke-Captured {
+            Invoke-ProgressSteps -Title 'T' -Items 'a' -Mode Plain -Action {
+                param($i)
+                Write-Host 'a' -NoNewline
+                Write-Host "b`nc" -NoNewline
+                Write-Host 'd'
+            }
+        }
+
+        $r.Result.Done | Should -Be 1
+        $r.Result.Failed.Count | Should -Be 0
+        $r.Lines | Should -Not -Contain '    ab'
+        $r.Lines.Count | Should -Be 2
+    }
+
     It 'fails an item that throws an exception with an empty message' {
         $r = Invoke-Captured {
             Invoke-ProgressSteps -Title 'T' -Items 'a' -Action { param($i) throw [System.Exception]::new('') } -Mode Plain
