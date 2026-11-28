@@ -16,6 +16,15 @@ Traps and rules for the chezmoi source in `home/`. Commands are in the root `AGE
   `~/scoop/shims` is on `PATH` since `install.ps1`. A script that calls an app which adds its own `PATH` entry or
   variables (`env_add_path`, `env_set`) reads them back from the user registry first; today only
   `03-dotnet-tools` does this, for `dotnet-sdk`.
+- The Windows install scripts report through the `StepProgress` module
+  (`home/readonly_Documents/PowerShell/Modules/StepProgress/`): one live line locally, one line per item when
+  `CI=true`, tool output only for an item that failed, and an item that is already installed is counted, not listed.
+  A `before_` script runs before any file is written, so the copy deployed to `~/Documents` does not exist on the
+  first apply; the scripts therefore import the module from `$env:CHEZMOI_SOURCE_DIR`. They use that variable, not
+  the template variable `.chezmoi.sourceDir`, so the machine path stays out of the rendered script and out of
+  chezmoi's change hash. A failed item makes the script exit 1: `chezmoi apply` stops and the next apply retries it.
+  The `PackageUpdates` module (`Update-Apps`, `Update-Modules`, `Update-DotnetTools`) uses the same module from the
+  deployed copy.
 
 ## Templates and scripts
 
