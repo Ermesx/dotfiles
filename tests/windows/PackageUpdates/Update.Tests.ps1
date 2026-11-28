@@ -11,10 +11,14 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
         # Scoop is not on the host and dotnet may be missing; Mock needs a command to replace
         function global:scoop { }
         function global:dotnet { }
+        # Plain output: no live line, so the captured lines are the whole report
+        $script:previousCI = $env:CI
+        $env:CI = 'true'
     }
 
     AfterAll {
         Remove-Item function:global:scoop, function:global:dotnet -ErrorAction SilentlyContinue
+        if ($null -eq $script:previousCI) { Remove-Item Env:CI -ErrorAction SilentlyContinue } else { $env:CI = $script:previousCI }
     }
 
     InModuleScope PackageUpdates {
@@ -31,11 +35,9 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             })
             $d = @{ Apps = @('git', 'jq', 'bat'); Modules = @('PSfzf', 'posh-git') }
 
-            Mock Write-Host { }
-            Mock Write-Cyan { }
-            Mock Write-Yellow { }
-            Mock Write-Green { }
             Mock Write-Red { }
+            # The lines the module printed (information records); anything else is not output of the report
+            $lines = { process { if ($_ -is [System.Management.Automation.InformationRecord]) { "$($_.MessageData)" } } }
         }
 
         Context 'Update-Apps' {
@@ -58,7 +60,7 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             It 'reports an app Scoop skipped with exit code 0 (running process) and keeps it in the cache' {
                 $script:stillOutdated = @('jq', 'git')
 
-                Update-Apps -Declared $d
+                Update-Apps -Declared $d 6>&1 | Out-Null
 
                 Should -Invoke Write-Red -ParameterFilter { $Text -like 'Not updated: git is still outdated*' }
                 Should -Invoke Write-Red -Times 0 -Exactly -ParameterFilter { $Text -like 'Not updated: jq*' }
@@ -66,21 +68,39 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             }
 
             It 'updates Scoop, then every app, and keeps going after a failure' {
-                Update-Apps -Declared $d
+                $out = @(Update-Apps -Declared $d 6>&1 | & $lines)
 
                 $script:scoopCalls | Should -Be @('update', 'update git', 'update jq', 'update bat')
-                Should -Invoke Write-Red -Times 1 -Exactly
-                Should -Invoke Write-Red -ParameterFilter { $Text -eq 'Failed to update app: jq' }
+                $out | Should -Contain '✗ jq'
+                $out | Should -Contain '✗ 1 failed: jq'
+                Should -Invoke Write-Red -Times 0 -Exactly
+            }
+
+            It 'prints a done line with the version change for an app that updated' {
+                $out = @(Update-Apps -Declared $d 6>&1 | & $lines)
+
+                ($out -join "`n") | Should -Match '(?m)^✓ git\s+1\.0 → 2\.0\s+\S+$'
+                $out | Should -Contain '► Updating Apps'
+                ($out -join "`n") | Should -Match '(?m)^✓ 2 updated in '
+            }
+
+            It 'reports Scoop and buckets as one line without a summary' {
+                $out = @(Update-Apps -Declared $d 6>&1 | & $lines)
+
+                $out | Should -Contain '► Updating Scoop and buckets'
+                @($out -match '(?m)^✓ Scoop and buckets').Count | Should -Be 1
+                # The only summary lines are the ones of the app loop
+                @($out -match ' updated in ').Count | Should -Be 1
             }
 
             It 'computes the list after updating Scoop, with the declared apps' {
-                Update-Apps -Declared $d
+                Update-Apps -Declared $d 6>&1 | Out-Null
 
                 Should -Invoke Get-ScoopAppUpdates -Times 2 -Exactly -ParameterFilter { "$Names" -eq 'git jq bat' }
             }
 
             It 'keeps only the failed app in the cache and leaves the rest of it' {
-                Update-Apps -Declared $d
+                Update-Apps -Declared $d 6>&1 | Out-Null
 
                 $cache = Read-PackageUpdatesCache
                 @($cache.Apps).Name | Should -Be @('jq')
@@ -93,7 +113,7 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
                 $script:stillOutdated = @()
                 Mock Get-ScoopAppUpdates { }
 
-                Update-Apps -Declared $d
+                Update-Apps -Declared $d 6>&1 | Out-Null
 
                 $script:scoopCalls | Should -Be @('update')
                 @((Read-PackageUpdatesCache).Apps).Count | Should -Be 0
@@ -107,20 +127,21 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             }
 
             It 'updates every module in the user scope and keeps going after a failure' {
-                Update-Modules -Declared $d
+                $out = @(Update-Modules -Declared $d 6>&1 | & $lines)
 
                 Should -Invoke Update-Module -Times 2 -Exactly -ParameterFilter { $Scope -eq 'CurrentUser' }
-                Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update module: PSfzf' }
+                $out | Should -Contain '✗ PSfzf'
+                ($out -join "`n") | Should -Match '(?m)^✓ posh-git'
             }
 
             It 'shows why a module failed' {
-                Update-Modules -Declared $d
+                $out = @(Update-Modules -Declared $d 6>&1 | & $lines)
 
-                Should -Invoke Write-Host -ParameterFilter { "$Object" -match 'locked' }
+                ($out -join "`n") | Should -Match 'locked'
             }
 
             It 'keeps only the failed module in the cache' {
-                Update-Modules -Declared $d
+                Update-Modules -Declared $d 6>&1 | Out-Null
 
                 $cache = Read-PackageUpdatesCache
                 @($cache.Modules).Name | Should -Be @('PSfzf')
@@ -139,10 +160,11 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
             }
 
             It 'updates every tool and keeps going after a failure' {
-                Update-DotnetTools
+                $out = @(Update-DotnetTools 6>&1 | & $lines)
 
                 $script:dotnetCalls | Should -Be @('tool update -g dotnet-ef', 'tool update -g refitter')
-                Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update .NET tool: refitter' }
+                $out | Should -Contain '✗ refitter'
+                ($out -join "`n") | Should -Match '(?m)^✓ dotnet-ef'
             }
 
             It 'reports a failed tool even when dotnet writes to stdout' {
@@ -151,14 +173,15 @@ Describe 'Update-Apps, Update-Modules, Update-DotnetTools' {
                     $global:LASTEXITCODE = if ($args -contains 'refitter') { 1 } else { 0 }
                 }
 
-                Update-DotnetTools
+                $out = @(Update-DotnetTools 6>&1 | & $lines)
 
-                Should -Invoke Write-Red -Times 1 -Exactly -ParameterFilter { $Text -eq 'Failed to update .NET tool: refitter' }
+                $out | Should -Contain '✗ refitter'
+                ($out -join "`n") | Should -Match "failed to update"
                 @((Read-PackageUpdatesCache).DotnetTools).Name | Should -Be @('refitter')
             }
 
             It 'keeps only the failed tool in the cache' {
-                Update-DotnetTools
+                Update-DotnetTools 6>&1 | Out-Null
 
                 @((Read-PackageUpdatesCache).DotnetTools).Name | Should -Be @('refitter')
             }
