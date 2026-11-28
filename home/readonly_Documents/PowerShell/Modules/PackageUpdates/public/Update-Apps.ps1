@@ -3,6 +3,8 @@ function Update-Apps {
         [hashtable]$Declared = $Global:PackageUpdatesDeclared
     )
 
+    # A failed self-update shows its own tool output as a failed line but does not stop the run: the checks below
+    # read the local bucket data, as the background refresh does when its scoop update fails
     $null = Invoke-ProgressSteps -Title 'Updating Scoop and buckets' -Items @('Scoop and buckets') -Verb Updated -Action { scoop update }
 
     # Computed after `scoop update`, not taken from the cache, which may be hours old
