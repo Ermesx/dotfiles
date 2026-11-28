@@ -23,7 +23,7 @@ function Invoke-ProgressSteps {
         [ValidateSet('Installed', 'Updated')]
         [string]$Verb = 'Installed',
 
-        # Only plain output exists so far, so every mode behaves as Plain
+        # Auto draws a live line on an interactive terminal and plain lines everywhere else
         [ValidateSet('Auto', 'Live', 'Plain')]
         [string]$Mode = 'Auto'
     )
@@ -31,7 +31,15 @@ function Invoke-ProgressSteps {
     $maxNameWidth = 40
     $total = [System.Diagnostics.Stopwatch]::StartNew()
 
-    Write-Host "► $Title"
+    $live = (Resolve-ProgressMode -Mode $Mode) -eq 'Live'
+    $ascii = $live -and [Console]::OutputEncoding.CodePage -ne 65001
+    $erase = "`r`e[2K"
+    $prefix = if ($live) { $erase } else { '' }
+    $cyan = if ($live) { @{ ForegroundColor = 'Cyan' } } else { @{} }
+    $red = if ($live) { @{ ForegroundColor = 'Red' } } else { @{} }
+    $verbingText = if ($Verb -eq 'Updated') { 'updating' } else { 'installing' }
+
+    Write-Host "► $Title" @cyan
 
     # Present items are decided up front so the names of the rest can be padded to one width
     $present = 0
@@ -52,50 +60,67 @@ function Invoke-ProgressSteps {
 
     $done = 0
     $failed = [System.Collections.Generic.List[object]]::new()
+    $liveShowing = $false
+    $index = 0
 
-    foreach ($entry in $pending) {
-        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-        $records = [System.Collections.Generic.List[object]]::new()
-        $thrown = $null
-
-        # A stale exit code from an earlier item or from the caller must not fail this one
-        $global:LASTEXITCODE = 0
-        try {
-            # Streamed into the list so output printed before a throw is kept
-            & $Action $entry.Item *>&1 | ForEach-Object { $records.Add($_) }
-        }
-        catch {
-            $thrown = $_.Exception.Message
-        }
-        $stopwatch.Stop()
-
-        $lines = [System.Collections.Generic.List[string]]::new()
-        foreach ($record in $records) {
-            $text = if ($record -is [System.Management.Automation.InformationRecord]) { "$($record.MessageData)" }
-            elseif ($record -is [System.Management.Automation.ErrorRecord]) { $record.ToString() }
-            else { (Out-String -InputObject $record).TrimEnd() }
-            $lines.AddRange([string[]]($text -split '\r?\n'))
-        }
-        if ($thrown) { $lines.Add($thrown) }
-
-        if ($thrown -or $global:LASTEXITCODE -ne 0) {
-            $output = ($lines -join "`n").Trim("`n")
-            $failed.Add([pscustomobject]@{ Item = $entry.Item; Name = $entry.Name; Output = $output })
-
-            Write-Host "✗ $($entry.Name)"
-            if ($output) {
-                foreach ($line in $output -split '\n') { Write-Host "    $line" }
+    try {
+        foreach ($entry in $pending) {
+            $index++
+            if ($live) {
+                $liveText = Format-LiveLine -Index $index -Total $pending.Count -Text "$verbingText $($entry.Name)" -Width (Get-ProgressWidth) -Ascii:$ascii
+                Write-Host "$erase$liveText" -NoNewline
+                $liveShowing = $true
             }
-            continue
-        }
 
-        $done++
-        $text = "✓ $($entry.Name.PadRight($width))"
-        if ($Detail) {
-            $detailText = & $Detail $entry.Item
-            if ($detailText) { $text += "  $detailText" }
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+            $records = [System.Collections.Generic.List[object]]::new()
+            $thrown = $null
+
+            # A stale exit code from an earlier item or from the caller must not fail this one
+            $global:LASTEXITCODE = 0
+            try {
+                # Streamed into the list so output printed before a throw is kept
+                & $Action $entry.Item *>&1 | ForEach-Object { $records.Add($_) }
+            }
+            catch {
+                $thrown = $_.Exception.Message
+            }
+            $stopwatch.Stop()
+
+            $lines = [System.Collections.Generic.List[string]]::new()
+            foreach ($record in $records) {
+                $text = if ($record -is [System.Management.Automation.InformationRecord]) { "$($record.MessageData)" }
+                elseif ($record -is [System.Management.Automation.ErrorRecord]) { $record.ToString() }
+                else { (Out-String -InputObject $record).TrimEnd() }
+                $lines.AddRange([string[]]($text -split '\r?\n'))
+            }
+            if ($thrown) { $lines.Add($thrown) }
+
+            if ($thrown -or $global:LASTEXITCODE -ne 0) {
+                $output = ($lines -join "`n").Trim("`n")
+                $failed.Add([pscustomobject]@{ Item = $entry.Item; Name = $entry.Name; Output = $output })
+
+                Write-Host "$prefix✗ $($entry.Name)" @red
+                $liveShowing = $false
+                if ($output) {
+                    foreach ($line in $output -split '\n') { Write-Host "    $line" }
+                }
+                continue
+            }
+
+            $done++
+            $text = "✓ $($entry.Name.PadRight($width))"
+            if ($Detail) {
+                $detailText = & $Detail $entry.Item
+                if ($detailText) { $text += "  $detailText" }
+            }
+            Write-Host "$prefix$text  $(Format-Elapsed $stopwatch.Elapsed)"
+            $liveShowing = $false
         }
-        Write-Host "$text  $(Format-Elapsed $stopwatch.Elapsed)"
+    }
+    finally {
+        # Leaves no half-drawn line behind when something unexpected escapes
+        if ($liveShowing) { Write-Host $erase -NoNewline }
     }
 
     $total.Stop()
@@ -107,7 +132,7 @@ function Invoke-ProgressSteps {
         if ($summary) { Write-Host $summary }
     }
     if ($failed.Count -gt 0) {
-        Write-Host "✗ $($failed.Count) failed: $($failed.Name -join ', ')"
+        Write-Host "✗ $($failed.Count) failed: $($failed.Name -join ', ')" @red
     }
 
     [pscustomobject]@{
