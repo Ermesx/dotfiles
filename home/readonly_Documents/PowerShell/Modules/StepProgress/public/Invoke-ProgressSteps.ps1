@@ -74,7 +74,8 @@ function Invoke-ProgressSteps {
 
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $records = [System.Collections.Generic.List[object]]::new()
-            $thrown = $null
+            $thrown = $false
+            $thrownMessage = ''
 
             # A stale exit code from an earlier item or from the caller must not fail this one
             $global:LASTEXITCODE = 0
@@ -83,18 +84,32 @@ function Invoke-ProgressSteps {
                 & $Action $entry.Item *>&1 | ForEach-Object { $records.Add($_) }
             }
             catch {
-                $thrown = $_.Exception.Message
+                $thrown = $true
+                $thrownMessage = $_.Exception.Message
             }
             $stopwatch.Stop()
 
+            # Write-Host -NoNewline arrives as one record per piece; the pieces belong on one line
             $lines = [System.Collections.Generic.List[string]]::new()
+            $open = $false
             foreach ($record in $records) {
+                $continues = $record -is [System.Management.Automation.InformationRecord] -and
+                    $record.MessageData -is [System.Management.Automation.HostInformationMessage] -and
+                    $record.MessageData.NoNewLine
                 $text = if ($record -is [System.Management.Automation.InformationRecord]) { "$($record.MessageData)" }
                 elseif ($record -is [System.Management.Automation.ErrorRecord]) { $record.ToString() }
                 else { (Out-String -InputObject $record).TrimEnd() }
-                $lines.AddRange([string[]]($text -split '\r?\n'))
+                $parts = [string[]]($text -split '\r?\n')
+                if ($open) {
+                    $lines[$lines.Count - 1] += $parts[0]
+                    if ($parts.Count -gt 1) { $lines.AddRange($parts[1..($parts.Count - 1)]) }
+                }
+                else {
+                    $lines.AddRange($parts)
+                }
+                $open = $continues
             }
-            if ($thrown) { $lines.Add($thrown) }
+            if ($thrown) { $lines.Add($thrownMessage) }
 
             if ($thrown -or $global:LASTEXITCODE -ne 0) {
                 $output = ($lines -join "`n").Trim("`n")

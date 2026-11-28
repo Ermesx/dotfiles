@@ -109,6 +109,35 @@ Describe 'Invoke-ProgressSteps (plain mode)' {
         $r.Result.Failed[0].Output | Should -Match 'x\s+y'
     }
 
+    It 'joins output written without a newline into one line of a failed item' {
+        $r = Invoke-Captured {
+            Invoke-ProgressSteps -Title 'T' -Items 'a' -Mode Plain -Action {
+                param($i)
+                Write-Host 'Checking hash of ' -NoNewline
+                Write-Host 'app.zip' -NoNewline
+                Write-Host ' ... ' -NoNewline
+                Write-Host 'ERROR Hash check failed!'
+                throw 'x'
+            }
+        }
+
+        $idx = [array]::IndexOf($r.Lines, '✗ a')
+        $idx | Should -BeGreaterOrEqual 0
+        $r.Lines[$idx + 1] | Should -BeExactly '    Checking hash of app.zip ... ERROR Hash check failed!'
+        $r.Lines[$idx + 2] | Should -BeExactly '    x'
+        $r.Result.Failed[0].Output | Should -Match 'Checking hash of app\.zip \.\.\. ERROR Hash check failed!'
+    }
+
+    It 'fails an item that throws an exception with an empty message' {
+        $r = Invoke-Captured {
+            Invoke-ProgressSteps -Title 'T' -Items 'a' -Action { param($i) throw [System.Exception]::new('') } -Mode Plain
+        }
+
+        $r.Result.Failed.Count | Should -Be 1
+        $r.Result.Done | Should -Be 0
+        $r.Lines | Should -Contain '✗ a'
+    }
+
     It 'does not carry a stale exit code over to the next item' {
         $r = Invoke-Captured {
             Invoke-ProgressSteps -Title 'T' -Items 'a', 'b' -Action { param($i) if ($i -eq 'a') { $global:LASTEXITCODE = 1 } } -Mode Plain
