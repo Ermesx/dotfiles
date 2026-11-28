@@ -77,17 +77,19 @@ the first apply either); it writes its own ANSI sequences.
   parameter names are the builder's call. Failure is decided by the module (D10); the captured output must never mix
   with the success result.
 - **R2 Header.** Prints `► <title>` in cyan, in the style of the existing scripts.
-- **R3 Finished item.** One permanent line: `✓ <name>  [<detail>]  <duration>`; for a failure `✗ <name>` followed by
-  the captured output of the item, indented. Durations are rounded to 0.1 s.
+- **R3 Finished item.** One permanent line: `✓ <name>  [<detail>]  <duration>` color: default; for a failure `✗ <name>`
+  followed by
+  the captured output of the item, indented. Durations are rounded to 0.1 s, color: red.
 - **R4 Live line (interactive).** While an item runs, the last line shows a bar, `N/M` and the item name, redrawn in
   place (carriage return, clear-to-end-of-line); the finished line replaces it and a new live line starts below. `N`
   counts items to run, not items present (D5), so `M` is the number of items that will actually run. Truncated to the
   terminal width (80 when unknown). The cursor is left on a clean line on success, failure and Ctrl+C.
 - **R5 Plain mode (CI).** The same finished lines and header, no live line, no cursor control, **no control
-  characters at all** (colour included), so the log is greppable.
+  characters at all** (colour included), so the log is greppable. The colours of R2 and R3 apply to live mode only.
 - **R6 Presence (D5).** Items for which the presence test is true are not run and not listed. Final line: `✓ N
   installed, M already present` (updates: `updated`), `✓ M already present` when nothing ran, `✓ N installed in 1m 12s`
-  when nothing was present. The test is cheap: a single query per installer, not one process per item (see R10).
+  when nothing was present; **no final line when exactly one item ran, succeeded and nothing was present** (it would
+  repeat the item line, e.g. the single "Scoop and buckets" step of `Update-Apps`). The test is cheap: a single query per installer, not one process per item (see R10).
 - **R7 Failure (D6).** After the last item: the failed names as one summary line. The caller exits non-zero.
 - **R8 No side effects on import.** Importing prints nothing and changes no preferences, so the thread job of
   `Check-Updates` can load `PackageUpdates` without noise.
@@ -179,8 +181,8 @@ installed" in Scoop's output (breaks on a wording change; a presence query does 
 
 - Exact presence queries (R10), in particular whether `scoop list` output is object-shaped on the pinned Scoop
   version; verify on a machine with Scoop.
-- Whether chezmoi hands the script a real console. If it does not, the live line degrades to a stack of lines; the
-  fallback is plain mode, selected by something other than `CI` (a parameter of the script, or detection), decided
-  once this is observed. Until then D3 stands.
+- Whether chezmoi hands the script a real console. The owner states it does (a script may need to interact with the
+  user), so D3 stands; still observed on the VM (acceptance 1). If it does not, the redirection check of D3 degrades
+  the live line to plain mode.
 - Bar glyphs and the spinner glyph in the live line, for a console font without them (fallback to ASCII).
 - Whether `scoop bucket add` needs the same treatment (R11).
