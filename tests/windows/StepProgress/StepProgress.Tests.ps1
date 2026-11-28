@@ -97,6 +97,18 @@ Describe 'Invoke-ProgressSteps (plain mode)' {
         $r.Lines[$idx + 1] | Should -Match '^    tool said no'
     }
 
+    It 'keeps the output an item printed before it threw' {
+        $r = Invoke-Captured {
+            Invoke-ProgressSteps -Title 'T' -Items 'a' -Action { param($i) Write-Host 'x'; throw 'y' } -Mode Plain
+        }
+
+        $idx = [array]::IndexOf($r.Lines, '✗ a')
+        $idx | Should -BeGreaterOrEqual 0
+        $r.Lines[$idx + 1] | Should -BeExactly '    x'
+        $r.Lines[$idx + 2] | Should -BeExactly '    y'
+        $r.Result.Failed[0].Output | Should -Match 'x\s+y'
+    }
+
     It 'does not carry a stale exit code over to the next item' {
         $r = Invoke-Captured {
             Invoke-ProgressSteps -Title 'T' -Items 'a', 'b' -Action { param($i) if ($i -eq 'a') { $global:LASTEXITCODE = 1 } } -Mode Plain

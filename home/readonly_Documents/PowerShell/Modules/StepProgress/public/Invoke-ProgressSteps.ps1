@@ -55,13 +55,14 @@ function Invoke-ProgressSteps {
 
     foreach ($entry in $pending) {
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-        $records = @()
+        $records = [System.Collections.Generic.List[object]]::new()
         $thrown = $null
 
         # A stale exit code from an earlier item or from the caller must not fail this one
         $global:LASTEXITCODE = 0
         try {
-            $records = @(& $Action $entry.Item *>&1)
+            # Streamed into the list so output printed before a throw is kept
+            & $Action $entry.Item *>&1 | ForEach-Object { $records.Add($_) }
         }
         catch {
             $thrown = $_.Exception.Message
