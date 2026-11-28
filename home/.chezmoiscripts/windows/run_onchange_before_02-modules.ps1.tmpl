@@ -1,13 +1,24 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- if $v.modules }}
-Write-Host "► Installing PowerShell modules" -ForegroundColor Cyan
+Import-Module "$env:CHEZMOI_SOURCE_DIR/readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1" -ErrorAction Stop
+
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+$installed = @(Get-InstalledModule -ErrorAction SilentlyContinue | ForEach-Object Name)
+$result = Invoke-ProgressSteps -Title 'Installing PowerShell modules' -Items @(
 {{- range $v.modules }}
-{{- if eq . "Pester" }}
-# The inbox Pester 3.4 is signed by another publisher
-Install-Module -Name Pester -Scope CurrentUser -Force -SkipPublisherCheck
-{{- else }}
-Install-Module -Name {{ . }} -Scope CurrentUser
+    {{ . | squote }}
 {{- end }}
+) -IsPresent { param($module) $module -in $installed } -Action {
+    param($module)
+{{- if has "Pester" $v.modules }}
+    if ($module -eq 'Pester') {
+        # The inbox Pester 3.4 is signed by another publisher
+        Install-Module -Name $module -Scope CurrentUser -Force -SkipPublisherCheck -ErrorAction Stop
+        return
+    }
 {{- end }}
+    Install-Module -Name $module -Scope CurrentUser -ErrorAction Stop
+}
+
+exit (Get-ProgressExitCode $result)
 {{ end }}

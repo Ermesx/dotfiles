@@ -3,18 +3,15 @@ function Update-Apps {
         [hashtable]$Declared = $Global:PackageUpdatesDeclared
     )
 
-    Write-Cyan -Text '► Updating Scoop and buckets'
-    scoop update | Out-Host
+    # A failed self-update shows its own tool output as a failed line but does not stop the run: the checks below
+    # read the local bucket data, as the background refresh does when its scoop update fails
+    $null = Invoke-ProgressSteps -Title 'Updating Scoop and buckets' -Items @('Scoop and buckets') -Verb Updated -Action { scoop update }
 
     # Computed after `scoop update`, not taken from the cache, which may be hours old
     $rows = @(Get-ScoopAppUpdates -Names $Declared.Apps)
-    Invoke-PackageUpdateLoop -Rows $rows -Kind 'app' -Section Apps -Update {
+    Invoke-PackageUpdateLoop -Rows $rows -Title 'Updating Apps' -Section Apps -Update {
         param($name)
-        # Scoop aborts with a non-zero exit code; it does not throw. Out-Host keeps its output
-        # out of the success result.
-        $global:LASTEXITCODE = 0
-        scoop update $name | Out-Host
-        $LASTEXITCODE -eq 0
+        scoop update $name
     }
     if (-not $rows) { return }
 

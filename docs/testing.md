@@ -98,12 +98,12 @@ Tests under `tests/windows/` that check a completed install (`Installed-Apps-Mod
 
 ## Unit tests against the working copy
 
-Module tests (`tests/windows/Write-Pretty/`, `tests/windows/PackageUpdates/`) run on the host without applying
+Module tests (`tests/windows/Write-Pretty/`, `tests/windows/StepProgress/`, `tests/windows/PackageUpdates/`) run on the host without applying
 chezmoi: prepend the source module directory to `PSModulePath` in a child shell. Only Pester 6 is supported; the
 test files enforce it with `#Requires`. Name the folders: `tests/windows` itself holds the post-apply tests.
 
 ```powershell
-pwsh -NoProfile -Command 'Import-Module Pester -MinimumVersion 6.0.0; $env:PSModulePath = "$PWD\home\readonly_Documents\PowerShell\Modules;$env:PSModulePath"; Invoke-Pester tests/windows/Write-Pretty, tests/windows/PackageUpdates -Output Detailed'
+pwsh -NoProfile -Command 'Import-Module Pester -MinimumVersion 6.0.0; $env:PSModulePath = "$PWD\home\readonly_Documents\PowerShell\Modules;$env:PSModulePath"; Invoke-Pester tests/windows/Write-Pretty, tests/windows/StepProgress, tests/windows/PackageUpdates -Output Detailed'
 ```
 
 Without the `PSModulePath` prefix, `Import-Module` loads the *installed* copy from `~/Documents`. The

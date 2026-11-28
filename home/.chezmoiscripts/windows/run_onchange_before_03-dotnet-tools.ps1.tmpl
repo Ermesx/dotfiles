@@ -1,12 +1,18 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- if $v.dotnet_tools }}
+Import-Module "$env:CHEZMOI_SOURCE_DIR/readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1" -ErrorAction Stop
+
 # dotnet-sdk writes its PATH entry and DOTNET_ROOT to the user registry, which this process,
 # started by chezmoi before the install, does not see yet
 $env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'User') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $env:DOTNET_ROOT = [Environment]::GetEnvironmentVariable('DOTNET_ROOT', 'User')
 
-Write-Host "► Installing .NET tools" -ForegroundColor Cyan
+$installed = @((dotnet tool list -g --format json | ConvertFrom-Json).data | ForEach-Object packageId)
+$result = Invoke-ProgressSteps -Title 'Installing .NET tools' -Items @(
 {{- range $v.dotnet_tools }}
-dotnet tool install -g {{ . }}
+    {{ . | squote }}
 {{- end }}
+) -IsPresent { param($tool) $tool -in $installed } -Action { param($tool) dotnet tool install -g $tool }
+
+exit (Get-ProgressExitCode $result)
 {{ end }}
