@@ -147,6 +147,42 @@ Describe 'Invoke-ProgressSteps (plain mode)' {
         $r.Result.Failed[0].Output | Should -BeExactly "ab`ncd`nx"
     }
 
+    It 'keeps only the final frame of a progress line redrawn with carriage returns in a failed item' {
+        $r = Invoke-Captured {
+            Invoke-ProgressSteps -Title 'T' -Items 'a' -Mode Plain -Action {
+                param($i)
+                Write-Host 'app.zip  10%' -NoNewline
+                Write-Host "`rapp.zip  50%" -NoNewline
+                Write-Host "`rapp.zip 100%"
+                throw 'x'
+            }
+        }
+
+        $idx = [array]::IndexOf($r.Lines, '✗ a')
+        $idx | Should -BeGreaterOrEqual 0
+        $r.Lines[$idx + 1] | Should -BeExactly '    app.zip 100%'
+        $r.Lines[$idx + 2] | Should -BeExactly '    x'
+        $r.Lines.Count | Should -Be ($idx + 3 + 1)
+        $r.Lines | Where-Object { $_ -match "`r" } | Should -BeNullOrEmpty
+        $r.Result.Failed[0].Output | Should -BeExactly "app.zip 100%`nx"
+    }
+
+    It 'keeps the text before a trailing carriage return and empties a line of only carriage returns' {
+        $r = Invoke-Captured {
+            Invoke-ProgressSteps -Title 'T' -Items 'a' -Mode Plain -Action {
+                param($i)
+                Write-Host "kept text`r"
+                Write-Host "`r`r"
+                Write-Host 'last'
+                throw 'x'
+            }
+        }
+
+        $r.Result.Failed[0].Output | Should -BeExactly "kept text`n`nlast`nx"
+        $r.Result.Failed[0].Output | Should -Not -Match "`r"
+        $r.Lines | Where-Object { $_ -match "`r" } | Should -BeNullOrEmpty
+    }
+
     It 'folds multi-line text that follows a no-newline piece in a successful item' {
         $r = Invoke-Captured {
             Invoke-ProgressSteps -Title 'T' -Items 'a' -Mode Plain -Action {

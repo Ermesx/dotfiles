@@ -111,6 +111,13 @@ function Invoke-ProgressSteps {
             }
             if ($thrown) { $lines.Add($thrownMessage) }
 
+            # A bar redrawn in place with bare carriage returns shows only its last frame on a terminal;
+            # replaying every frame would print cursor control instead of a readable line
+            for ($n = 0; $n -lt $lines.Count; $n++) {
+                $frames = @($lines[$n] -split "`r" | Where-Object { $_ })
+                $lines[$n] = if ($frames.Count) { $frames[-1] } else { '' }
+            }
+
             if ($thrown -or $global:LASTEXITCODE -ne 0) {
                 $output = ($lines -join "`n").Trim("`n")
                 $failed.Add([pscustomobject]@{ Item = $entry.Item; Name = $entry.Name; Output = $output })
