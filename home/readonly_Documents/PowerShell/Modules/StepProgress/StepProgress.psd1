@@ -8,6 +8,7 @@
     RequiredModules = @()
     # Listed explicitly: the module is autoloaded on first use
     FunctionsToExport = @(
+        'Get-ProgressExitCode'
         'Invoke-ProgressSteps'
     )
     CmdletsToExport = @()

@@ -283,3 +283,29 @@ Describe 'Format helpers' {
         }
     }
 }
+
+Describe 'Get-ProgressExitCode' {
+
+    BeforeAll { Import-Module StepProgress -Force }
+
+    It 'returns 1 for a null result' {
+        Get-ProgressExitCode $null | Should -Be 1
+    }
+
+    It 'returns 0 for the result of a run without failures' {
+        $result = Invoke-ProgressSteps -Title 'T' -Items 'a' -Action { param($i) } -Mode Plain 6>$null
+
+        Get-ProgressExitCode $result | Should -Be 0
+    }
+
+    It 'returns 1 for the result of a run with a failure' {
+        $result = Invoke-ProgressSteps -Title 'T' -Items 'a' -Action { param($i) throw 'x' } -Mode Plain 6>$null
+
+        Get-ProgressExitCode $result | Should -Be 1
+    }
+
+    It 'returns an integer' {
+        (Get-ProgressExitCode $null) | Should -BeOfType ([int])
+        (Get-ProgressExitCode ([pscustomobject]@{ Failed = @() })) | Should -BeOfType ([int])
+    }
+}

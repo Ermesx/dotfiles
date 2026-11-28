@@ -64,6 +64,7 @@ Checked 2026-11-28 unless noted.
 | D11 | One-time rerun | **My call:** accepted. The first apply after this change rerun all install scripts on every machine, because their rendered content changes once | Unavoidable for any change to those scripts; with D5 the rerun is cheap (everything is present) and CI is a clean machine anyway. Later changes to the look do not rerun anything (D1) |
 | D12 | Presence by name | **My call:** the presence test compares names only; `packages.yaml` has no version-pinned (`@`) entries today | Installing an already-installed item does nothing in Scoop and `dotnet tool install` either, so no behaviour is lost. If a pinned entry is ever added, the test must compare versions; noted so it is not forgotten |
 | D13 | Import mechanism | **My call:** every script, `before_` and `after_` (the yazi plugins script too), imports from `$env:CHEZMOI_SOURCE_DIR` | One mechanism, and the `after_` scripts do not depend on the deployed copy either |
+| D14 | Exit code and import form | The exit code is computed by the module function `Get-ProgressExitCode` so the four scripts do not repeat the expression; the import is a string with `-ErrorAction Stop` so a missing module or an unset `CHEZMOI_SOURCE_DIR` stops the script — agreed by the owner in the PR review | With `Join-Path`, an unset variable made the argument binding fail and the whole import statement was skipped silently; the function would then not exist, so the import must fail the script itself |
 
 ## Requirements
 
@@ -100,7 +101,7 @@ the first apply either); it writes its own ANSI sequences.
 
 ### Install scripts
 
-- **R9 Import (D13).** Each install script, `before_` and `after_` alike, starts with a single import of the module from `$env:CHEZMOI_SOURCE_DIR` (not from the
+- **R9 Import (D13).** Each install script, `before_` and `after_` alike, starts with a single import of the module from `$env:CHEZMOI_SOURCE_DIR`, written as a string with `-ErrorAction Stop` (D14; not from the
   template variable, so the rendered script content does not contain a machine path; a different checkout location
   would otherwise change the hash and rerun the script). No tool or file guards: a missing module is a bug and fails
   the script loudly.
@@ -118,7 +119,7 @@ the first apply either); it writes its own ANSI sequences.
 - **R13 Exit code.** A script that had failed items exits non-zero (D6); one that had none exits 0 even when the last
   native command inside returned non-zero (under `pwsh <file>` the process exit code otherwise follows the success of
   the last command only, so an earlier failure is invisible today). The scripts therefore end with an explicit
-  `exit`.
+  `exit (Get-ProgressExitCode $result)`: the module function returns 1 when the result is missing or has failed items, otherwise 0 (D14).
 
 ### `PackageUpdates`
 

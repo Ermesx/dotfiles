@@ -20,7 +20,7 @@
 - The module writes only with `Write-Host`; the success pipeline carries only the result object. Tests capture with `6>&1` (information records = lines, everything else = result).
 - Copy fixed by the spec: header `► <title>` (cyan, live mode only); `✓ <name>  [<detail>]  <duration>`; `✗ <name>` (red, live mode only) followed by the item's output indented 4 spaces; summary `✓ N installed, M already present` / `✓ M already present` / `✓ N installed in <elapsed>` (`updated` for `-Verb Updated`); failure summary `✗ N failed: a, b`; no summary when exactly one item ran, succeeded and nothing was present. Plain mode: no ESC character at all.
 - Failure of an item = its action throws, or `$LASTEXITCODE` is non-zero after it (the module sets `$global:LASTEXITCODE = 0` before each action). Callers add no exit-code checks.
-- Install scripts: no `Get-Command` / exit-code guards (the packages are guaranteed by the dotfiles themselves); the module import goes **inside** each script's existing `{{ if }}` so an empty selection still renders an empty script; every script ends with `exit [int]($result.Failed.Count -gt 0)`.
+- Install scripts: no `Get-Command` / exit-code guards (the packages are guaranteed by the dotfiles themselves); the module import goes **inside** each script's existing `{{ if }}` so an empty selection still renders an empty script; every script ends with `exit (Get-ProgressExitCode $result)`.
 - Code comments state the reason in words; they never cite issue, requirement or decision numbers.
 
 ## Review Focus
@@ -118,7 +118,7 @@
 - Consumes: `Invoke-ProgressSteps` (Task 1; the scripts never pass `-Mode`).
 - Produces: nothing for later tasks.
 
-Each script renders its item list from the `packages.tmpl` view as a PowerShell array of single-quoted strings (`{{ . | squote }}`), imports the module first inside the existing `{{ if }}` with `Import-Module (Join-Path $env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1')`, calls `Invoke-ProgressSteps`, and ends with `exit [int]($result.Failed.Count -gt 0)`. The part that differs per script:
+Each script renders its item list from the `packages.tmpl` view as a PowerShell array of single-quoted strings (`{{ . | squote }}`), imports the module first inside the existing `{{ if }}` with `Import-Module "$env:CHEZMOI_SOURCE_DIR/readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1" -ErrorAction Stop`, calls `Invoke-ProgressSteps`, and ends with `exit (Get-ProgressExitCode $result)`. The part that differs per script:
 
 | Script | Title | Presence (queried once, before the call) | Action per item |
 |---|---|---|---|
@@ -129,7 +129,7 @@ Each script renders its item list from the `packages.tmpl` view as a PowerShell 
 
 - [ ] **Step 1: Update and add the static tests** in `InstallScripts.Tests.ps1`:
   - Replace the `^scoop install <app>$` assertions of *installs base and shell only* and *installs only picked apps* with `(?m)^\s*'<app>'\s*$` and `Should -Not -Match "'extras/rider'"`; keep the `Not -Match` for `dotnet-sdk` as `"'dotnet-sdk'"`. *installs modules and .NET tools of the selection* stays as it is.
-  - New `Describe 'install scripts use StepProgress'`, for each of the four scripts rendered with the default data (`Get-RenderedScript <name>` without `-Data`: with no stored selection `packages.tmpl` selects every profile and pick, so every script is non-empty): contains the import line above, contains `Invoke-ProgressSteps`, ends with the `exit [int](...)` line, and the rendered text does not match `[A-Za-z]:[\\/]` (no absolute path in it).
+  - New `Describe 'install scripts use StepProgress'`, for each of the four scripts rendered with the default data (`Get-RenderedScript <name>` without `-Data`: with no stored selection `packages.tmpl` selects every profile and pick, so every script is non-empty): contains the import line above, contains `Invoke-ProgressSteps`, ends with the `exit (Get-ProgressExitCode $result)` line, and the rendered text does not match `[A-Za-z]:[\\/]` (no absolute path in it).
   - The module folder contains no `*.tmpl`: `Get-ChildItem $root/home/readonly_Documents/PowerShell/Modules/StepProgress -Recurse -Filter *.tmpl | Should -BeNullOrEmpty`.
   - **Smoke:** with `$env:CHEZMOI_SOURCE_DIR = "$root/home"` the import line from the scripts loads the module (`Import-Module … -Force -PassThru` returns a module named `StepProgress`); restore the variable afterwards.
   - **Presence (Review Focus 5):** the predicate is inline in the template, so the static test only pins its text: the rendered 01 script contains `($app -split '/')[-1] -in $installed` (`-in` is case-insensitive). The behaviour itself (`nerd-fonts/Hasklig-NF` against an installed `hasklig-nf`) is checked on the VM in Task 5, step 6; it cannot run on the host, which has no Scoop.

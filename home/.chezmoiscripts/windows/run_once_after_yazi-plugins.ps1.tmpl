@@ -1,6 +1,6 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- if $v.yazi_plugins }}
-Import-Module (Join-Path $env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1') -ErrorAction Stop
+Import-Module "$env:CHEZMOI_SOURCE_DIR/readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1" -ErrorAction Stop
 
 $installedPlugins = ya pkg list
 $result = Invoke-ProgressSteps -Title 'Installing yazi plugins' -Items @(
@@ -9,5 +9,5 @@ $result = Invoke-ProgressSteps -Title 'Installing yazi plugins' -Items @(
 {{- end }}
 ) -IsPresent { param($plugin) [bool]($installedPlugins -like "*$plugin*") } -Action { param($plugin) ya pkg add $plugin }
 
-exit [int]($null -eq $result -or $result.Failed.Count -gt 0)
+exit (Get-ProgressExitCode $result)
 {{ end }}

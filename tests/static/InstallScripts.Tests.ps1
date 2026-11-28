@@ -75,7 +75,7 @@ Describe 'install scripts follow the selection' {
 Describe 'install scripts use StepProgress' {
 
     BeforeAll {
-        $importLine = "Import-Module (Join-Path `$env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1') -ErrorAction Stop"
+        $importLine = "Import-Module `"`$env:CHEZMOI_SOURCE_DIR/readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1`" -ErrorAction Stop"
     }
 
     It 'imports the module, calls Invoke-ProgressSteps and exits on failure in <_>' -ForEach @(
@@ -85,7 +85,7 @@ Describe 'install scripts use StepProgress' {
 
         $out | Should -Match ([regex]::Escape($importLine))
         $out | Should -Match 'Invoke-ProgressSteps'
-        $out.TrimEnd() | Should -Match '(?:^|\n)exit \[int\]\(\$null -eq \$result -or \$result\.Failed\.Count -gt 0\)\z'
+        $out.TrimEnd() | Should -Match '(?:^|\n)exit \(Get-ProgressExitCode \$result\)\z'
     }
 
     Context 'when the module cannot be loaded' {
@@ -123,6 +123,10 @@ Describe 'install scripts use StepProgress' {
         It 'exits 0 when the module loads and nothing failed' {
             Invoke-ScriptEnds -SourceDir "$root/home" -Stub '$result = [pscustomobject]@{ Failed = @() }' | Should -Be 0
         }
+
+        It 'exits 1 when the module loads and an item failed' {
+            Invoke-ScriptEnds -SourceDir "$root/home" -Stub '$result = [pscustomobject]@{ Failed = @([pscustomobject]@{ Name = ''x'' }) }' | Should -Be 1
+        }
     }
 
     It 'bakes no absolute path into <_>' -ForEach @(
@@ -144,7 +148,7 @@ Describe 'install scripts use StepProgress' {
         $saved = $env:CHEZMOI_SOURCE_DIR
         try {
             $env:CHEZMOI_SOURCE_DIR = "$root/home"
-            $module = Invoke-Expression ($importLine -replace '^Import-Module \(', 'Import-Module -Force -PassThru (')
+            $module = Invoke-Expression ($importLine -replace '^Import-Module ', 'Import-Module -Force -PassThru ')
             $module.Name | Should -Be 'StepProgress'
         }
         finally {

@@ -3,7 +3,7 @@
 {{- range $v.scoop -}}
 {{-   if contains "/" . }}{{ $buckets = append $buckets (splitList "/" . | first) }}{{ end -}}
 {{- end -}}
-Import-Module (Join-Path $env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1') -ErrorAction Stop
+Import-Module "$env:CHEZMOI_SOURCE_DIR/readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1" -ErrorAction Stop
 
 Write-Host "► Adding Scoop buckets" -ForegroundColor Cyan
 {{- range $buckets | uniq }}
@@ -18,5 +18,5 @@ $result = Invoke-ProgressSteps -Title 'Installing Scoop apps' -Items @(
 {{- end }}
 ) -IsPresent { param($app) ($app -split '/')[-1] -in $installed } -Action { param($app) scoop install $app }
 
-exit [int]($null -eq $result -or $result.Failed.Count -gt 0)
+exit (Get-ProgressExitCode $result)
 {{ end }}

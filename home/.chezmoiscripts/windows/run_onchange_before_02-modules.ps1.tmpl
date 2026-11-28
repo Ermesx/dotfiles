@@ -1,6 +1,6 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- if $v.modules }}
-Import-Module (Join-Path $env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1') -ErrorAction Stop
+Import-Module "$env:CHEZMOI_SOURCE_DIR/readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1" -ErrorAction Stop
 
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 $installed = @(Get-InstalledModule -ErrorAction SilentlyContinue | ForEach-Object Name)
@@ -20,5 +20,5 @@ $result = Invoke-ProgressSteps -Title 'Installing PowerShell modules' -Items @(
     Install-Module -Name $module -Scope CurrentUser -ErrorAction Stop
 }
 
-exit [int]($null -eq $result -or $result.Failed.Count -gt 0)
+exit (Get-ProgressExitCode $result)
 {{ end }}
