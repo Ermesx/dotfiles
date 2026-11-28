@@ -4,7 +4,7 @@
 
 **Goal:** The install scripts and the `Update-*` functions show finished items as one line each, the current item on one live line locally, and the tool's output only when an item fails.
 
-**Architecture:** A new module `StepProgress` (one public function, `Invoke-ProgressSteps`) runs a list of items through an action, captures every stream per item, and draws either a live line plus permanent `✓` lines (interactive) or plain `✓` lines (CI). The `before_`/`after_` install scripts import it from the source tree through `$env:CHEZMOI_SOURCE_DIR`; `PackageUpdates` imports it from the deployed copy and its shared loop `Invoke-PackageUpdateLoop` delegates to it.
+**Architecture:** A new module `StepProgress` (two public functions, `Invoke-ProgressSteps` and `Get-ProgressExitCode`) runs a list of items through an action, captures every stream per item, and draws either a live line plus permanent `✓` lines (interactive) or plain `✓` lines (CI). The `before_`/`after_` install scripts import it from the source tree through `$env:CHEZMOI_SOURCE_DIR`; `PackageUpdates` imports it from the deployed copy and its shared loop `Invoke-PackageUpdateLoop` delegates to it.
 
 **Tech Stack:** PowerShell 7.6, Pester 6, chezmoi 2.73 templates.
 
