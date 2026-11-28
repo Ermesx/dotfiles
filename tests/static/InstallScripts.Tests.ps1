@@ -75,7 +75,7 @@ Describe 'install scripts follow the selection' {
 Describe 'install scripts use StepProgress' {
 
     BeforeAll {
-        $importLine = "Import-Module (Join-Path `$env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1')"
+        $importLine = "Import-Module (Join-Path `$env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1') -ErrorAction Stop"
     }
 
     It 'imports the module, calls Invoke-ProgressSteps and exits on failure in <_>' -ForEach @(
@@ -85,9 +85,45 @@ Describe 'install scripts use StepProgress' {
 
         $out | Should -Match ([regex]::Escape($importLine))
         $out | Should -Match 'Invoke-ProgressSteps'
-        $out.TrimEnd() | Should -Match '(?m)^exit \[int\]\(\$result\.Failed\.Count -gt 0\)$'
+        $out.TrimEnd() | Should -Match '(?:^|\n)exit \[int\]\(\$null -eq \$result -or \$result\.Failed\.Count -gt 0\)\z'
     }
 
+    Context 'when the module cannot be loaded' {
+
+        BeforeAll {
+            $rendered = (Get-RenderedScript 'run_onchange_before_01-scoop.ps1.tmpl') -split '\r?\n'
+            $script:import = $rendered | Where-Object { $_ -like 'Import-Module *' } | Select-Object -First 1
+            $script:exitLine = $rendered | Where-Object { $_ -like 'exit *' } | Select-Object -Last 1
+
+            function Invoke-ScriptEnds([string]$SourceDir, [string]$Stub = '') {
+                $path = Join-Path $TestDrive "ends-$([guid]::NewGuid().ToString('N')).ps1"
+                Set-Content -LiteralPath $path -Value @($script:import, $Stub, $script:exitLine)
+
+                $saved = $env:CHEZMOI_SOURCE_DIR
+                try {
+                    # An empty SourceDir means the variable is not set at all
+                    [Environment]::SetEnvironmentVariable('CHEZMOI_SOURCE_DIR', $(if ($SourceDir) { $SourceDir }))
+                    $null = pwsh -NoLogo -NoProfile -File $path 2>&1
+                    $LASTEXITCODE
+                }
+                finally {
+                    [Environment]::SetEnvironmentVariable('CHEZMOI_SOURCE_DIR', $saved)
+                }
+            }
+        }
+
+        It 'exits 1 when CHEZMOI_SOURCE_DIR is not set' {
+            Invoke-ScriptEnds -SourceDir '' | Should -Be 1
+        }
+
+        It 'exits 1 when the module path does not exist' {
+            Invoke-ScriptEnds -SourceDir (Join-Path $TestDrive 'no-such-source') | Should -Be 1
+        }
+
+        It 'exits 0 when the module loads and nothing failed' {
+            Invoke-ScriptEnds -SourceDir "$root/home" -Stub '$result = [pscustomobject]@{ Failed = @() }' | Should -Be 0
+        }
+    }
     It 'bakes no absolute path into <_>' -ForEach @(
         'run_onchange_before_01-scoop.ps1.tmpl', 'run_onchange_before_02-modules.ps1.tmpl',
         'run_onchange_before_03-dotnet-tools.ps1.tmpl', 'run_once_after_yazi-plugins.ps1.tmpl') {
