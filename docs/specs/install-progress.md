@@ -2,7 +2,7 @@
 
 Issue: [#62](https://github.com/Ermesx/dotfiles/issues/62) · Related: [#45](https://github.com/Ermesx/dotfiles/issues/45),
 [#47](https://github.com/Ermesx/dotfiles/issues/47) · Status: Draft · Date: 2026-11-28 ·
-Plan: `install-progress.plan.md` (not written yet)
+Plan: [`install-progress.plan.md`](install-progress.plan.md)
 
 ## Intent
 
