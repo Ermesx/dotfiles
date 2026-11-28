@@ -57,6 +57,15 @@ Describe 'install scripts follow the selection' {
         Get-RenderedScript 'run_onchange_before_03-dotnet-tools.ps1.tmpl' -Data $data | Should -Not -Match 'dotnet tool install'
     }
 
+    It 'passes --no-tty to chezmoi init only when CI is true' {
+        # A runner has no TTY, so chezmoi reads prompt answers from stdin there; the work email reaches CI
+        # through DOTFILES_GIT_WORK_EMAIL because of this
+        $text = Get-Content -Raw (Join-Path $root 'install.ps1')
+
+        $text | Should -Match "\`$initArgs = @\(if \(\`$env:CI -eq 'true'\) \{ '--no-tty' \}\)"
+        $text | Should -Match 'chezmoi init --apply \$GITHUB_USERNAME @initArgs'
+    }
+
     It 'deploys enable-wsl only where WSL is needed' {
         Get-ManagedPath -Source $root -Data @{ profiles = @('shell') } | Should -Not -Contain '.config/dotfiles/admin/enable-wsl.ps1'
         Get-ManagedPath -Source $root -Data @{ profiles = @('containers') } | Should -Contain '.config/dotfiles/admin/enable-wsl.ps1'

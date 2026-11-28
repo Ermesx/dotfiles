@@ -17,10 +17,12 @@ BeforeAll {
     $aiList = ConvertTo-TomlList $aiLabels
     $appsLabels = Get-Label 'apps'
 
-    # $Existing is the config already on the machine; Output is the config init wrote
+    # $Existing is the config already on the machine; Output is the config init wrote.
+    # The work email is always answered, as private: these tests are about profiles, and under --no-tty its
+    # prompt would fail with EOF on every init that has no DOTFILES_PROFILES
     function Invoke-InitTemplate([hashtable]$Env = @{}, [string[]]$Flags = @(), [string]$Existing = '') {
         $config = Join-Path $TestDrive "$([guid]::NewGuid()).toml"
-        Set-Content -Path $config -Value $Existing
+        Set-Content -Path $config -Value "$Existing`n[data.git]`nwork_email = `"`""
         $names = @('DOTFILES_PROFILES') + @(Get-ChildItem Env: | Where-Object Name -like 'DOTFILES_PICKS_*' | ForEach-Object Name) + @($Env.Keys)
         $saved = @{}
         foreach ($name in $names) { $saved[$name] = [Environment]::GetEnvironmentVariable($name) }
