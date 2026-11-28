@@ -40,6 +40,10 @@ Checked 2026-11-28 unless noted.
   environment).
 - Scripts run under `pwsh -NoLogo -NoProfile` (`[interpreters.ps1]`), so ANSI sequences are available; `Write-Pretty`
   already relies on that.
+- What the install scripts install is the selection of the `packages.tmpl` view (profiles and picks, e.g.
+  `DOTFILES_PROFILES`); `CI` does not change it (static test *ignores CI for the selection*). The CI apply installs
+  `shell,sdk,ai` with the pick `claude-code`. `install.ps1` passes `--no-tty` to `chezmoi init` only when `CI=true`,
+  so a local apply has a terminal (prompts need one) and a runner has none.
 - `PackageUpdates` already has one shared update loop, `Invoke-PackageUpdateLoop`, used by the three `Update-*`
   functions; they currently print the tool's full output (`| Out-Host`) between the loop's one-line headers.
 
@@ -49,10 +53,10 @@ Checked 2026-11-28 unless noted.
 |---|---|---|---|
 | D1 | Where the shared code lives | **Agreed 2026-11-28:** a new module (name: D9) next to `Write-Pretty` and `PackageUpdates`, imported by the `before_` scripts from the **source tree** through `$env:CHEZMOI_SOURCE_DIR`, and by `PackageUpdates` from the deployed copy | Rejected: a helper rendered into each script from `.chezmoitemplates/`, because a tweak to the look would change the rendered content of all install scripts and rerun every install on every machine, and because `Update-*` could not share it. Rejected: relying on the deployed module, which does not exist yet on the first apply |
 | D2 | Scope | **Agreed 2026-11-28:** all installers (`01-scoop`, `02-modules`, `03-dotnet-tools`) and all three `Update-*` functions | One consistent output |
-| D3 | Interactive vs CI | **My call (revised after the builder check):** the live line is used only when `CI` is not `true` **and** the output is not redirected; in every other case the module falls back to plain mode (never a stack of `\r` lines). A parameter overrides both, for tests | `CI` is already the repo's switch (`ci.skip_scoop_profiles`). Redirection is a safe second condition: if chezmoi pipes script output, the worst case is plain `✓` lines locally, which is still the compact log the issue asks for. Whether chezmoi gives the script a console is observed on the VM and a real terminal (acceptance 1), not assumed |
+| D3 | Interactive vs CI | **My call (revised after the builder check):** the live line is used only when `CI` is not `true` **and** the output is not redirected; in every other case the module falls back to plain mode (never a stack of `\r` lines). A parameter overrides both, for tests | `CI=true` is what GitHub sets, and the repo already keys on it (the decryption guard, `--no-tty` in `install.ps1`). Redirection is a safe second condition: if chezmoi pipes script output, the worst case is plain `✓` lines locally, which is still the compact log the issue asks for. Whether chezmoi gives the script a console is observed on the VM and a real terminal (acceptance 1), not assumed |
 | D4 | Output of an item | **My call:** every stream captured (`*>&1`) per item, discarded on success, printed in full on failure | The tool's own words are the diagnostics; the live line replaces them on success |
 | D5 | Items already present | **My call:** not listed, only counted in the final line | `run_onchange_` reruns the whole list, so a normal apply has 1 new item among ~40 present |
-| D6 | A failed item | **Agreed 2026-11-28:** the remaining items still run; the script then exits 1, so `chezmoi apply` stops (files and later scripts are not applied) and the CI step fails | A single failure should not leave the rest of the packages uninstalled. chezmoi records a `run_onchange_` script only after a successful run, so the next apply retries it. Rejected: exit 0 with a summary (outside CI or everywhere): the failed item would not be retried until the script content changes, and CI would not catch a broken install. Today's exit code is that of the last native command, i.e. arbitrary |
+| D6 | A failed item | **Agreed 2026-11-28:** the remaining items still run; the script then exits 1, so `chezmoi apply` stops (files and later scripts are not applied) and the CI step fails | A single failure should not leave the rest of the packages uninstalled. chezmoi records a `run_onchange_` script only after a successful run, so the next apply retries it. Rejected: exit 0 with a summary (outside CI or everywhere): the failed item would not be retried until the script content changes, and CI would not catch a broken install. Today only the last command decides the script's exit code, so a failure in the middle of the list is silent |
 | D7 | Scope exclusions | **My call:** WSL distro install stays as is | One conditional, one-off item whose own `wsl --install` progress is the useful output; nothing to count or collapse |
 | D8 | Yazi plugins | **My call:** included | Already a list with a presence test; fits the same mechanism |
 | D9 | Module name | **My call:** `StepProgress`, one public function `Invoke-ProgressSteps` | Names the job (run a list of steps with progress), not the tools |
@@ -109,10 +113,12 @@ the first apply either); it writes its own ANSI sequences.
 - **R11 Scoop buckets.** `scoop bucket add` keeps working as before; it prints one line per bucket and is not
   wrapped unless the builder finds it equally noisy in the CI log.
 - **R12 Behaviour that must not change:** which items are installed, the order (`01` → `02` → `03`), the
-  `ci.skip_scoop_profiles` rule, the `PATH` refresh at the top of the .NET tools script, `Set-PSRepository`
+  selection of the `packages.tmpl` view (`CI` does not change it), the `PATH` refresh at the top of the .NET tools script, `Set-PSRepository`
   trusting the Gallery, the `Pester` special case (inbox Pester 3.4 is signed by another publisher).
 - **R13 Exit code.** A script that had failed items exits non-zero (D6); one that had none exits 0 even when the last
-  native command inside returned non-zero (today the script's exit code is the last native command's).
+  native command inside returned non-zero (under `pwsh <file>` the process exit code otherwise follows the success of
+  the last command only, so an earlier failure is invisible today). The scripts therefore end with an explicit
+  `exit`.
 
 ### `PackageUpdates`
 
