@@ -3,12 +3,20 @@
 {{- range $v.scoop -}}
 {{-   if contains "/" . }}{{ $buckets = append $buckets (splitList "/" . | first) }}{{ end -}}
 {{- end -}}
+Import-Module (Join-Path $env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1')
+
 Write-Host "► Adding Scoop buckets" -ForegroundColor Cyan
 {{- range $buckets | uniq }}
 scoop bucket add {{ . }}
 {{- end }}
-
-Write-Host "► Installing Scoop apps" -ForegroundColor Cyan
+{{ if $v.scoop }}
+# A bucket-qualified name such as nerd-fonts/Hasklig-NF is listed by its app name only
+$installed = @(scoop list 6>$null | ForEach-Object Name)
+$result = Invoke-ProgressSteps -Title 'Installing Scoop apps' -Items @(
 {{- range $v.scoop }}
-scoop install {{ . }}
+    {{ . | squote }}
 {{- end }}
+) -IsPresent { param($app) ($app -split '/')[-1] -in $installed } -Action { param($app) scoop install $app }
+
+exit [int]($result.Failed.Count -gt 0)
+{{ end }}

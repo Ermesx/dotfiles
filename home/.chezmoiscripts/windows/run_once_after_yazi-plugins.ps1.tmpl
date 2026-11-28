@@ -1,12 +1,13 @@
 {{- $v := includeTemplate "packages.tmpl" . | fromJson -}}
 {{- if $v.yazi_plugins }}
-# Install yazi plugins
-$installedPlugins = ya pkg list
+Import-Module (Join-Path $env:CHEZMOI_SOURCE_DIR 'readonly_Documents/PowerShell/Modules/StepProgress/StepProgress.psd1')
 
-Write-Host "► Installing yazi plugins" -ForegroundColor Cyan
-{{ range $v.yazi_plugins }}
-if (-not ($installedPlugins -like {{ print "*" . "*" | squote }})) {
-    ya pkg add {{ . | squote }} | Out-Null
-}
-{{ end }}
+$installedPlugins = ya pkg list
+$result = Invoke-ProgressSteps -Title 'Installing yazi plugins' -Items @(
+{{- range $v.yazi_plugins }}
+    {{ . | squote }}
+{{- end }}
+) -IsPresent { param($plugin) [bool]($installedPlugins -like "*$plugin*") } -Action { param($plugin) ya pkg add $plugin }
+
+exit [int]($result.Failed.Count -gt 0)
 {{ end }}
